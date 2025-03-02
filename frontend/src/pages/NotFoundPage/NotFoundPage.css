@@ -1,0 +1,23 @@
+.not-found-page {
+  padding: 100px 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.not-found-page h1 {
+  font-size: 6rem;
+}
+
+.not-found-page h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.not-found-page .btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate  } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getEmployees, deleteEmployee } from "../../services/employeeService";
 
 const Employees = () => {
@@ -10,7 +10,6 @@ const Employees = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 5;
   const navigate = useNavigate();
-
 
   useEffect(() => {
     fetchEmployees();
@@ -107,8 +106,8 @@ const Employees = () => {
                         {emp.fullName || "Không có tên"}
                       </Link>
                     </td>
-                    <td>{emp.positionName || "N/A"}</td>
-                    <td>{emp.departmentName || "N/A"}</td>
+                    <td>{emp.position.positionName || "N/A"}</td>
+                    <td>{emp.department.departmentName || "N/A"}</td>
                     <td>{emp.email || "Không có email"}</td>
                     <td>{emp.phone || "Không có số"}</td>
                     <td>
@@ -124,14 +123,17 @@ const Employees = () => {
                     </td>
                     <td>{emp.hireDate || "N/A"}</td>
                     <td>
-                      <button className="btn btn-warning btn-sm me-2">
-                        Sửa
-                      </button>
+                      <Link
+                        to={`/employees/${emp.userId}/edit`}
+                        className="btn btn-outline-warning btn-sm me-2"
+                      >
+                        <i className="fa-solid fa-pen-to-square"></i>
+                      </Link>
                       <button
-                        className="btn btn-danger btn-sm"
+                        className="btn btn-outline-danger btn-sm"
                         onClick={() => handleDelete(emp.userId)}
                       >
-                        Xóa
+                        <i className="fa-solid fa-trash"></i>
                       </button>
                     </td>
                   </tr>
