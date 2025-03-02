@@ -27,26 +27,28 @@ export const getEmployeeById = async (id) => {
 // Thêm nhân viên mới
 export const addEmployee = async (employeeData) => {
   try {
-    const response = await axios.post(API_URL, employeeData, {
-      auth: {
-        username: 'admin', // Thay bằng username thực tế
-        password: 'hashed_password' // Thay bằng password thực tế
-      },
-      headers: {
-        "Content-Type": "application/json"
+    const response = await axios.post(
+      "http://localhost:8080/api/users",
+      employeeData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    });
-    return response.data;
+    );
+    console.log("User created:", response.data); // Dữ liệu trả về là UserDTO
   } catch (error) {
-    console.error("Lỗi khi thêm nhân viên:", error);
-    throw error;
+    console.error("Error adding user:", error);
   }
 };
 
-// Cập nhật thông tin nhân viên
 export const updateEmployee = async (id, updatedData) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, updatedData);
+    const response = await axios.put(`${API_URL}/${id}`, updatedData, {
+      headers: {
+        "Content-Type": "application/json", // Đảm bảo Content-Type là application/json
+      },
+    });
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi cập nhật nhân viên ID: ${id}`, error);
