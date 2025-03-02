@@ -1,0 +1,54 @@
+.sidebar {
+  width: 250px;
+  background-color: #000;
+  color: #fff;
+  height: 100vh;
+  padding: 10px;
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  width: 100%; 
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 10px 0px;
+  display: block;
+}
+
+.sidebar ul li a {
+  color: #ccc;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.sidebar ul li a i {
+  margin-right: 10px; /* Khoảng cách giữa icon và text */
+  font-size: 18px; /* Kích thước icon */
+}
+
+.sidebar ul li a:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.sidebar ul li a.active {
+  background-color: #444;
+  color: #fff;
+  font-weight: bold;
+}
