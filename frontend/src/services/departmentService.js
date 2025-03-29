@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/departments"; // URL API của bạn
+const API_URL = "/departments"; // URL API của bạn
 
 // Lấy danh sách phòng ban
 export const getDepartments = async () => {

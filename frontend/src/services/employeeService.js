@@ -24,6 +24,18 @@ export const getEmployeeById = async (id) => {
   }
 };
 
+
+// Lấy thông tin chi tiết nhân viên theo ID
+export const getEmployeesByDepartmentId = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/department/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Lỗi khi lấy danh sách nhân viên với ID phòng ban là: ${id}`, error);
+    throw error;
+  }
+};
+
 // Thêm nhân viên mới
 export const addEmployee = async (employeeData) => {
   try {

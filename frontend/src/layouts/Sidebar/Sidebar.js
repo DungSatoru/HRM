@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 
 const Sidebar = () => {
@@ -9,24 +9,68 @@ const Sidebar = () => {
       <h2>HR Management</h2>
       <ul>
         <li>
-          <Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/dashboard"
+          >
             <i className="fas fa-chart-simple"></i> Tổng quan
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/employees" className={location.pathname === "/employees" ? "active" : ""}>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/employees"
+          >
             <i className="fa-solid fa-users"></i> Nhân viên
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/departments" className={location.pathname === "/departments" ? "active" : ""}>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/departments"
+          >
             <i className="fa-solid fa-briefcase"></i> Phòng ban
-          </Link>
+            </NavLink>
         </li>
         <li>
-          <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/roles"
+          >
+            <i className="fa-solid fa-user-lock"></i> Phân quyền
+            </NavLink>
+        </li>
+        <li>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/attendance"
+          >
+            <i className="fa-solid fa-calendar-days"></i> Chấm công
+            </NavLink>
+        </li>
+        <li>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/payroll"
+          >
+            <i className="fa-solid fa-sack-dollar"></i> Lương & Thưởng
+            </NavLink>
+        </li>
+        <li>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/reports"
+          >
+            <i className="fa-solid fa-chart-bar"></i> Báo cáo & Thống kê
+            </NavLink>
+        </li>
+        <li>
+          <NavLink
+            className={(nav) => nav.isActive ? "active" : ""}
+            to="/settings"
+          >
             <i className="fas fa-gear"></i> Cài đặt
-          </Link>
+            </NavLink>
         </li>
         <li>
           <Link to="/logout" className="logout">

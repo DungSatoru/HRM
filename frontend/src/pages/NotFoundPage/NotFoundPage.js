@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./NotFoundPage.css"; // Tùy chỉnh CSS cho trang 404
 
 const NotFoundPage = () => {
   return (

@@ -1,0 +1,31 @@
+.settings-container {
+  padding: 20px;
+}
+
+.settings-container h2 {
+  margin-bottom: 20px;
+}
+
+.settings-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  background: #2c3e50;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.settings-item i {
+  margin-right: 10px;
+}
+
+.settings-item:hover {
+  background: #1a252f;
+}
