@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getEmployeeById } from "../../services/employeeService"; // Dịch vụ lấy thông tin nhân viên theo ID
+import { getEmployeeById } from "~/services/employeeService"; // Dịch vụ lấy thông tin nhân viên theo ID
 
 const EmployeeDetail = () => {
   const { id } = useParams(); // Lấy ID từ URL

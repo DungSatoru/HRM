@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./FaceTraining.css";
-import { getDepartments } from "../../../services/departmentService";
-import { getEmployees } from "../../../services/employeeService";
-import { uploadVideo } from "../../../services/videoService";
-import ButtonBack from "../../../components/ButtonBack/ButtonBack";
+import { getDepartments } from "~/services/departmentService";
+import { getEmployees } from "~/services/employeeService";
+import { uploadVideo } from "~/services/videoService";
+import ButtonBack from "~/components/ButtonBack/ButtonBack";
 
 const FaceTraining = () => {
   const videoRef = useRef(null);

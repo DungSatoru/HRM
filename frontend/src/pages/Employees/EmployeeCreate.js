@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { addEmployee } from "../../services/employeeService";
-import { getDepartments } from "../../services/departmentService";
-import { getPositions, addPosition } from "../../services/positionService"; // Import service cho vị trí
+import { addEmployee } from "~/services/employeeService";
+import { getDepartments } from "~/services/departmentService";
+import { getPositions, addPosition } from "~/services/positionService"; // Import service cho vị trí
 
 const EmployeeCreate = () => {
   const navigate = useNavigate();

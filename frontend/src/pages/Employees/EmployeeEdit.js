@@ -3,9 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   getEmployeeById,
   updateEmployee,
-} from "../../services/employeeService"; // Dịch vụ lấy và sửa thông tin nhân viên
-import { getDepartments } from "../../services/departmentService";
-import { getPositions } from "../../services/positionService";
+} from "~/services/employeeService"; // Dịch vụ lấy và sửa thông tin nhân viên
+import { getDepartments } from "~/services/departmentService";
+import { getPositions } from "~/services/positionService";
 
 const EmployeeEdit = () => {
   const { id } = useParams(); // Lấy ID từ URL
