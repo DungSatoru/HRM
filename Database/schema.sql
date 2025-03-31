@@ -86,7 +86,7 @@ CREATE TABLE payrolls (
     basic_salary DECIMAL(15,2) NULL,
     overtime_salary DECIMAL(15,2) NULL,
     total_salary DECIMAL(15,2) NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERrolesENCES users(user_id) ON DELETE CASCADE
 );
 
 📌 9. Bảng salary_slips - Phiếu lương
@@ -110,4 +110,6 @@ CREATE TABLE leave_requests (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+
+SHOW TABLES;roles
 

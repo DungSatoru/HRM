@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <title>Hệ thống quản lý nhân sự</title>
+  </head>
+  <body>
+    <div class="container-fluid m-0 p-0">
+      <div class="d-flex">
+        <div class="sidebar">
+          <div class="user-info">
+            <div class="row">
+              <div class="col-md-3">
+                <img
+                  src="https://yt3.googleusercontent.com/teSofwgIZAZaLEFxJtRJkZxZV3KsMdO4BB-vuUkXPcEPdM2bvEPzn4k92VksjV4v49L-cJqGGQ=s900-c-k-c0x00ffffff-no-rj"
+                  alt="Ảnh đại diện"
+                  class="profile-img"
+                />
+              </div>
+              <div class="col-md-9">
+                <p class="username">HẠ QUANG DŨNG</p>
+                <p class="role">Quản lý nhân sự</p>
+              </div>
+            </div>
+          </div>
+          <div class="menu">
+            <p class="fw-bold">Main menu</p>
+            <ul class="list-unstyled">
+              <!-- Tổng quan -->
+              <li>
+                <a href="#"><i class="fas fa-solid fa-tachometer-alt"></i> Tổng quan</a>
+              </li>
+              <!-- Quản lý nhân viên -->
+              <li>
+                <a
+                  href="#collapseNhanVien"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapseNhanVien"
+                >
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-users"></i> Nhân viên </span>
+                    <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                  </div>
+                </a>
+                <div class="collapse" id="collapseNhanVien">
+                  <ul class="submenu">
+                    <li><a href="#">Danh sách nhân viên</a></li>
+                    <li><a href="#">Quản lý nhân viên</a></li>
+                  </ul>
+                </div>
+              </li>
+              <!-- Quản lý phòng ban -->
+              <li>
+                <a
+                  href="#collapsePhongBan"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapsePhongBan"
+                >
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-building"></i> Phòng ban </span>
+                    <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                  </div>
+                </a>
+                <div class="collapse" id="collapsePhongBan">
+                  <ul class="submenu">
+                    <li><a href="#">Danh sách Phòng ban</a></li>
+                    <li><a href="#">Quản lý Phòng ban</a></li>
+                  </ul>
+                </div>
+              </li>
+              <!-- Quản lý Chức vụ -->
+              <li>
+                <a
+                  href="#collapseChucVu"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapseChucVu"
+                >
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-user-tie"></i> Chức vụ </span>
+                    <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                  </div>
+                </a>
+                <div class="collapse" id="collapseChucVu">
+                  <ul class="submenu">
+                    <li><a href="#">Danh sách Chức vụ</a></li>
+                    <li><a href="#">Quản lý Chức vụ</a></li>
+                  </ul>
+                </div>
+              </li>
+              <!-- Quản lý chấm công -->
+              <li>
+                <a
+                  href="#collapseChamCong"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapseChamCong"
+                >
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-clock"></i> Chấm công </span>
+                    <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                  </div>
+                </a>
+                <div class="collapse" id="collapseChamCong">
+                  <ul class="submenu">
+                    <li><a href="#">Theo dõi chấm công nhân viên</a></li>
+                    <li><a href="#">Báo cáo chấm công</a></li>
+                  </ul>
+                </div>
+              </li>
+              <!-- Lương và phúc lợi -->
+              <li>
+                <a
+                  href="#collapseLuongPhucLoi"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapseLuongPhucLoi"
+                >
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-money-check-dollar"></i> Lương và phúc lợi </span>
+                    <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                  </div>
+                </a>
+                <div class="collapse" id="collapseLuongPhucLoi">
+                  <ul class="submenu">
+                    <li><a href="#">Xem bảng lương</a></li>
+                    <li><a href="#">Quản lý lương và phúc lợi</a></li>
+                  </ul>
+                </div>
+              </li>
+              <!-- Tuyển dụng -->
+              <li>
+                <a
+                  href="#collapseTuyenDung"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapseTuyenDung"
+                >
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-user-plus"></i> Tuyển dụng </span>
+                    <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                  </div>
+                </a>
+                <div class="collapse" id="collapseTuyenDung">
+                  <ul class="submenu">
+                    <li><a href="#">Quản lý ứng viên</a></li>
+                    <li><a href="#">Tạo thông báo tuyển dụng</a></li>
+                  </ul>
+                </div>
+              </li>
+              <!-- Báo cáo -->
+              <li>
+                <a
+                  href="#collapseBaoCao"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapseBaoCao"
+                >
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-chart-line"></i> Báo cáo và thống kê </span>
+                    <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                  </div>
+                </a>
+                <div class="collapse" id="collapseBaoCao">
+                  <ul class="submenu">
+                    <li><a href="#">Báo cáo nhân sự</a></li>
+                    <li><a href="#">Báo cáo lương</a></li>
+                    <li><a href="#">Báo cáo tuyển dụng</a></li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="admin-menu">
+            <p class="fw-bold">Admin menu</p>
+            <ul>
+              <li>
+                <a
+                  href="#collapseUser"
+                  class="nav-item"
+                  data-bs-toggle="collapse"
+                  aria-expanded="false"
+                  aria-controls="collapseUser"
+                >
+                  <i class="fa-solid fa-user-shield"></i> Quản lý người dùng
+                  <span class="dropdown-icon"><i class="fa-solid fa-chevron-down"></i></span>
+                </a>
+                <div class="collapse" id="collapseUser">
+                  <ul class="submenu">
+                    <li><a href="#">Danh sách người dùng</a></li>
+                    <li><a href="#">Phân quyền người dùng</a></li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="other">
+            <p class="fw-bold">Other</p>
+            <ul>
+              <li>
+                <a href="#"><i class="fa-solid fa-cogs"></i> Cài đặt</a>
+              </li>
+              <li>
+                <a href="#"><i class="fa-solid fa-sign-out-alt"></i> Đăng xuất</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <main>Nội dung chính</main>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS (kèm Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

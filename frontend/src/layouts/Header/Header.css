@@ -1,0 +1,33 @@
+.header {
+  background: var(--color-primary);
+  color: white;
+  border-bottom: 1px solid #ccc;
+}
+
+.breadcrumb {
+  margin: 0;
+  height: 50px;
+  background-color: transparent; /* Giữ nền trong suốt */
+  margin-left: 20px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px; /* Kích thước chữ */
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: '›'; /* Biểu tượng phân cách */
+  color: #333;
+  padding: 0 20px;
+}
+
+.breadcrumb-item a {
+  text-decoration: none; /* Xóa gạch chân liên kết */
+  color: #007bff;
+}
+
+.breadcrumb-item a:hover {
+  color: #0056b3; /* Màu khi hover */
+}

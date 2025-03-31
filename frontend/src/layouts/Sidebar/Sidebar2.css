@@ -1,0 +1,113 @@
+/* Cấu hình thanh cuộn cho toàn bộ trang */
+::-webkit-scrollbar {
+  width: 1px; /* Đặt chiều rộng thanh cuộn dọc (vertical scrollbar) */
+  height: 1px; /* Đặt chiều cao thanh cuộn ngang (horizontal scrollbar) */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ccc; /* Màu của phần kéo thanh cuộn */
+  border-radius: 10px; /* Làm tròn các góc của phần kéo */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ccc; /* Màu khi hover thanh cuộn */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Màu nền của track thanh cuộn */
+  border-radius: 10px; /* Làm tròn các góc của track */
+}
+
+/* Áp dụng cho thanh cuộn trong sidebar */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  border-right: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  left: 0;
+  overflow-y: auto; /* Cho phép cuộn khi nội dung vượt quá chiều cao */
+  overflow-x: hidden; /* Tắt cuộn ngang */
+}
+
+.user-info {
+  padding: 10px;
+  position: sticky; /* Cố định phần user-info */
+  top: 0; /* Đảm bảo nó cố định khi cuộn */
+  background-color: #f6f6f6; /* Giữ màu nền khi cuộn */
+}
+
+.profile-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.username,
+.role {
+  margin: 0;
+}
+
+.menu,
+.admin-menu,
+.other {
+  padding: 10px;
+}
+
+.menu ul,
+.admin-menu ul,
+.other ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.menu a,
+.admin-menu a,
+.other a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 4px;
+}
+
+.menu a:hover,
+.admin-menu a:hover,
+.other a:hover {
+  font-weight: 500;
+}
+
+.submenu {
+  margin-left: 16px;
+  padding-left: 20px;
+  padding-top: 5px;
+  border-left: 2px solid #ddd;
+}
+
+.submenu a {
+  padding-left: 15px;
+}
+
+.nav-item::after {
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.dropdown-icon {
+  margin-left: 5px;
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.nav-item.open .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.fa-solid {
+  width: 16px;
+  text-align: center;
+  margin-right: 10px;
+}
