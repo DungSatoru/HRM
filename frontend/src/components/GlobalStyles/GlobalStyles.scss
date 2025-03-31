@@ -1,0 +1,25 @@
+@import 'normalize.css';
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+:root {
+  --color-primary: #f6f6f6; /* Tomato */
+  --color-secondary: #4caf50; /* Green */
+  --color-background: #f6f6f6; /* Light Gray */
+  --color-text: #333333; /* Dark Gray */
+  --color-border: #cccccc; /* Light Gray */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%; /* 1rem = 10px */
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.6rem; /* 16px */
+  line-height: 1.5;
+  text-rendering: optimizeSpeed;
+}
