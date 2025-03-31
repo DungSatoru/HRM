@@ -1,83 +1,281 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
-import "./Sidebar.css";
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import './Sidebar2.css';
 
 const Sidebar = () => {
-  const location = useLocation();
+  // Tạo trạng thái cho các icon (tắt/mở)
+  const [openSections, setOpenSections] = useState({
+    collapseNhanVien: false,
+    collapsePhongBan: false,
+    collapseChucVu: false,
+    collapseChamCong: false,
+    collapseLuongPhucLoi: false,
+    collapseTuyenDung: false,
+    collapseBaoCao: false,
+    collapseUser: false,
+  });
+
+  const handleToggle = (section) => {
+    // Đảo ngược trạng thái của mục được nhấn
+    setOpenSections((prevState) => ({
+      ...prevState,
+      [section]: !prevState[section],
+    }));
+  };
 
   return (
     <div className="sidebar">
-      <h2>HR Management</h2>
-      <ul>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/dashboard"
-          >
-            <i className="fas fa-chart-simple"></i> Tổng quan
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/employees"
-          >
-            <i className="fa-solid fa-users"></i> Nhân viên
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/departments"
-          >
-            <i className="fa-solid fa-briefcase"></i> Phòng ban
+      <div className="user-info">
+        <div className="row">
+          <div className="col-md-3">
+            <img
+              src="https://yt3.googleusercontent.com/teSofwgIZAZaLEFxJtRJkZxZV3KsMdO4BB-vuUkXPcEPdM2bvEPzn4k92VksjV4v49L-cJqGGQ=s900-c-k-c0x00ffffff-no-rj"
+              alt="Ảnh đại diện"
+              className="profile-img"
+            />
+          </div>
+          <div className="col-md-9">
+            <p className="username">HẠ QUANG DŨNG</p>
+            <p className="role">Quản lý nhân sự</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="menu">
+        <p className="fw-bold">Main menu</p>
+        <ul className="list-unstyled">
+          {/* Tổng quan */}
+          <li>
+            <NavLink to="/dashboard" activeClassName="active">
+              <i className="fas fa-tachometer-alt"></i> Tổng quan
             </NavLink>
-        </li>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/roles"
-          >
-            <i className="fa-solid fa-user-lock"></i> Phân quyền
+          </li>
+
+          {/* Quản lý nhân viên */}
+          <li>
+            <NavLink to="#collapseNhanVien" className="nav-item" onClick={() => handleToggle('collapseNhanVien')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-users"></i> Nhân viên
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapseNhanVien ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
             </NavLink>
-        </li>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/attendance"
-          >
-            <i className="fa-solid fa-calendar-days"></i> Chấm công
+            <div className={`collapse ${openSections.collapseNhanVien ? 'show' : ''}`} id="collapseNhanVien">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/employees">Danh sách nhân viên</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/manage-employees">Quản lý nhân viên</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          {/* Quản lý phòng ban */}
+          <li>
+            <NavLink to="#collapsePhongBan" className="nav-item" onClick={() => handleToggle('collapsePhongBan')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-building"></i> Phòng ban
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapsePhongBan ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
             </NavLink>
-        </li>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/payroll"
-          >
-            <i className="fa-solid fa-sack-dollar"></i> Lương & Thưởng
+            <div className={`collapse ${openSections.collapsePhongBan ? 'show' : ''}`} id="collapsePhongBan">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/departments">Danh sách Phòng ban</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/manage-departments">Quản lý Phòng ban</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          {/* Quản lý chức vụ */}
+          <li>
+            <NavLink to="#collapseChucVu" className="nav-item" onClick={() => handleToggle('collapseChucVu')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-user-tie"></i> Chức vụ
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapseChucVu ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
             </NavLink>
-        </li>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/reports"
-          >
-            <i className="fa-solid fa-chart-bar"></i> Báo cáo & Thống kê
+            <div className={`collapse ${openSections.collapseChucVu ? 'show' : ''}`} id="collapseChucVu">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/roles">Danh sách Chức vụ</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/manage-roles">Quản lý Chức vụ</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          {/* Quản lý Chấm công */}
+          <li>
+            <NavLink to="#collapseChamCong" className="nav-item" onClick={() => handleToggle('collapseChamCong')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-user-clock"></i> Chấm công
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapseChamCong ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
             </NavLink>
-        </li>
-        <li>
-          <NavLink
-            className={(nav) => nav.isActive ? "active" : ""}
-            to="/settings"
-          >
-            <i className="fas fa-gear"></i> Cài đặt
+            <div className={`collapse ${openSections.collapseChamCong ? 'show' : ''}`} id="collapseChamCong">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/attendances">Theo dõi chấm công nhân viên</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/attendance-reports">Báo cáo chấm công</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          {/* Quản lý Lương và Phúc lợi */}
+          <li>
+            <NavLink
+              to="#collapseLuongPhucLoi"
+              className="nav-item"
+              onClick={() => handleToggle('collapseLuongPhucLoi')}
+            >
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-money-check-alt"></i> Lương và phúc lợi
+                </span>
+                <span className="dropdown-icon">
+                  <i
+                    className={`fa-solid ${openSections.collapseLuongPhucLoi ? 'fa-chevron-up' : 'fa-chevron-down'}`}
+                  ></i>
+                </span>
+              </div>
             </NavLink>
-        </li>
-        <li>
-          <Link to="/logout" className="logout">
-            <i className="fa-solid fa-right-from-bracket"></i> Đăng xuất
-          </Link>
-        </li>
-      </ul>
+            <div className={`collapse ${openSections.collapseLuongPhucLoi ? 'show' : ''}`} id="collapseLuongPhucLoi">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/payroll">Xem bảng lương</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/manage-payroll">Quản lý lương và phúc lợi</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          {/* Các mục menu khác */}
+          {/* Tuyển dụng */}
+          <li>
+            <NavLink to="#collapseTuyenDung" className="nav-item" onClick={() => handleToggle('collapseTuyenDung')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-user-plus"></i> Tuyển dụng
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapseTuyenDung ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
+            </NavLink>
+            <div className={`collapse ${openSections.collapseTuyenDung ? 'show' : ''}`} id="collapseTuyenDung">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/recruitment">Quản lý ứng viên</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/create-job-post">Tạo thông báo tuyển dụng</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          {/* Báo cáo */}
+          <li>
+            <NavLink to="#collapseBaoCao" className="nav-item" onClick={() => handleToggle('collapseBaoCao')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-chart-line"></i> Báo cáo
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapseBaoCao ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
+            </NavLink>
+            <div className={`collapse ${openSections.collapseBaoCao ? 'show' : ''}`} id="collapseBaoCao">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/reports">Báo cáo nhân sự</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/salary-reports">Báo cáo lương</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/recruitment-reports">Báo cáo tuyển dụng</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      {/* Admin menu */}
+      <div className="admin-menu">
+        <p className="fw-bold">Admin menu</p>
+        <ul>
+          <li>
+            <NavLink to="#collapseUser" className="nav-item" onClick={() => handleToggle('collapseUser')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-user-shield"></i> Quản lý người dùng
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapseUser ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
+            </NavLink>
+            <div className={`collapse ${openSections.collapseUser ? 'show' : ''}`} id="collapseUser">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/user-list">Danh sách người dùng</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/user-permissions">Phân quyền người dùng</NavLink>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      {/* Other menu */}
+      <div className="other">
+        <p className="fw-bold">Other</p>
+        <ul>
+          <li>
+            <NavLink to="/settings" activeClassName="active">
+              <i className="fa-solid fa-cogs"></i> Cài đặt
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/logout" activeClassName="active">
+              <i className="fa-solid fa-sign-out-alt"></i> Đăng xuất
+            </NavLink>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };

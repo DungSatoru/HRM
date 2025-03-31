@@ -1,7 +1,7 @@
 .sidebar {
   width: 250px;
-  background-color: #000;
-  color: #fff;
+  background-color: var(--color-background);
+  color: var(--color-text);
   height: 100vh;
   padding: 10px;
   position: sticky;
@@ -28,7 +28,7 @@
 }
 
 .sidebar ul li a {
-  color: #ccc;
+  color: var(--color-text);
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -43,13 +43,11 @@
 }
 
 .sidebar ul li a:hover {
-  background-color: #333;
-  color: #fff;
+  background-color: #ccc;
 }
 
 .sidebar ul li a.active {
-  background-color: #444;
-  color: #fff;
+  background-color: #ccc;
   font-weight: bold;
 }
 
