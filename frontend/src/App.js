@@ -1,4 +1,4 @@
-import AppRoutes from "~/configs/AppRoutes";
+import AppRoutes from '~/configs/AppRoutes';
 
 function App() {
   return <AppRoutes />;
