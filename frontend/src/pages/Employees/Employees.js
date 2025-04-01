@@ -1,16 +1,41 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import EmployeeList from '~/components/EmployeeList/EmployeeList';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { getEmployees, deleteEmployee } from '~/services/employeeService';
+import './Employees.css'; 
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // Pagination state
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const employeesPerPage = 5;
+
   const navigate = useNavigate();
+  const location = useLocation(); // Hook to track current location (URL)
+
+  // Calculate the range of employees for current page
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentEmployees = employees.slice(startIndex, endIndex);
+
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Reset to the first page
+  };
+
+  const handleNextPage = () => {
+    if (currentPage * rowsPerPage < employees.length) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
 
   useEffect(() => {
     fetchEmployees();
@@ -28,53 +53,43 @@ const Employees = () => {
     }
   };
 
-  // Xác nhận và xóa nhân viên
   const handleDelete = async (id) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) {
       try {
         await deleteEmployee(id);
-        fetchEmployees(); // Tải lại danh sách sau khi xóa
+        fetchEmployees();
       } catch (error) {
         console.error('Lỗi khi xóa nhân viên:', error);
       }
     }
   };
 
-  // Lọc nhân viên theo họ tên hoặc email
   const filteredEmployees = employees.filter(
     (emp) =>
       (emp.fullName ? emp.fullName.toLowerCase() : '').includes(searchTerm.toLowerCase()) ||
-      (emp.email ? emp.email.toLowerCase() : '').includes(searchTerm.toLowerCase()),
+      (emp.email ? emp.email.toLowerCase() : '').includes(searchTerm.toLowerCase())
   );
 
-  // Sample employee data
-  const employeesTest = [
-    { name: 'Nguyễn Văn A', position: 'Quản lý', joinDate: '01/10/2020', status: 'Đang làm việc' },
-    { name: 'Trần Thị B', position: 'Nhân viên', joinDate: '15/03/2021', status: 'Đang làm việc' },
-    { name: 'Lê Minh C', position: 'Giám đốc', joinDate: '01/05/2019', status: 'Đang làm việc' },
-    { name: 'Phạm Thị D', position: 'Nhân viên', joinDate: '25/12/2020', status: 'Đang nghỉ' },
-    // Add more rows as needed
-  ];
+  // Function to apply 'active' class based on current location
+  const getLinkClassName = (path) => {
+    return location.pathname === path ? 'active' : '';
+  };
 
   return (
-    <div className="container mt-4">
-      {/* Thanh tìm kiếm và nút thêm nhân viên */}
+    <div className="employees-container">
       <div className="mb-3 d-flex justify-content-between">
         <input
           type="text"
-          className="form-control w-50"
+          className="search-input"
           placeholder="Tìm kiếm nhân viên..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button className="btn btn-success" onClick={() => navigate('/employees/add')}>
+        <button className="add-employee-btn" onClick={() => navigate('/employees/add')}>
           + Thêm Nhân Viên
         </button>
       </div>
 
-      <EmployeeList employees={employeesTest}/>
-
-      {/* Hiển thị trạng thái loading */}
       {loading ? (
         <div className="text-center">
           <div className="spinner-border text-primary"></div>
@@ -82,44 +97,40 @@ const Employees = () => {
         </div>
       ) : (
         <div className="table-responsive">
-          <table className="table table-bordered table-hover">
-            <thead className="table-dark">
+          <table className="table table-bordered table-hover employee-table">
+            <thead>
               <tr>
-                <th>ID</th>
-                <th>Họ và Tên</th>
+                <th>
+                  <input type="checkbox" />
+                </th>
+                <th>Tên nhân viên</th>
                 <th>Chức vụ</th>
-                <th>Phòng ban</th>
-                <th>Email</th>
-                <th>Điện thoại</th>
+                <th>Ngày gia nhập</th>
                 <th>Trạng thái</th>
-                <th>Ngày vào làm</th>
                 <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
               {filteredEmployees.length > 0 ? (
-                filteredEmployees.map((emp) => (
-                  <tr key={emp.userId}>
-                    <td>{emp.userId}</td>
+                filteredEmployees.map((emp, index) => (
+                  <tr key={index}>
                     <td>
-                      <Link to={`/employees/${emp.userId}`} className="text-primary fw-bold">
-                        {emp.fullName || 'Không có tên'}
-                      </Link>
+                      <input type="checkbox" />
                     </td>
-                    <td>{emp.position.positionName || 'N/A'}</td>
-                    <td>{emp.department.departmentName || 'N/A'}</td>
-                    <td>{emp.email || 'Không có email'}</td>
-                    <td>{emp.phone || 'Không có số'}</td>
-                    <td>
-                      <span className={`badge ${emp.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`}>
-                        {emp.status}
-                      </span>
+                    <td>{emp.fullName}</td>
+                    <td>{emp.position.positionName}</td>
+                    <td>{emp.hireDate}</td>
+                    <td className={`${emp.status === 'ACTIVE' ? 'text-success' : 'text-secondary'}`}>
+                      {emp.status === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ việc'}
                     </td>
-                    <td>{emp.hireDate || 'N/A'}</td>
                     <td>
-                      <Link to={`/employees/${emp.userId}/edit`} className="btn btn-outline-warning btn-sm me-2">
+                      <NavLink
+                        to={`/employees/${emp.userId}/edit`}
+                        className="btn btn-outline-warning btn-sm me-2"
+                        activeClassName="active"
+                      >
                         <i className="fa-solid fa-pen-to-square"></i>
-                      </Link>
+                      </NavLink>
                       <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(emp.userId)}>
                         <i className="fa-solid fa-trash"></i>
                       </button>
@@ -137,6 +148,22 @@ const Employees = () => {
           </table>
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div className="pagination">
+        <span>Số nhân viên mỗi trang: </span>
+        <select value={rowsPerPage} onChange={handleRowsPerPageChange}>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+        </select>
+        <button onClick={handlePreviousPage} disabled={currentPage === 1}>
+          Trang trước
+        </button>
+        <button onClick={handleNextPage} disabled={currentPage * rowsPerPage >= filteredEmployees.length}>
+          Trang sau
+        </button>
+      </div>
     </div>
   );
 };

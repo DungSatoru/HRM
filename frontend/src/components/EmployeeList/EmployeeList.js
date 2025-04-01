@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import './EmployeeList.css'; // Đảm bảo bạn có file CSS tương ứng
+import { Link } from 'react-router-dom';
+import { deleteEmployee } from '~/services/employeeService';
 
-const EmployeeList = ({ employees }) => {
+const EmployeeList = ({ employees, setEmployees }) => {
   // State to handle pagination (rows per page, current page)
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,14 +29,28 @@ const EmployeeList = ({ employees }) => {
     }
   };
 
+  // Xác nhận và xóa nhân viên
+  const handleDelete = async (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) {
+      try {
+        // Gọi API xóa nhân viên
+        await deleteEmployee(id);
+
+        // Sau khi xóa, cập nhật lại danh sách nhân viên trong state
+        setEmployees(prevEmployees => prevEmployees.filter(employee => employee.userId !== id));
+
+      } catch (error) {
+        console.error('Lỗi khi xóa nhân viên:', error);
+      }
+    }
+  };
+
   return (
     <div className="table-container">
       <table className="employee-table">
         <thead>
           <tr>
-            <th>
-              <input type="checkbox" />
-            </th>
+            <th><input type="checkbox" /></th>
             <th>Tên nhân viên</th>
             <th>Chức vụ</th>
             <th>Ngày gia nhập</th>
@@ -45,16 +61,20 @@ const EmployeeList = ({ employees }) => {
         <tbody>
           {currentRows.map((employee, index) => (
             <tr key={index}>
-              <td>
-                <input type="checkbox" />
+              <td><input type="checkbox" /></td>
+              <td>{employee.fullName}</td>
+              <td>{employee.position.positionName}</td>
+              <td>{employee.hireDate}</td>
+              <td className={`${employee.status === 'ACTIVE' ? 'text-success' : 'text-secondary'}`}>
+                {employee.status === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ việc'}
               </td>
-              <td>{employee.name}</td>
-              <td>{employee.position}</td>
-              <td>{employee.joinDate}</td>
-              <td>{employee.status}</td>
               <td>
-                <button>Edit</button>
-                <button>Delete</button>
+                <Link to={`/employees/${employee.userId}/edit`} className="btn btn-outline-warning btn-sm me-2">
+                  <i className="fa-solid fa-pen-to-square"></i>
+                </Link>
+                <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(employee.userId)}>
+                  <i className="fa-solid fa-trash"></i>
+                </button>
               </td>
             </tr>
           ))}
@@ -63,17 +83,17 @@ const EmployeeList = ({ employees }) => {
 
       {/* Pagination Controls */}
       <div className="pagination">
-        <span>Rows per page: </span>
+        <span>Số nhân viên mỗi trang: </span>
         <select value={rowsPerPage} onChange={handleRowsPerPageChange}>
           <option value="10">10</option>
           <option value="20">20</option>
           <option value="30">30</option>
         </select>
         <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-          Previous
+          Trang trước
         </button>
         <button onClick={handleNextPage} disabled={currentPage * rowsPerPage >= employees.length}>
-          Next
+          Trang sau
         </button>
       </div>
     </div>

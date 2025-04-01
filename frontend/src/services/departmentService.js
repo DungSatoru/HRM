@@ -1,6 +1,8 @@
-import axios from "axios";
+import axios from 'axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
-const API_URL = "/departments"; // URL API của bạn
+// Sử dụng template literals để chèn biến vào chuỗi
+const API_URL = `${apiUrl}/departments`; // URL API của bạn
 
 // Lấy danh sách phòng ban
 export const getDepartments = async () => {
@@ -8,7 +10,7 @@ export const getDepartments = async () => {
     const response = await axios.get(API_URL);
     return response.data; // Trả về danh sách phòng ban
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách phòng ban:", error);
+    console.error('Lỗi khi lấy danh sách phòng ban:', error);
     throw error;
   }
 };
@@ -29,12 +31,12 @@ export const addDepartment = async (departmentData) => {
   try {
     const response = await axios.post(API_URL, departmentData, {
       headers: {
-        "Content-Type": "application/json"
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    console.log("User created:", response.data);  // Dữ liệu trả về là UserDTO
+    console.log('User created:', response.data); // Dữ liệu trả về là UserDTO
   } catch (error) {
-    console.error("Error adding user:", error);
+    console.error('Error adding user:', error);
   }
 };
 
@@ -53,7 +55,7 @@ export const updateDepartment = async (id, updatedData) => {
 export const deleteDepartment = async (id) => {
   try {
     await axios.delete(`${API_URL}/${id}`);
-    return { message: "Xóa phòng ban thành công" };
+    return { message: 'Xóa phòng ban thành công' };
   } catch (error) {
     console.error(`Lỗi khi xóa phòng ban ID: ${id}`, error);
     throw error;

@@ -8,25 +8,36 @@ const Header = () => {
   const path = location.pathname.split('/').filter(Boolean); // Lấy các phần đường dẫn từ URL
 
   const renderBreadcrumb = () => {
-    let breadcrumbItems = [
-      { name: 'Main menu', link: '/' }, // Trang chủ luôn là item đầu tiên
-    ];
+    let breadcrumbItems = [{ name: 'Chức năng chính', link: '#' }];
 
     if (path.length === 0) {
       return breadcrumbItems; // Nếu chưa có trang con, chỉ hiển thị Home
     }
 
     // Thêm các mục vào breadcrumb dựa trên path hiện tại
+    if (path[0] === 'dashboard') {
+      breadcrumbItems.push({ name: 'Dashboard', link: '/dashboard' });
+    }
+
+    // Thêm các mục vào breadcrumb dựa trên path hiện tại
     if (path[0] === 'employees') {
       breadcrumbItems.push({ name: 'Nhân viên', link: '/employees' });
-      breadcrumbItems.push({ name: 'Danh sách nhân viên', link: '/employees' });
+
+      if (path[1] === 'add') {
+        breadcrumbItems.push({ name: 'Quản lý nhân viên (Thêm nhân viên)', link: '/employees/add' });
+      } else if (path[2] === 'edit') {
+        breadcrumbItems.push({ name: 'Quản lý nhân viên (Chỉnh sửa nhân viên)', link: `/employees/${path[2]}/edit` });
+      } else {
+        breadcrumbItems.push({ name: 'Danh sách nhân viên', link: '/employees' });
+      }
     }
 
     if (path[0] === 'departments') {
-      breadcrumbItems.push({ name: 'Phòng ban', link: '/departments' });
-      if (path[1] === 'list') {
-        breadcrumbItems.push({ name: 'Danh sách Phòng ban', link: '/departments/list' });
-      }
+      breadcrumbItems.push({ name: 'Phòng ban - Chức vụ (Quản lý phòng ban)', link: '/departments' });
+    }
+
+    if (path[0] === 'roles') {
+      breadcrumbItems.push({ name: 'Phòng ban - Chức vụ (Quản lý chức vụ)', link: '/roles' });
     }
 
     return breadcrumbItems;

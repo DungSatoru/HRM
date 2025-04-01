@@ -6,7 +6,7 @@ const Sidebar = () => {
   // Tạo trạng thái cho các icon (tắt/mở)
   const [openSections, setOpenSections] = useState({
     collapseNhanVien: false,
-    collapsePhongBan: false,
+    collapsePhongBanVaChucVu: false,
     collapseChucVu: false,
     collapseChamCong: false,
     collapseLuongPhucLoi: false,
@@ -42,7 +42,7 @@ const Sidebar = () => {
       </div>
 
       <div className="menu">
-        <p className="fw-bold">Main menu</p>
+        <p className="fw-bold">Chức năng chính</p>
         <ul className="list-unstyled">
           {/* Tổng quan */}
           <li>
@@ -69,55 +69,42 @@ const Sidebar = () => {
                   <NavLink to="/employees">Danh sách nhân viên</NavLink>
                 </li>
                 <li>
-                  <NavLink to="/manage-employees">Quản lý nhân viên</NavLink>
+                  <NavLink to="/employees/add">Quản lý nhân viên</NavLink>
                 </li>
               </ul>
             </div>
           </li>
 
-          {/* Quản lý phòng ban */}
+          {/* Quản lý phòng ban và chức vụ */}
           <li>
-            <NavLink to="#collapsePhongBan" className="nav-item" onClick={() => handleToggle('collapsePhongBan')}>
+            <NavLink
+              to="#collapsePhongBanVaChucVu"
+              className="nav-item"
+              onClick={() => handleToggle('collapsePhongBanVaChucVu')}
+            >
               <div className="d-flex justify-content-between align-items-center">
                 <span>
-                  <i className="fa-solid fa-building"></i> Phòng ban
+                  <i className="fa-solid fa-building"></i> Phòng ban - Chức vụ
                 </span>
                 <span className="dropdown-icon">
-                  <i className={`fa-solid ${openSections.collapsePhongBan ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                  <i
+                    className={`fa-solid ${
+                      openSections.collapsePhongBanVaChucVu ? 'fa-chevron-up' : 'fa-chevron-down'
+                    }`}
+                  ></i>
                 </span>
               </div>
             </NavLink>
-            <div className={`collapse ${openSections.collapsePhongBan ? 'show' : ''}`} id="collapsePhongBan">
+            <div
+              className={`collapse ${openSections.collapsePhongBanVaChucVu ? 'show' : ''}`}
+              id="collapsePhongBanVaChucVu"
+            >
               <ul className="submenu">
                 <li>
-                  <NavLink to="/departments">Danh sách Phòng ban</NavLink>
+                  <NavLink to="/departments">Quản lý phòng ban</NavLink>
                 </li>
                 <li>
-                  <NavLink to="/manage-departments">Quản lý Phòng ban</NavLink>
-                </li>
-              </ul>
-            </div>
-          </li>
-
-          {/* Quản lý chức vụ */}
-          <li>
-            <NavLink to="#collapseChucVu" className="nav-item" onClick={() => handleToggle('collapseChucVu')}>
-              <div className="d-flex justify-content-between align-items-center">
-                <span>
-                  <i className="fa-solid fa-user-tie"></i> Chức vụ
-                </span>
-                <span className="dropdown-icon">
-                  <i className={`fa-solid ${openSections.collapseChucVu ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                </span>
-              </div>
-            </NavLink>
-            <div className={`collapse ${openSections.collapseChucVu ? 'show' : ''}`} id="collapseChucVu">
-              <ul className="submenu">
-                <li>
-                  <NavLink to="/roles">Danh sách Chức vụ</NavLink>
-                </li>
-                <li>
-                  <NavLink to="/manage-roles">Quản lý Chức vụ</NavLink>
+                  <NavLink to="/roles">Quản lý chức vụ</NavLink>
                 </li>
               </ul>
             </div>
@@ -254,6 +241,9 @@ const Sidebar = () => {
                 <li>
                   <NavLink to="/user-permissions">Phân quyền người dùng</NavLink>
                 </li>
+                <li>
+                  <NavLink to="/face-training">Huấn luyện khuôn mặt</NavLink>
+                </li>
               </ul>
             </div>
           </li>
@@ -265,14 +255,26 @@ const Sidebar = () => {
         <p className="fw-bold">Other</p>
         <ul>
           <li>
-            <NavLink to="/settings" activeClassName="active">
-              <i className="fa-solid fa-cogs"></i> Cài đặt
+            <NavLink to="#collapseSetting" className="nav-item" onClick={() => handleToggle('collapseSetting')}>
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  <i className="fa-solid fa-cogs"></i> Cài đặt
+                </span>
+                <span className="dropdown-icon">
+                  <i className={`fa-solid ${openSections.collapseSetting ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </span>
+              </div>
             </NavLink>
-          </li>
-          <li>
-            <NavLink to="/logout" activeClassName="active">
-              <i className="fa-solid fa-sign-out-alt"></i> Đăng xuất
-            </NavLink>
+            <div className={`collapse ${openSections.collapseSetting ? 'show' : ''}`} id="collapseSetting">
+              <ul className="submenu">
+                <li>
+                  <NavLink to="/settings/account">Quản lý tài khoản</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/settings/security">Cấu hình bảo mật</NavLink>
+                </li>
+              </ul>
+            </div>
           </li>
         </ul>
       </div>

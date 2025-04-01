@@ -1,0 +1,222 @@
+/* Main container styles */
+.department-container {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  /* Page title */
+  .page-title {
+    font-size: 2.4rem; /* Increased from 24px */
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  /* Card container */
+  .card-container {
+    margin-bottom: 2.5rem;
+  }
+  
+  /* Card styles */
+  .card {
+    border: none;
+    border-radius: 0.8rem;
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .card:hover {
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1.5rem 2rem;
+    border-top-left-radius: 0.8rem !important;
+    border-top-right-radius: 0.8rem !important;
+  }
+  
+  .card-title {
+    font-size: 1.6rem; /* Increased from 16px */
+    font-weight: 600;
+    color: #444;
+    margin: 0;
+  }
+  
+  .card-body {
+    padding: 2rem;
+  }
+  
+  /* Input group styles */
+  .input-group {
+    box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
+    border-radius: 0.6rem;
+  }
+  
+  .input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #6c757d;
+    font-size: 1.4rem; /* Added font size for input group text */
+  }
+  
+  .form-control {
+    border: 1px solid #ced4da;
+    padding: 1rem 1.5rem;
+    height: auto;
+    font-size: 1.4rem; /* Added font size for form controls */
+  }
+  
+  .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+    border-color: #80bdff;
+  }
+  
+  /* Button styles */
+  .btn {
+    padding: 1rem 2rem;
+    border-radius: 0.6rem;
+    transition: all 0.2s;
+    font-size: 1.4rem; /* Added font size for buttons */
+  }
+  
+  .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+  }
+  
+  /* Table styles */
+  .department-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 1.4rem; /* Added base font size for table */
+  }
+  
+  .department-table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+    color: #495057;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  .department-table td {
+    padding: 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(0, 0, 0, 0.01);
+  }
+  
+  .table-hover > tbody > tr:hover > * {
+    background-color: rgba(0, 123, 255, 0.05);
+  }
+  
+  /* Department link */
+  .department-link {
+    color: #0d6efd;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 1.4rem; /* Added font size for links */
+  }
+  
+  .department-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+  }
+  
+  
+  /* Badge styles */
+  .badge {
+    font-size: 1.2rem; /* Increased from 85% */
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.4rem;
+  }
+  
+  .bg-info {
+    background-color: #0dcaf0 !important;
+  }
+  
+  /* Empty table state */
+  .text-muted {
+    color: #6c757d !important;
+    font-size: 1.4rem; /* Added font size for muted text */
+  }
+  
+  /* Button group for actions */
+  .btn-group .btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1.3rem; /* Added font size for button group buttons */
+  }
+  
+  .btn-sm {
+    font-size: 1.2rem; /* Added font size for small buttons */
+  }
+  
+  .btn-outline-primary {
+    color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: #fff;
+  }
+  
+  .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
+  /* Icon sizing */
+  .fas {
+    font-size: 1.4rem; /* Added font size for FontAwesome icons */
+  }
+  
+  .fa-2x {
+    font-size: 2.8rem; /* Added size for 2x icons */
+  }
+  
+  .me-1, .me-2 {
+    margin-right: 0.5rem; /* Fixed margin for icon spacing */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .card-container .col-md-6 {
+      padding: 0 1rem;
+    }
+  
+    .table-responsive {
+      border: 0;
+    }
+    
+    /* Smaller font sizes on mobile */
+    .department-table {
+      font-size: 1.3rem;
+    }
+    
+    .btn {
+      font-size: 1.3rem;
+    }
+  }

@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import "./Settings.css";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import './Settings.css';
 
 const Settings = () => {
   return (
