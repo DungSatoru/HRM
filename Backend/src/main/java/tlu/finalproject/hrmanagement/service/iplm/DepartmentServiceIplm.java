@@ -19,10 +19,11 @@ public class DepartmentServiceIplm implements DepartmentService {
 
     @Override
     public List<DepartmentDTO> getAllDepartment() {
-        return departmentRepository.findAll()
-                .stream()
-                .map(department -> modelMapper.map(department, DepartmentDTO.class))
-                .collect(Collectors.toList());
+        return departmentRepository.getDepartmentList();
+//        return departmentRepository.findAll()
+//                .stream()
+//                .map(department -> modelMapper.map(department, DepartmentDTO.class))
+//                .collect(Collectors.toList());
     }
 
     @Override
