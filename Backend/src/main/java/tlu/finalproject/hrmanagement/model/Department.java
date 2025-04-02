@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @Table(name = "departments")
 @AllArgsConstructor
@@ -19,4 +21,7 @@ public class Department {
 
     @Column(name = "department_name", length = 100)
     String departmentName;
+
+    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    private List<User> users;
 }

@@ -12,4 +12,6 @@ import lombok.experimental.FieldDefaults;
 public class DepartmentDTO {
     Long departmentId;
     String departmentName;
+    Long totalEmployees;
+    String departmentManager;
 }
