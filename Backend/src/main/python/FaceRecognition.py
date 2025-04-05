@@ -39,61 +39,6 @@ def load_encoding_file(file_path):
 
     return names, encodings
 
-# 2️⃣ Nhận diện khuôn mặt trong ảnh
-def recognize_faces(image_path, names, encodings, output_file):
-    image = face_recognition.load_image_file(image_path)
-    face_locations = face_recognition.face_locations(image)
-    face_encodings = face_recognition.face_encodings(image, face_locations)
-
-    results = []
-    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-        matches = face_recognition.compare_faces(encodings, face_encoding, tolerance=0.3)
-        name = "Unknown"
-
-        if True in matches:
-            first_match_index = matches.index(True)
-            name = names[first_match_index]
-
-        results.append({"top": top, "right": right, "bottom": bottom, "left": left, "name": name})
-
-    # Vẽ kết quả lên ảnh
-    pil_image = Image.fromarray(image)
-    draw = ImageDraw.Draw(pil_image)
-    font = ImageFont.load_default()
-
-    for result in results:
-        top, right, bottom, left = result["top"], result["right"], result["bottom"], result["left"]
-        name = result["name"]
-
-        if name == "Unknown":
-            box_color = (255, 0, 0)  # Đỏ
-            text_color = (255, 255, 255, 255)  # Trắng
-        else:
-            box_color = (0, 0, 255)  # Xanh
-            text_color = (255, 255, 255, 255)  # Trắng
-
-        draw.rectangle(((left, top), (right, bottom)), outline=box_color, width=2)
-        text_width, text_height = draw.textbbox((0, 0), name, font=font)[2:]
-        draw.rectangle(((left, bottom - text_height - 10), (right, bottom)), fill=box_color, outline=box_color)
-        draw.text((left + 6, bottom - text_height - 5), name, fill=text_color, font=font)
-
-    output_image_path = os.path.splitext(image_path)[0] + "_recognized.jpg"
-    pil_image.save(output_image_path)
-    print(f"Ảnh kết quả được lưu tại: {output_image_path}")
-
-    # Ghi kết quả vào file
-    try:
-        with open(output_file, "w") as file:
-            if len(results) > 1:
-                file.write("Phát hiện nhiều hơn một khuôn mặt, vui lòng thử lại!")
-            elif len(results) == 1:
-                file.write(f"{results[0]['name']} ({results[0]['top']}, {results[0]['right']}, {results[0]['bottom']}, {results[0]['left']})")
-            else:
-                file.write("Không có khuôn mặt nào được tìm thấy.\n")
-    except Exception as e:
-        with open(output_file, "w") as file:
-            file.write(f"Lỗi khi thực thi script Python: {e}\n")
-
 # 3️⃣ Mã hóa tất cả ảnh trong thư mục
 def encode_images(video_path, directory_path, encoding_file, ID):
     extract_frames(video_path, folder_path)

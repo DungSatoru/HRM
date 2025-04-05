@@ -1,18 +1,20 @@
 # main.py - Main application file
-import os
+import os, sys
 import time
 import cv2
-from face_recognition_module import FaceRecognizer
-from attendance_module import AttendanceTracker
-from video_module import VideoProcessor
-from utils import create_directory
+from src.face_recognition.face_recognizer import FaceRecognizer
+from src.attendance.attendance_tracker import AttendanceTracker
+from src.video.video_module import VideoProcessor
+from src.utils.utils import create_directory
+
+# Thêm thư mục gốc của project vào sys.path
 
 def main():
     # Configuration parameters
-    encoding_file = "encodings.txt"
+    encoding_file = r"data\encodings.txt"
     rtsp_url = "rtsp://admin:L23F65D3@192.168.2.109:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
-    yolo_model_path = "yolov8n-face.pt"
-    checkin_folder = "checkin"
+    yolo_model_path = r"data\yolov8n-face.pt"
+    checkin_folder = r"src\attendance\checkin"
     frame_resize_width = 640
     recognition_interval = 25  # Process every 25 frames
     check_in_cooldown = 600  # 10 minutes in seconds
