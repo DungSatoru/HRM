@@ -7,6 +7,7 @@ import EmployeeEdit from '~/pages/Employees/EmployeeEdit';
 import Settings from '~/pages/Settings/Settings.js';
 import FaceTrainingWrapper from '~/pages/Settings/FaceTraining/FaceTraining.js';
 import Dashboard from '~/pages/Dashboard/Dashboard';
+import Role from '~/pages/Positions/Position';
 
 // Router ko cần đăng nhập
 const publicRoutes = [
@@ -17,6 +18,7 @@ const publicRoutes = [
   { path: '/employees/:id/edit', component: EmployeeEdit },
 
   { path: '/departments', component: Departments },
+  { path: '/roles', component: Role },
 
   { path: '/settings', component: Settings },
   { path: '/face-training', component: FaceTrainingWrapper },

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getEmployeeById } from "~/services/employeeService"; // Dịch vụ lấy thông tin nhân viên theo ID
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getEmployeeById } from '~/services/employeeService'; // Dịch vụ lấy thông tin nhân viên theo ID
 
 const EmployeeDetail = () => {
   const { id } = useParams(); // Lấy ID từ URL
@@ -20,88 +20,124 @@ const EmployeeDetail = () => {
       setEmployee(data);
       setLoading(false);
     } catch (error) {
-      console.error("Lỗi khi tải thông tin nhân viên:", error);
+      console.error('Lỗi khi tải thông tin nhân viên:', error);
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading-message">Loading...</div>;
   }
 
   if (!employee) {
-    return <div>Không tìm thấy nhân viên</div>;
+    return <div className="error-message">Không tìm thấy nhân viên</div>;
   }
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-3">Chi tiết Nhân viên</h2>
-      <div className="shadow p-4 bg-light rounded">
+    <div className="page-container employee-detail-container">
+      <h2 className="page-title">Hồ sơ nhân viên</h2>
+
+      {/* Hồ sơ nhân viên */}
+      <div className="card-container">
         <div className="row">
-          {/* Cột trái */}
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">Tên tài khoản</label>
-              <p>{employee.username}</p>
-            </div>
+          <div className="col-md-12">
+            <div className="card">
+              <div className="card-body">
+                <div className="row">
+                  {/* Hình ảnh nhân viên */}
+                  <div className="col-md-9 mb-4 d-flex align-items-center">
+                    <img
+                      src={employee.avatar || 'https://cdn-icons-png.flaticon.com/512/219/219969.png'}
+                      alt="Avatar"
+                      className="img-fluid rounded-circle"
+                      style={{ width: '100px', height: '100px' }}
+                    />
+                    <div className="profile-name ms-3">
+                      <h1 className="profile-name-text">{employee.fullName}</h1>
+                      <span
+                        className={`profile-status p-2 rounded text-white ${
+                          employee.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'
+                        }`}
+                      >
+                        {employee.status === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ việc'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="col-md-3 mb-4 d-flex justify-content-end align-items-center">
+                    <button className="btn btn-outline-secondary" onClick={() => navigate(`/employees/${id}/edit`)}>
+                      <i className="fas fa-edit me-1"></i> Chỉnh sửa
+                    </button>
+                  </div>
+                  <hr />
+                  {/* Cột trái */}
+                  <div className="col-md-6 mt-4">
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Tên tài khoản
+                      </label>
+                      <span className="profile-value">{employee.username}</span>
+                    </div>
 
-            <div className="mb-3">
-              <label className="form-label">Họ và Tên</label>
-              <p>{employee.fullName}</p>
-            </div>
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Căn cước công dân
+                      </label>
+                      <span className="profile-value">{employee.identity}</span>
+                    </div>
 
-            <div className="mb-3">
-              <label className="form-label">Căn cước công dân</label>
-              <p>{employee.identity}</p>
-            </div>
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Email
+                      </label>
+                      <span className="profile-value">{employee.email}</span>
+                    </div>
 
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <p>{employee.email}</p>
-            </div>
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Số điện thoại
+                      </label>
+                      <span className="profile-value">{employee.phone}</span>
+                    </div>
+                  </div>
+                  <div className="col-md-6 mt-4">
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Vai trò
+                      </label>
+                      <span className="profile-value">{employee.role.roleName}</span>
+                    </div>
 
-            <div className="mb-3">
-              <label className="form-label">Số điện thoại</label>
-              <p>{employee.phone}</p>
-            </div>
-          </div>
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Chức vụ
+                      </label>
+                      <span className="profile-value">{employee.position.positionName}</span>
+                    </div>
 
-          {/* Cột phải */}
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">Vai trò</label>
-              <p>{employee.role.roleName}</p>
-            </div>
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Phòng ban
+                      </label>
+                      <span className="profile-value">{employee.department.departmentName}</span>
+                    </div>
 
-            <div className="mb-3">
-              <label className="form-label">Chức vụ</label>
-              <p>{employee.position.positionName}</p>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Phòng ban</label>
-              <p>{employee.department.departmentName}</p>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Trạng thái</label>
-              <p>{employee.status}</p>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Ngày vào làm</label>
-              <p>{employee.hireDate}</p>
+                    <div className="profile-item">
+                      <label style={{ minWidth: '200px' }} className="form-label fw-bold">
+                        Ngày vào làm
+                      </label>
+                      <span className="profile-value">{employee.hireDate}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <button
-          className="btn btn-secondary"
-          onClick={() => navigate("/employees")}
-        >
-          Quay lại
-        </button>
       </div>
+      <button className="btn btn-outline-secondary" onClick={() => navigate('/employees')}>
+        <i class="fa-solid fa-left-long"></i>
+        Quay lại
+      </button>
     </div>
   );
 };

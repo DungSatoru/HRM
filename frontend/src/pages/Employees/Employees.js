@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { getEmployees, deleteEmployee } from '~/services/employeeService';
-import './Employees.css'; 
+import './Employees.css';
+import Loading from '~/components/Loading/Loading';
+import DataTable from '~/components/DataTable/DataTable';
+import Modal from '~/components/Modal/Modal';
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [employeeIdToDelete, setEmployeeIdToDelete] = useState(null); // Thêm state lưu id của nhân viên cần xóa
 
   // Pagination state
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -53,116 +57,179 @@ const Employees = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) {
-      try {
-        await deleteEmployee(id);
-        fetchEmployees();
-      } catch (error) {
-        console.error('Lỗi khi xóa nhân viên:', error);
-      }
-    }
-  };
-
   const filteredEmployees = employees.filter(
     (emp) =>
       (emp.fullName ? emp.fullName.toLowerCase() : '').includes(searchTerm.toLowerCase()) ||
-      (emp.email ? emp.email.toLowerCase() : '').includes(searchTerm.toLowerCase())
+      (emp.email ? emp.email.toLowerCase() : '').includes(searchTerm.toLowerCase()),
   );
 
-  // Function to apply 'active' class based on current location
-  const getLinkClassName = (path) => {
-    return location.pathname === path ? 'active' : '';
+  const columns = [
+    {
+      key: 'id',
+      title: 'ID',
+      dataIndex: 'userId',
+      width: '10%',
+      centerAlign: true,
+    },
+    {
+      key: 'name',
+      title: 'Tên nhân viên',
+      dataIndex: 'fullName',
+      width: '20%',
+      type: 'link',
+      defauleValue: 'No Name',
+      idField: 'userId',
+    },
+    {
+      key: 'position',
+      title: 'Chức vụ',
+      dataIndex: 'position',
+      width: '20%',
+      render: (value) => (value ? value.positionName : 'Chưa có chức vụ'), // Lấy giá trị của positionName từ đối tượng position
+    },
+    {
+      key: 'hireDate',
+      title: 'Ngày gia nhập',
+      dataIndex: 'hireDate',
+      width: '20%',
+    },
+    {
+      key: 'status',
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      width: '20%',
+      centerAlign: true,
+      render: (value) => (value === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ việc'),
+    },
+    {
+      key: 'actions',
+      title: 'Thao tác',
+      width: '10%',
+      centerAlign: true,
+      type: 'actions',
+      showEdit: true,
+      showDelete: true,
+      idField: 'userId',
+    },
+  ];
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = (id) => {
+    setEmployeeIdToDelete(id); // Lưu id nhân viên vào state khi mở modal
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSave = async (employeeIdToDelete) => {
+    try {
+      await deleteEmployee(employeeIdToDelete);
+      fetchEmployees();
+    } catch (error) {
+      console.error('Lỗi khi xóa nhân viên:', error);
+    }
+    setEmployeeIdToDelete(null); // Reset lại id sau khi xóa
+    closeModal();
   };
 
   return (
-    <div className="employees-container">
-      <div className="mb-3 d-flex justify-content-between">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Tìm kiếm nhân viên..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button className="add-employee-btn" onClick={() => navigate('/employees/add')}>
-          + Thêm Nhân Viên
-        </button>
+    <div className="page-container employees-container">
+      <h2 className="page-title">Danh sách nhân viên</h2>
+
+      {/* Modal Component */}
+      <Modal
+        title="Modal title"
+        showModal={isModalOpen}
+        onClose={closeModal}
+        onSave={() => handleSave(employeeIdToDelete)}
+        saveButtonText="Save changes"
+        closeButtonText="Close"
+      >
+        Xác nhận xóa nhân viên này?
+      </Modal>
+
+      <div className="card-container">
+        <div className="row">
+          {/* Search Department Card */}
+          <div className="col-md-8">
+            <div className="card">
+              <div className="card-header">
+                <h5 className="card-title">Tìm kiếm nhân viên</h5>
+              </div>
+              <div className="card-body">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="fas fa-search mx-2"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Nhập tên nhân viên..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Add New Employee Card */}
+          <div className="col-md-4">
+            <div className="card">
+              <div className="card-header">
+                <h5 className="card-title">Thêm mới nhân viên</h5>
+              </div>
+              <div className="card-body">
+                <button className="btn btn-primary" onClick={() => navigate('/employees/add')}>
+                  Tới trang thêm nhân viên...
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="text-center">
-          <div className="spinner-border text-primary"></div>
-          <p>Đang tải dữ liệu...</p>
+      {/* Department Table Card */}
+      <div className="card">
+        <div className="card-header d-flex justify-content-between align-items-center">
+          <h5 className="card-title m-0">Danh sách nhân viên</h5>
+          <span className="badge bg-primary">{filteredEmployees.length} nhân viên</span>
         </div>
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-bordered table-hover employee-table">
-            <thead>
-              <tr>
-                <th>
-                  <input type="checkbox" />
-                </th>
-                <th>Tên nhân viên</th>
-                <th>Chức vụ</th>
-                <th>Ngày gia nhập</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEmployees.length > 0 ? (
-                filteredEmployees.map((emp, index) => (
-                  <tr key={index}>
-                    <td>
-                      <input type="checkbox" />
-                    </td>
-                    <td>{emp.fullName}</td>
-                    <td>{emp.position.positionName}</td>
-                    <td>{emp.hireDate}</td>
-                    <td className={`${emp.status === 'ACTIVE' ? 'text-success' : 'text-secondary'}`}>
-                      {emp.status === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ việc'}
-                    </td>
-                    <td>
-                      <NavLink
-                        to={`/employees/${emp.userId}/edit`}
-                        className="btn btn-outline-warning btn-sm me-2"
-                        activeClassName="active"
-                      >
-                        <i className="fa-solid fa-pen-to-square"></i>
-                      </NavLink>
-                      <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(emp.userId)}>
-                        <i className="fa-solid fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="9" className="text-center text-muted">
-                    Không tìm thấy nhân viên nào
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="card-body">
+          {loading ? (
+            <Loading />
+          ) : (
+            <DataTable
+              columns={columns}
+              data={filteredEmployees}
+              emptyMessage={{
+                icon: 'fas fa-folder-open',
+                text: 'Không tìm thấy nhân viên',
+              }}
+              onEdit={(id) => navigate(`/employees/${id}/edit`)}
+              onDelete={openModal}
+              detailsPath="/employees"
+            />
+          )}
+          {/* Pagination Controls */}
+          <div className="pagination">
+            <span>Số nhân viên mỗi trang: </span>
+            <select value={rowsPerPage} onChange={handleRowsPerPageChange}>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+            </select>
+            <button onClick={handlePreviousPage} disabled={currentPage === 1}>
+              Trang trước
+            </button>
+            <button onClick={handleNextPage} disabled={currentPage * rowsPerPage >= filteredEmployees.length}>
+              Trang sau
+            </button>
+          </div>
         </div>
-      )}
-
-      {/* Pagination Controls */}
-      <div className="pagination">
-        <span>Số nhân viên mỗi trang: </span>
-        <select value={rowsPerPage} onChange={handleRowsPerPageChange}>
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="30">30</option>
-        </select>
-        <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-          Trang trước
-        </button>
-        <button onClick={handleNextPage} disabled={currentPage * rowsPerPage >= filteredEmployees.length}>
-          Trang sau
-        </button>
       </div>
     </div>
   );

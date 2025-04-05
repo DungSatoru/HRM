@@ -1,82 +1,84 @@
 import { useEffect, useState } from 'react';
-import { getDepartments, deleteDepartment, addDepartment, updateDepartment } from '~/services/departmentService';
-import './Departments.css';
+// import { getPositions, deletePosition, addPosition, updatePosition } from '~/services/positionService';
+import './Positions.css';
 import Loading from '~/components/Loading/Loading';
 import DataTable from '~/components/DataTable/DataTable';
 import { useNavigate } from 'react-router-dom';
 import Modal from '~/components/Modal/Modal';
+import { addPosition, deletePosition, getPositions, updatePosition } from '~/services/positionService';
 
-const Departments = () => {
-  const [departments, setDepartments] = useState([]);
+const Positions = () => {
+  const [positions, setPositions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [newDepartmentName, setNewDepartmentName] = useState('');
+  const [newPositionName, setNewPositionName] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchDepartments();
+    fetchPositions();
   }, []);
 
-  const fetchDepartments = async () => {
+  const fetchPositions = async () => {
     try {
       setLoading(true);
-      const data = await getDepartments();
-      setDepartments(data || []);
+      const data = await getPositions();
+      setPositions(data || []);
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      console.error('Error fetching positions:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveDepartment = async (e) => {
+
+  const handleSavePosition = async (e) => {
     e.preventDefault();
-    if (!newDepartmentName.trim()) {
-      alert('Please enter a department name');
+    if (!newPositionName.trim()) {
+      alert('Please enter a position name');
       return;
     }
 
-    const departmentData = {
-      departmentName: newDepartmentName,
+    const positionData = {
+      positionName: newPositionName,
     };
 
     try {
-      await addDepartment(departmentData);
-      setNewDepartmentName('');
-      fetchDepartments();
+      await addPosition(positionData);
+      setNewPositionName('');
+      fetchPositions();
     } catch (error) {
-      console.error('Error adding department:', error);
+      console.error('Error adding position:', error);
     }
   };
 
-  const filteredDepartments = departments.filter((department) =>
-    (department.departmentName ? department.departmentName.toLowerCase() : '').includes(searchTerm.toLowerCase()),
+  const filteredPositions = positions.filter((position) =>
+    (position.positionName ? position.positionName.toLowerCase() : '').includes(searchTerm.toLowerCase()),
   );
 
-  console.log('Filtered Departments:', filteredDepartments);
+  console.log('Filtered Positions:', filteredPositions);
 
   // Định nghĩa cấu trúc cột
   const columns = [
     {
       key: 'id',
       title: 'ID',
-      dataIndex: 'departmentId',
+      dataIndex: 'positionId',
       width: '10%',
       centerAlign: true,
     },
     {
       key: 'name',
       title: 'Tên phòng ban',
-      dataIndex: 'departmentName',
+      dataIndex: 'positionName',
       width: '30%',
       type: 'link',
       defaultValue: 'No Name',
-      idField: 'departmentId',
+      idField: 'positionId',
     },
     {
       key: 'manager',
       title: 'Trưởng phòng',
-      dataIndex: 'departmentManager',
+      dataIndex: 'positionManager',
       width: '25%',
       defaultValue: 'Chưa có',
     },
@@ -98,18 +100,18 @@ const Departments = () => {
       type: 'actions',
       showEdit: true,
       showDelete: true,
-      idField: 'departmentId',
+      idField: 'positionId',
     },
   ];
-  const [modalAction, setModalAction] = useState(''); // Lưu hành động hiện tại (Edit hoặc Delete)
-  const [departmentId, setDepartmentId] = useState(null); // Thêm state lưu id của nhân viên cần xóa
-  const [departmentName, setDepartmentName] = useState('');
+  const [modalAction, setModalAction] = useState(""); // Lưu hành động hiện tại (Edit hoặc Delete)
+  const [positionId, setPositionId] = useState(null); // Thêm state lưu id của nhân viên cần xóa
+  const [positionName, setPositionName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = (actionType, id, name = '') => {
+  const openModal = (actionType, id, name = "") => {
     setModalAction(actionType);
-    setDepartmentId(id);
-    setDepartmentName(name); // Nếu là sửa, đặt tên phòng ban vào input
+    setPositionId(id);
+    setPositionName(name); // Nếu là sửa, đặt tên phòng ban vào input
     setIsModalOpen(true);
   };
 
@@ -118,31 +120,32 @@ const Departments = () => {
   };
 
   const handleSave = async () => {
-    if (modalAction === 'Edit') {
-      if (!departmentName.trim()) {
-        alert('Vui lòng nhập tên phòng ban mới');
+    if (modalAction === "Edit") {
+      if (!positionName.trim()) {
+        alert("Vui lòng nhập tên phòng ban mới");
         return;
       }
-
+  
       try {
-        await updateDepartment(departmentId, { departmentName });
-        fetchDepartments(); // Reload danh sách phòng ban
+        await updatePosition(positionId, { positionName });
+        fetchPositions(); // Reload danh sách phòng ban
       } catch (error) {
-        console.error('Lỗi khi cập nhật phòng ban:', error);
+        console.error("Lỗi khi cập nhật phòng ban:", error);
       }
-    } else if (modalAction === 'Delete') {
+    } else if (modalAction === "Delete") {
       try {
-        await deleteDepartment(departmentId);
-        fetchDepartments();
+        await deletePosition(positionId);
+        fetchPositions();
       } catch (error) {
-        console.error('Lỗi khi xóa phòng ban:', error);
+        console.error("Lỗi khi xóa phòng ban:", error);
       }
     }
     closeModal();
   };
+  
 
   return (
-    <div className="page-container department-container">
+    <div className="page-container position-container">
       <h2 className="page-title">Quản lý phòng ban</h2>
 
       {/* Modal Component */}
@@ -150,44 +153,38 @@ const Departments = () => {
         title="Chỉnh sửa phòng ban"
         showModal={isModalOpen}
         onClose={closeModal}
-        onSave={() => handleSave(departmentName)}
+        onSave={() => handleSave(positionName)}
         saveButtonText="Xóa phòng ban"
         closeButtonText="Hủy"
       >
-        {modalAction === 'Edit' ? (
-          <>
-            <label htmlFor="departmentName">Nhập tên phòng ban mới:</label>
-            <input
-              type="text"
-              id="departmentName"
-              value={departmentName}
-              onChange={(e) => setDepartmentName(e.target.value)}
-              className="border rounded p-2 w-full mt-2"
-              placeholder="Nhập tên phòng ban..."
-            />
-          </>
-        ) : (
-          <>Bạn chắc chắn muốn xóa phòng ban này</>
-        )}
+        <label htmlFor="positionName">Nhập tên phòng ban mới:</label>
+        <input
+          type="text"
+          id="positionName"
+          value={positionName}
+          onChange={(e) => setPositionName(e.target.value)}
+          className="border rounded p-2 w-full mt-2"
+          placeholder="Nhập tên phòng ban..."
+        />
       </Modal>
 
       <div className="card-container">
         <div className="row">
-          {/* Add New Department Card */}
+          {/* Add New Position Card */}
           <div className="col-md-6 mb-4">
             <div className="card">
               <div className="card-header">
                 <h5 className="card-title">Thêm phòng ban mới</h5>
               </div>
               <div className="card-body">
-                <form onSubmit={handleSaveDepartment}>
+                <form onSubmit={handleSavePosition}>
                   <div className="input-group">
                     <input
                       type="text"
                       className="form-control"
                       placeholder="Nhập tên phòng ban..."
-                      value={newDepartmentName}
-                      onChange={(e) => setNewDepartmentName(e.target.value)}
+                      value={newPositionName}
+                      onChange={(e) => setNewPositionName(e.target.value)}
                     />
                     <button type="submit" className="btn-save m-0">
                       <i className="fas fa-save me-1"></i> Save
@@ -198,7 +195,7 @@ const Departments = () => {
             </div>
           </div>
 
-          {/* Search Department Card */}
+          {/* Search Position Card */}
           <div className="col-md-6 mb-4">
             <div className="card">
               <div className="card-header">
@@ -223,11 +220,11 @@ const Departments = () => {
         </div>
       </div>
 
-      {/* Department Table Card */}
+      {/* Position Table Card */}
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
           <h5 className="card-title m-0">Danh sách phòng ban</h5>
-          <span className="badge bg-primary">{filteredDepartments.length} phòng ban</span>
+          <span className="badge bg-primary">{filteredPositions.length} phòng ban</span>
         </div>
         <div className="card-body">
           {loading ? (
@@ -235,14 +232,14 @@ const Departments = () => {
           ) : (
             <DataTable
               columns={columns}
-              data={filteredDepartments}
+              data={filteredPositions}
               emptyMessage={{
                 icon: 'fas fa-folder-open',
                 text: 'Không tìm thấy phòng ban',
               }}
-              onEdit={(id) => openModal('Edit', id)}
-              onDelete={(id) => openModal('Delete', id)}
-              detailsPath="/departments"
+              onEdit={(id) => openModal("Edit", id)}
+              onDelete={(id) => openModal("Delete", id)}
+              detailsPath="/positions"
             />
           )}
         </div>
@@ -251,4 +248,4 @@ const Departments = () => {
   );
 };
 
-export default Departments;
+export default Positions;

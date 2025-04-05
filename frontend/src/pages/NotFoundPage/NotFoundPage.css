@@ -3,18 +3,17 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 2.4rem;
+  padding: 24px;
   font-family: 'Circular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #222222;
   background-color: #ffffff;
 }
 
 .airbnb-not-found-logo {
-  margin-bottom: 4rem;
+  margin-bottom: 40px;
 }
 
 .airbnb-not-found-content {
-  max-width: 120rem;
   margin: 0 auto;
   width: 100%;
 }
@@ -24,7 +23,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4rem;
+  margin-bottom: 40px;
 }
 
 .airbnb-not-found-text {
@@ -38,7 +37,7 @@
 }
 
 .airbnb-not-found-text h1 {
-  font-size: 7.2rem;
+  font-size: 72px;
   font-weight: 600;
   margin: 0 0 2rem 0;
   line-height: 1;
@@ -46,21 +45,21 @@
 }
 
 .airbnb-not-found-message {
-  font-size: 2.2rem;
+  font-size: 22px;
   margin: 0 0 2rem 0;
   line-height: 1.4;
   color: #222222;
-  max-width: 40rem;
+  max-width: 400px;
 }
 
 .airbnb-not-found-error-code {
-  font-size: 1.4rem;
+  font-size: 14px;
   color: #717171;
   margin: 0 0 1.6rem 0;
 }
 
 .airbnb-not-found-help-text {
-  font-size: 1.4rem;
+  font-size: 14px;
   color: #222222;
   margin: 0 0 1rem 0;
 }
@@ -72,11 +71,11 @@
 }
 
 .airbnb-not-found-link-list li {
-  margin-bottom: 0.8rem;
+  margin-bottom: 8px;
 }
 
 .airbnb-not-found-link-list a {
-  font-size: 1.4rem;
+  font-size: 14px;
   color: #008489;
   text-decoration: none;
   display: inline-block;
@@ -96,12 +95,12 @@
 
   .airbnb-not-found-text {
     order: 1;
-    margin-bottom: 2rem;
+    margin-bottom: 20px;
   }
 
   .airbnb-not-found-illustration {
     order: 2;
-    margin-bottom: 3rem;
+    margin-bottom: 30px;
   }
 
   .airbnb-not-found-message {
@@ -115,11 +114,11 @@
 
 @media (max-width: 480px) {
   .airbnb-not-found-text h1 {
-    font-size: 5rem;
+    font-size: 50px;
   }
 
   .airbnb-not-found-message {
-    font-size: 1.8rem;
+    font-size: 18px;
   }
 
   .airbnb-not-found-illustration svg {

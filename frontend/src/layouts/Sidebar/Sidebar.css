@@ -12,8 +12,8 @@
 .sidebar h2 {
   margin-bottom: 20px;
   text-align: center;
-  width: 100%; 
-  font-size: 1.5rem;
+  width: 100%;
+  font-size: 15px;
   font-weight: bold;
 }
 
@@ -50,5 +50,3 @@
   background-color: #ccc;
   font-weight: bold;
 }
-
-

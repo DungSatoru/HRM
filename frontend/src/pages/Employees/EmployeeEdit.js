@@ -1,243 +1,336 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  getEmployeeById,
-  updateEmployee,
-} from "~/services/employeeService"; // Dịch vụ lấy và sửa thông tin nhân viên
-import { getDepartments } from "~/services/departmentService";
-import { getPositions } from "~/services/positionService";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getEmployeeById, updateEmployee } from '~/services/employeeService';
+import { getDepartments } from '~/services/departmentService';
+import { getPositions } from '~/services/positionService';
+import './EmployeeEdit.css';
+import Loading from '~/components/Loading/Loading';
 
 const EmployeeEdit = () => {
-  const { id } = useParams(); // Lấy ID từ URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [employee, setEmployee] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
+  const [formData, setFormData] = useState({});
+  const [saving, setSaving] = useState(false);
 
+  // Fetch data on component mount
   useEffect(() => {
-    fetchDepartments();
-    fetchPositions();
-    fetchEmployeeDetail();
+    const fetchData = async () => {
+      try {
+        const [departmentsData, positionsData, employeeData] = await Promise.all([
+          getDepartments(),
+          getPositions(),
+          getEmployeeById(id),
+        ]);
+
+        setDepartments(departmentsData || []);
+        setPositions(positionsData || []);
+        setEmployee(employeeData);
+
+        if (employeeData) {
+          setFormData({
+            username: employeeData.username || '',
+            fullName: employeeData.fullName || '',
+            identity: employeeData.identity || '',
+            email: employeeData.email || '',
+            phone: employeeData.phone || '',
+            positionId: employeeData.position?.positionId || '',
+            departmentId: employeeData.department?.departmentId || '',
+            status: employeeData.status || 'ACTIVE',
+            hireDate: employeeData.hireDate?.split('T')[0] || '',
+          });
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Lỗi khi tải dữ liệu:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [id]);
 
-  const fetchDepartments = async () => {
-    try {
-      const data = await getDepartments();
-      setDepartments(data || []);
-    } catch (error) {
-      console.error("Lỗi khi tải phòng ban:", error);
-    }
-  };
-
-  const fetchPositions = async () => {
-    try {
-      const data = await getPositions();
-      setPositions(data || []);
-    } catch (error) {
-      console.error("Lỗi khi tải vị trí:", error);
-    }
-  };
-
-  const fetchEmployeeDetail = async () => {
-    try {
-      const data = await getEmployeeById(id);
-      setEmployee(data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Lỗi khi lấy thông tin nhân viên:", error);
-      setLoading(false);
-    }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   const handleSaveEmployee = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-
-    const updatedEmployeeData = {
-      username: formData.get("username"),
-      fullName: formData.get("fullName"),
-      identity: formData.get("identity"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      role: {
-        roleId: 5, // Vai trò Nhân viên mặc định
-        roleName: "Nhân viên",
-      },
-      department: {
-        departmentId: formData.get("departmentName"),
-        departmentName: formData.get("departmentName"),
-      },
-      position: {
-        positionId: formData.get("positionName"),
-        positionName: formData.get("positionName"),
-      },
-      status: formData.get("status"),
-      hireDate: formData.get("hireDate"),
-    };
+    setSaving(true);
 
     try {
-      await updateEmployee(id, updatedEmployeeData); // Cập nhật nhân viên qua API
-      navigate("/employees");
+      const updatedEmployeeData = {
+        username: formData.username,
+        fullName: formData.fullName,
+        identity: formData.identity,
+        email: formData.email,
+        phone: formData.phone,
+        role: {
+          roleId: 5,
+          roleName: 'Nhân viên',
+        },
+        department: {
+          departmentId: formData.departmentId,
+        },
+        position: {
+          positionId: formData.positionId,
+        },
+        status: formData.status,
+        hireDate: formData.hireDate,
+      };
+
+      await updateEmployee(id, updatedEmployeeData);
+      navigate('/employees', { state: { message: 'Cập nhật thông tin nhân viên thành công!' } });
     } catch (error) {
-      console.error("Lỗi khi sửa thông tin nhân viên:", error);
+      console.error('Lỗi khi cập nhật thông tin nhân viên:', error);
+      setSaving(false);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (!employee) {
-    return <div>Không tìm thấy nhân viên</div>;
+    return (
+      <div className="alert alert-danger text-center m-4">
+        <i className="fas fa-exclamation-circle me-2"></i>
+        Không tìm thấy thông tin nhân viên
+      </div>
+    );
   }
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-3">Sửa Thông Tin Nhân Viên</h2>
-      <form
-        onSubmit={handleSaveEmployee}
-        className="shadow p-4 bg-light rounded"
-      >
-        <div className="row">
-          {/* Cột trái */}
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">Tên tài khoản</label>
-              <input
-                type="text"
-                name="username"
-                className="form-control"
-                defaultValue={employee.username}
-                required
-              />
+    <div className="page-container employee-edit-container">
+      <h2 className="page-title">Chỉnh Sửa Thông Tin Nhân Viên</h2>
+      <div className="card-container">
+        <form onSubmit={handleSaveEmployee}>
+          <div className="row">
+            {/* Thông tin cá nhân */}
+            <div className="col-12">
+              <div className="card border-0">
+                <div className="card-body">
+                  <h6 className="card-subtitle mb-3 text-muted">
+                    <i className="fas fa-id-card me-2"></i>Thông tin cá nhân
+                  </h6>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <input
+                          type="text"
+                          id="username"
+                          name="username"
+                          className="form-control"
+                          value={formData.username || ''}
+                          onChange={handleInputChange}
+                          required
+                        />
+                        <label htmlFor="username">Tên tài khoản</label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <input
+                          type="text"
+                          id="fullName"
+                          name="fullName"
+                          className="form-control"
+                          value={formData.fullName || ''}
+                          onChange={handleInputChange}
+                          required
+                        />
+                        <label htmlFor="fullName">Họ và tên</label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <input
+                          type="text"
+                          id="identity"
+                          name="identity"
+                          className="form-control"
+                          value={formData.identity || ''}
+                          onChange={handleInputChange}
+                          required
+                        />
+                        <label htmlFor="identity">Căn cước công dân</label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <input
+                          type="date"
+                          id="hireDate"
+                          name="hireDate"
+                          className="form-control"
+                          value={formData.hireDate || ''}
+                          onChange={handleInputChange}
+                          required
+                        />
+                        <label htmlFor="hireDate">Ngày vào làm</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">Họ và Tên</label>
-              <input
-                type="text"
-                name="fullName"
-                className="form-control"
-                defaultValue={employee.fullName}
-                required
-              />
+            {/* Thông tin liên hệ */}
+            <div className="col-12">
+              <div className="card border-0 ">
+                <div className="card-body">
+                  <h6 className="card-subtitle mb-3 text-muted">
+                    <i className="fas fa-address-book me-2"></i>Thông tin liên hệ
+                  </h6>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          className="form-control"
+                          value={formData.email || ''}
+                          onChange={handleInputChange}
+                          required
+                        />
+                        <label htmlFor="email">Email</label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <input
+                          type="text"
+                          id="phone"
+                          name="phone"
+                          className="form-control"
+                          value={formData.phone || ''}
+                          onChange={handleInputChange}
+                          required
+                        />
+                        <label htmlFor="phone">Số điện thoại</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">Căn cước công dân</label>
-              <input
-                type="text"
-                name="identity"
-                className="form-control"
-                defaultValue={employee.identity}
-                required
-              />
-            </div>
+            {/* Thông tin công việc */}
+            <div className="col-12">
+              <div className="card border-0">
+                <div className="card-body">
+                  <h6 className="card-subtitle mb-3 text-muted">
+                    <i className="fas fa-briefcase me-2"></i>Thông tin công việc
+                  </h6>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <input type="text" id="roleName" className="form-control bg-light" value="Nhân viên" disabled />
+                        <label htmlFor="roleName">Vai trò</label>
+                      </div>
+                    </div>
 
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                name="email"
-                className="form-control"
-                defaultValue={employee.email}
-                required
-              />
-            </div>
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <select
+                          id="status"
+                          name="status"
+                          className="form-select"
+                          value={formData.status || ''}
+                          onChange={handleInputChange}
+                        >
+                          <option value="ACTIVE">Đang làm việc</option>
+                          <option value="INACTIVE">Nghỉ việc</option>
+                          <option value="BANNED">Cấm hoạt động</option>
+                        </select>
+                        <label htmlFor="status">Trạng thái</label>
+                      </div>
+                    </div>
 
-            <div className="mb-3">
-              <label className="form-label">Số điện thoại</label>
-              <input
-                type="text"
-                name="phone"
-                className="form-control"
-                defaultValue={employee.phone}
-                required
-              />
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <select
+                          id="departmentId"
+                          name="departmentId"
+                          className="form-select"
+                          value={formData.departmentId || ''}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">-- Chọn phòng ban --</option>
+                          {departments.map((dep) => (
+                            <option key={dep.departmentId} value={dep.departmentId}>
+                              {dep.departmentName}
+                            </option>
+                          ))}
+                        </select>
+                        <label htmlFor="departmentId">Phòng ban</label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-floating">
+                        <select
+                          id="positionId"
+                          name="positionId"
+                          className="form-select"
+                          value={formData.positionId || ''}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">-- Chọn chức vụ --</option>
+                          {positions.map((position) => (
+                            <option key={position.positionId} value={position.positionId}>
+                              {position.positionName}
+                            </option>
+                          ))}
+                        </select>
+                        <label htmlFor="positionId">Chức vụ</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Cột phải */}
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">Vai trò</label>
-              <input
-                type="text"
-                name="roleName"
-                className="form-control"
-                value="Nhân viên" // Vai trò mặc định là Nhân viên
-                disabled
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Chức vụ</label>
-              <select
-                name="positionName"
-                className="form-select"
-                defaultValue={employee.position.positionId}
-              >
-                {positions.map((position) => (
-                  <option key={position.positionId} value={position.positionId}>
-                    {position.positionName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Phòng ban</label>
-              <select
-                name="departmentName"
-                className="form-select"
-                defaultValue={employee.department.departmentId}
-              >
-                {departments.map((dep) => (
-                  <option key={dep.departmentId} value={dep.departmentId}>
-                    {dep.departmentName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Trạng thái</label>
-              <select
-                name="status"
-                className="form-select"
-                defaultValue={employee.status}
-              >
-                <option value="ACTIVE">Đang làm việc</option>
-                <option value="INACTIVE">Nghỉ việc</option>
-                <option value="BANNED">Cấm hoạt động</option>
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Ngày vào làm</label>
-              <input
-                type="date"
-                name="hireDate"
-                className="form-control"
-                defaultValue={employee.hireDate.split("T")[0]} // Đảm bảo ngày tháng theo định dạng yyyy-mm-dd
-                required
-              />
-            </div>
+          <div className="d-flex justify-content-end gap-2 mt-4">
+            <button
+              type="button"
+              className="btn btn-light px-4"
+              onClick={() => navigate('/employees')}
+              disabled={saving}
+            >
+              <i className="fas fa-times me-2"></i>
+              Hủy
+            </button>
+            <button type="submit" className="btn btn-primary px-4" disabled={saving}>
+              {saving ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Đang lưu...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save me-2"></i>
+                  Lưu thay đổi
+                </>
+              )}
+            </button>
           </div>
-        </div>
-
-        <button type="submit" className="btn btn-primary">
-          Lưu
-        </button>
-        <button
-          type="button"
-          className="btn btn-secondary ms-2"
-          onClick={() => navigate("/employees")}
-        >
-          Hủy
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

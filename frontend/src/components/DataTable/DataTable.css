@@ -1,0 +1,187 @@
+/* Table styles */
+#DataTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+#DataTable th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+#DataTable td {
+  vertical-align: middle;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.table-hover > tbody > tr:hover > * {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Department link */
+.dataTable-link {
+  color: #0d6efd;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dataTable-link:hover {
+  color: #0a58ca;
+  text-decoration: underline;
+}
+
+/* Badge styles */
+.badge {
+  font-weight: 500;
+}
+
+.bg-info {
+  background-color: #0dcaf0 !important;
+}
+
+/* Empty table state */
+.text-muted {
+  color: #6c757d !important;
+  font-size: 1.4; /* Added font size for muted text */
+}
+
+/* Button group for actions */
+.btn-group .btn {
+}
+
+.btn-sm {
+}
+
+.btn-outline-primary {
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.btn-outline-danger {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+/* Icon sizing */
+.fas {
+}
+
+.fa-2x {
+}
+
+.me-1,
+.me-2 {
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-container .col-md-6 {
+  }
+
+  .table-responsive {
+    border: 0;
+  }
+
+  /* Smaller font sizes on mobile */
+  #DataTable {
+  }
+
+  .btn {
+  }
+}
+
+/* Card container */
+.card-container {
+}
+
+/* Card styles */
+.card {
+  border: none;
+  box-shadow: 0 2px 1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 0.5rem 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 15px 20px;
+  border-top-left-radius: 0.8rem !important;
+  border-top-right-radius: 0.8rem !important;
+}
+
+.card-title {
+  font-size: 16px; /* Increased from 16px */
+  font-weight: 600;
+  color: #444;
+  margin: 0;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Input group styles */
+.input-group {
+  box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #6c757d;
+  font-size: 14px; /* Added font size for input group text */
+}
+
+.form-control {
+  border: 1px solid #ced4da;
+  padding: 1rem 15px;
+  height: auto;
+  font-size: 14px; /* Added font size for form controls */
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.2px rgba(0, 123, 255, 0.15);
+  border-color: #80bdff;
+}
+
+/* Button styles */
+.btn {
+  padding: 1rem 20px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-size: 14px; /* Added font size for buttons */
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}

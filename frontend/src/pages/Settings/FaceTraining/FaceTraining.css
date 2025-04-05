@@ -76,6 +76,6 @@
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .row > div:first-child {
-    margin-bottom: 2rem;
+    margin-bottom: 20px;
   }
 }

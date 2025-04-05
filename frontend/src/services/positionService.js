@@ -1,7 +1,9 @@
 import axios from "axios";
 
-// API endpoint để lấy danh sách vị trí
-const API_URL = "http://localhost:8080/api/positions"; // Thay đổi URL nếu cần
+const apiUrl = process.env.REACT_APP_API_URL;
+
+// Sử dụng template literals để chèn biến vào chuỗi
+const API_URL = `${apiUrl}/positions`; // URL API của bạn
 
 // Lấy tất cả các vị trí
 export const getPositions = async () => {
@@ -21,6 +23,29 @@ export const addPosition = async (positionData) => {
     return response.data; // Dữ liệu vị trí mới sau khi thêm
   } catch (error) {
     console.error("Lỗi khi thêm vị trí:", error);
+    throw error;
+  }
+};
+
+
+// Cập nhật thông tin chức vụ
+export const updatePosition = async (id, updatedData) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}`, updatedData);
+    return response.data;
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật vị trí ID: ${id}`, error);
+    throw error;
+  }
+};
+
+// Xóa vị trí
+export const deletePosition = async (id) => {
+  try {
+    await axios.delete(`${API_URL}/${id}`);
+    return { message: 'Xóa vị trí thành công' };
+  } catch (error) {
+    console.error(`Lỗi khi xóa vị trí ID: ${id}`, error);
     throw error;
   }
 };
