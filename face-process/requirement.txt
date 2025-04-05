@@ -1,0 +1,6 @@
+setuptools==69.5.1
+face_recognition==1.2.3
+opencv-python==4.11.0
+numpy==1.26.4
+ultralytics==8.3.86
+websocket-client==1.8.0
