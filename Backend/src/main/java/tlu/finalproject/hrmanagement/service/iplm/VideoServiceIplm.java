@@ -1,5 +1,6 @@
 package tlu.finalproject.hrmanagement.service.iplm;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tlu.finalproject.hrmanagement.service.VideoService;
@@ -10,7 +11,14 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class VideoServiceIplm implements VideoService {
+    @Value("${face.recognition.script}")
+    private String encoderFilePath;
 
+    @Value("${face.recognition.frames}")
+    private String extractFramesFilePath;
+
+    @Value("${face.recognition.model}")
+    private String encodingsPath;
     private static final String UPLOAD_DIR = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\uploads\\VideoFaceTraining";
 
     @Override
@@ -54,16 +62,15 @@ public class VideoServiceIplm implements VideoService {
 
     @Override
     public String trainFaceEmployee(String filePath, String Id) {
-        String mainFilePath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\python\\FaceRecognition.py";
-        String extractFramesFilePath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\uploads\\ImageExtractFromVideo";
-        String encodingsPath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\FaceEncoding\\encodings.txt";
+//        String mainFilePath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\python\\FaceRecognition.py";
+//        String extractFramesFilePath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\uploads\\ImageExtractFromVideo";
+//        String encodingsPath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\FaceEncoding\\encodings.txt";
 
         try {
             // Tạo command dưới dạng List<String> để tránh lỗi dấu cách
             ProcessBuilder pb = new ProcessBuilder(
                     "python",
-                    mainFilePath,
-                    "encode_images",
+                    encoderFilePath,
                     filePath,
                     extractFramesFilePath,
                     encodingsPath,
@@ -78,7 +85,7 @@ public class VideoServiceIplm implements VideoService {
 
             // Chạy tiến trình
             Process process = pb.start();
-            boolean finished = process.waitFor(90, TimeUnit.SECONDS);
+            boolean finished = process.waitFor(180, TimeUnit.SECONDS);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -96,8 +103,8 @@ public class VideoServiceIplm implements VideoService {
             return "Train Successfully. Command: " + result;
         } catch (Exception e) {
             throw new RuntimeException("Error processing video with Python script. Command: " +
-                    String.format("python %s encode_images %s %s %s %s",
-                            mainFilePath, filePath, extractFramesFilePath, encodingsPath, Id), e);
+                    String.format("python %s %s %s %s %s",
+                            encoderFilePath, filePath, extractFramesFilePath, encodingsPath, Id), e);
         }
     }
 

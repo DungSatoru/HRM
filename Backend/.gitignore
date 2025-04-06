@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### Videos ###
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.flv
+*.wmv
+*.webm  

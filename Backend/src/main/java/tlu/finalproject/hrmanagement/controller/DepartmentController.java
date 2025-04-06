@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
+import tlu.finalproject.hrmanagement.dto.EmployeeByDepartmentDTO;
 import tlu.finalproject.hrmanagement.service.DepartmentService;
 
 import java.util.List;
@@ -23,9 +24,9 @@ public class DepartmentController {
         return ResponseEntity.ok(departmentService.getAllDepartment());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<DepartmentDTO> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(departmentService.getDepartmentById(id));
+    @GetMapping("/{departmentId}")
+    public ResponseEntity<List<EmployeeByDepartmentDTO>> getUserById(@PathVariable Long departmentId) {
+        return ResponseEntity.ok(departmentService.getDepartmentById(departmentId));
     }
 
     @PostMapping

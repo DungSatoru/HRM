@@ -2,8 +2,11 @@ package tlu.finalproject.hrmanagement.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
+import tlu.finalproject.hrmanagement.dto.EmployeeByDepartmentDTO;
+import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
 import tlu.finalproject.hrmanagement.model.Department;
 
 import java.util.List;
@@ -22,5 +25,16 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
                 GROUP BY d.departmentId, d.departmentName
             """)
     List<DepartmentDTO> getDepartmentList();
+
+    @Query("""
+                SELECT new tlu.finalproject.hrmanagement.dto.EmployeeByDepartmentDTO(
+                    u.userId, u.fullName, u.email, u.phone, p.positionName
+                )
+                FROM User u
+                LEFT JOIN u.position p
+                WHERE u.department.departmentId = :departmentId
+            """)
+    List<EmployeeByDepartmentDTO> getEmployeesByDepartmentId(@Param("departmentId") Long departmentId);
+
 
 }
