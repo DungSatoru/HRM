@@ -72,7 +72,16 @@ const renderCellContent = (item, column, detailsPath, onEdit, onDelete) => {
         </Link>
       );
     case 'badge':
-      return <span className={`badge ${column.badgeClass || 'bg-info'}`}>{value || column.defaultValue || 0}</span>;
+      const badgeClass =
+        typeof column.badgeClass === 'function'
+          ? column.badgeClass(item) // truyền từng dòng vào để xử lý logic
+          : column.badgeClass || 'bg-info';
+
+      return (
+        <span className={`badge ${value ? badgeClass : 'bg-secondary'}`}>
+          {value || column.defaultValue || 'Chưa có'}
+        </span>
+      );
     case 'actions':
       return (
         <div className="btn-group">

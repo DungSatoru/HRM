@@ -40,6 +40,11 @@ const Header = () => {
       breadcrumbItems.push({ name: 'Phòng ban - Chức vụ (Quản lý chức vụ)', link: '/roles' });
     }
 
+    if (path[0] === 'attendances') {
+      breadcrumbItems.push({ name: 'Chấm công', link: '#' });
+      breadcrumbItems.push({ name: 'Theo dõi chấm công theo ngày', link: '/attendances' });
+    }
+
     return breadcrumbItems;
   };
 

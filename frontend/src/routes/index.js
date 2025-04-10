@@ -8,6 +8,8 @@ import Settings from '~/pages/Settings/Settings.js';
 import FaceTrainingWrapper from '~/pages/Settings/FaceTraining/FaceTraining.js';
 import Dashboard from '~/pages/Dashboard/Dashboard';
 import Role from '~/pages/Positions/Position';
+import Attendance from '~/pages/Attendances/Attendance';
+import UserAttendanceHistory from '~/pages/Attendances/UserAttendanceHistory';
 
 // Router ko cần đăng nhập
 const publicRoutes = [
@@ -19,6 +21,9 @@ const publicRoutes = [
 
   { path: '/departments', component: Departments },
   { path: '/roles', component: Role },
+
+  { path: '/attendances', component: Attendance },
+  { path: '/attendance-history', component: UserAttendanceHistory },
 
   { path: '/settings', component: Settings },
   { path: '/face-training', component: FaceTrainingWrapper },

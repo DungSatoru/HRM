@@ -125,7 +125,10 @@ const Sidebar = () => {
             <div className={`collapse ${openSections.collapseChamCong ? 'show' : ''}`} id="collapseChamCong">
               <ul className="submenu">
                 <li>
-                  <NavLink to="/attendances">Theo dõi chấm công nhân viên</NavLink>
+                  <NavLink to="/attendances">Theo dõi chấm công theo ngày</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/attendance-history">Lịch sử chấm công nhân viên</NavLink>
                 </li>
                 <li>
                   <NavLink to="/attendance-reports">Báo cáo chấm công</NavLink>

@@ -1,0 +1,166 @@
+import { type } from '@testing-library/user-event/dist/type';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DataTable from '~/components/DataTable/DataTable';
+import Loading from '~/components/Loading/Loading';
+import { getAttendances } from '~/services/attendanceService';
+
+const Attendance = () => {
+  const today = new Date().toISOString().split('T')[0];
+  const [attendances, setAttendances] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchAttendancesByDate(selectedDate);
+  }, [selectedDate]);
+
+  const fetchAttendancesByDate = async (date) => {
+    try {
+      setLoading(true);
+      const data = await getAttendances(date);
+      setAttendances(data || []);
+    } catch (error) {
+      console.error('Error fetching attendances:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  const calculateDuration = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return null;
+    const [h1, m1, s1] = checkIn.split(':').map(Number);
+    const [h2, m2, s2] = checkOut.split(':').map(Number);
+
+    const start = new Date(0, 0, 0, h1, m1, s1);
+    const end = new Date(0, 0, 0, h2, m2, s2);
+    const diff = new Date(end - start);
+
+    const hours = diff.getUTCHours().toString().padStart(2, '0');
+    const minutes = diff.getUTCMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  const mappedData = attendances?.map((item, index) => ({
+    key: item.attendanceId,
+    stt: index + 1,
+    fullName: item.fullName || 'Không tên',
+    userId: item.userId,
+    checkIn: item.checkIn || '-',
+    checkOut: item.checkOut || '-',
+    duration: item.checkIn && item.checkOut ? calculateDuration(item.checkIn, item.checkOut) : 'Dữ liệu chưa đủ',
+    status: item.checkOut ? 'Đã chấm công' : 'Chưa checkout',
+  }));
+
+  // Định nghĩa cấu trúc cột
+  const columns = [
+    {
+      key: 'stt',
+      title: 'STT',
+      dataIndex: 'stt',
+      width: '5%',
+      centerAlign: true,
+    },
+    {
+      key: 'fullName',
+      title: 'Họ tên',
+      dataIndex: 'fullName',
+      width: '25%',
+    },
+    {
+      key: 'checkIn',
+      title: 'Thời gian vào',
+      dataIndex: 'checkIn',
+      width: '15%',
+      centerAlign: true,
+      type: 'badge',
+      badgeClass: 'bg-info',
+    },
+    {
+      key: 'checkOut',
+      title: 'Thời gian ra',
+      dataIndex: 'checkOut',
+      width: '15%',
+      centerAlign: true,
+      type: 'badge',
+      badgeClass: 'bg-info',
+    },
+    {
+      key: 'duration',
+      title: 'Tổng giờ',
+      dataIndex: 'duration',
+      width: '10%',
+      centerAlign: true,
+    },
+    {
+      key: 'status',
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      width: '15%',
+      centerAlign: true,
+      type: 'badge',
+      badgeClass: (row) => (row.checkOut != '-' ? 'bg-success' : 'bg-danger'),
+    },
+    {
+      key: 'actions',
+      title: 'Thao tác',
+      width: '20%',
+      centerAlign: true,
+      type: 'actions',
+      showEdit: true,
+      showDelete: true,
+      idField: 'key',
+    },
+  ];
+
+  return (
+    <div className="page-container attendance-container">
+      <h2 className="page-title">Theo dõi chấm công theo ngày</h2>
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="date-picker" style={{ marginRight: '10px' }}>
+          Chọn ngày:
+        </label>
+        <input
+          id="date-picker"
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          style={{ padding: '5px' }}
+        />
+      </div>
+
+      <div className="card">
+        <div className="card-header d-flex justify-content-between align-items-center">
+          <h5 className="card-title m-0">Danh sách chấm công ngày {formatDate(selectedDate)}</h5>
+          <span className="badge bg-primary">{attendances.length} Nhân viên</span>
+        </div>
+        <div className="card-body">
+          {loading ? (
+            <Loading />
+          ) : (
+            <DataTable
+              columns={columns}
+              data={mappedData}
+              emptyMessage={{
+                icon: 'fas fa-clock',
+                text: 'Không tìm thấy dữ liệu chấm công',
+              }}
+              onEdit={(id) => navigate(`/attendances/${id}/edit`)}
+              //   onDelete={openModal}
+              detailsPa
+              th="/attendance"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Attendance;
