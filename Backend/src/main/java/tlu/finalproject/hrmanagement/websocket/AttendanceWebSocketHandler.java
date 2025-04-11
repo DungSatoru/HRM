@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import tlu.finalproject.hrmanagement.dto.AttendanceDTO;
+import tlu.finalproject.hrmanagement.dto.AttendanceByFaceDTO;
 import tlu.finalproject.hrmanagement.service.AttendanceService;
 
 import java.time.LocalDateTime;
@@ -23,14 +23,14 @@ public class AttendanceWebSocketHandler extends TextWebSocketHandler {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Chuyển đổi JSON thành object
-        AttendanceDTO attendanceDTO = objectMapper.readValue(payload, AttendanceDTO.class);
+        AttendanceByFaceDTO attendanceByFaceDTO = objectMapper.readValue(payload, AttendanceByFaceDTO.class);
 
         // Chuyển đổi time từ String sang LocalDateTime
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime attendanceTime = LocalDateTime.parse(attendanceDTO.getTime(), formatter);
+        LocalDateTime attendanceTime = LocalDateTime.parse(attendanceByFaceDTO.getTime(), formatter);
 
         // Gọi service để lưu vào database
-        attendanceService.processAttendance(attendanceDTO.getUserId(), attendanceTime);
+        attendanceService.processAttendance(attendanceByFaceDTO.getUserId(), attendanceTime);
 
         session.sendMessage(new TextMessage("Attendance received"));
     }

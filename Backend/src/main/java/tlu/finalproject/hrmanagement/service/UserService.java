@@ -1,20 +1,19 @@
 package tlu.finalproject.hrmanagement.service;
 
-import org.springframework.stereotype.Service;
-import tlu.finalproject.hrmanagement.dto.UserDTO;
+import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
 
 import java.util.List;
 
 public interface UserService {
-    List<UserDTO> getAllUsers();
+    List<EmployeeDTO> getAllUsers();
 
-    UserDTO getUserById(Long id);
+    EmployeeDTO getUserById(Long id);
 
-    List<UserDTO> getUsersByDepartmentId(Long id);
+    List<EmployeeDTO> getUsersByDepartmentId(Long id);
 
-    UserDTO createUser(UserDTO userDTO);
+    EmployeeDTO createUser(EmployeeDTO employeeDTO);
 
-    UserDTO updateUser(Long id, UserDTO userDTO);
+    EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO);
 
     void deleteUser(Long id);
 }

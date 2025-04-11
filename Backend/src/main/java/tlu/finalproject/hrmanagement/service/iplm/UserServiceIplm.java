@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tlu.finalproject.hrmanagement.dto.UserDTO;
+import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.*;
 import tlu.finalproject.hrmanagement.repository.DepartmentRepository;
@@ -28,7 +28,7 @@ public class UserServiceIplm implements UserService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<UserDTO> getAllUsers() {
+    public List<EmployeeDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
@@ -36,26 +36,26 @@ public class UserServiceIplm implements UserService {
     }
 
     @Override
-    public UserDTO getUserById(Long id) {
+    public EmployeeDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
         return convertToDTO(user);
     }
 
     @Override
-    public List<UserDTO> getUsersByDepartmentId(Long id) {  // ✅ Đổi kiểu trả về thành List<UserDTO>
+    public List<EmployeeDTO> getUsersByDepartmentId(Long id) {  // ✅ Đổi kiểu trả về thành List<UserDTO>
         List<User> users = userRepository.findByDepartment_DepartmentId(id);
 
         return users.stream()
-                .map(user -> modelMapper.map(user, UserDTO.class))
+                .map(user -> modelMapper.map(user, EmployeeDTO.class))
                 .collect(Collectors.toList());
     }
 
 
     @Override
-    public UserDTO createUser(UserDTO userDTO) {
+    public EmployeeDTO createUser(EmployeeDTO employeeDTO) {
         // Chuyển từ UserDTO sang User entity
-        User user = modelMapper.map(userDTO, User.class);
+        User user = modelMapper.map(employeeDTO, User.class);
         user.setPassword(Optional.ofNullable(user.getPassword()).orElse("123"));
         user.setStatus(Optional.ofNullable(user.getStatus()).orElse(Status.ACTIVE));
         user.setCreatedAt(Optional.ofNullable(user.getCreatedAt()).orElse(new Date()));
@@ -70,30 +70,30 @@ public class UserServiceIplm implements UserService {
 
     @Override
     @Transactional
-    public UserDTO updateUser(Long id, UserDTO userDTO) {
+    public EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
 
         // Cập nhật từng trường riêng lẻ, bỏ qua khóa ngoại
-        if (userDTO.getUsername() != null) existingUser.setUsername(userDTO.getUsername());
-        if (userDTO.getEmail() != null) existingUser.setEmail(userDTO.getEmail());
-        if (userDTO.getPhone() != null) existingUser.setPhone(userDTO.getPhone());
-        if (userDTO.getFullName() != null) existingUser.setFullName(userDTO.getFullName());
-        if (userDTO.getIdentity() != null) existingUser.setIdentity(userDTO.getIdentity());
-        if (userDTO.getStatus() != null) existingUser.setStatus(userDTO.getStatus());
-        if (userDTO.getHireDate() != null) existingUser.setHireDate(userDTO.getHireDate());
+        if (employeeDTO.getUsername() != null) existingUser.setUsername(employeeDTO.getUsername());
+        if (employeeDTO.getEmail() != null) existingUser.setEmail(employeeDTO.getEmail());
+        if (employeeDTO.getPhone() != null) existingUser.setPhone(employeeDTO.getPhone());
+        if (employeeDTO.getFullName() != null) existingUser.setFullName(employeeDTO.getFullName());
+        if (employeeDTO.getIdentity() != null) existingUser.setIdentity(employeeDTO.getIdentity());
+        if (employeeDTO.getStatus() != null) existingUser.setStatus(employeeDTO.getStatus());
+        if (employeeDTO.getHireDate() != null) existingUser.setHireDate(employeeDTO.getHireDate());
 
         // Cập nhật Department nếu có
-        if (userDTO.getDepartment().getDepartmentId() != null) {
-            Department department = departmentRepository.findById(userDTO.getDepartment().getDepartmentId())
-                    .orElseThrow(() -> new RuntimeException("Department not found with ID: " + userDTO.getDepartment().getDepartmentId()));
+        if (employeeDTO.getDepartment().getDepartmentId() != null) {
+            Department department = departmentRepository.findById(employeeDTO.getDepartment().getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found with ID: " + employeeDTO.getDepartment().getDepartmentId()));
             existingUser.setDepartment(department);
         }
 
         // Cập nhật Position nếu có
-        if (userDTO.getPosition().getPositionId() != null) {
-            Position position = positionRepository.findById(userDTO.getPosition().getPositionId())
-                    .orElseThrow(() -> new RuntimeException("Position not found with ID: " + userDTO.getPosition().getPositionId()));
+        if (employeeDTO.getPosition().getPositionId() != null) {
+            Position position = positionRepository.findById(employeeDTO.getPosition().getPositionId())
+                    .orElseThrow(() -> new RuntimeException("Position not found with ID: " + employeeDTO.getPosition().getPositionId()));
             existingUser.setPosition(position);
         }
 
@@ -114,15 +114,15 @@ public class UserServiceIplm implements UserService {
         userRepository.delete(user);
     }
 
-    private UserDTO convertToDTO(User user) {
-        UserDTO dto = modelMapper.map(user, UserDTO.class);
+    private EmployeeDTO convertToDTO(User user) {
+        EmployeeDTO dto = modelMapper.map(user, EmployeeDTO.class);
         dto.getRole().setRoleName(user.getRole() != null ? user.getRole().getRoleName() : null);
         dto.getDepartment().setDepartmentName(user.getDepartment() != null ? user.getDepartment().getDepartmentName() : null);
         dto.getPosition().setPositionName(user.getPosition() != null ? user.getPosition().getPositionName() : null);
         return dto;
     }
 
-    private User convertToEntity(UserDTO dto) {
+    private User convertToEntity(EmployeeDTO dto) {
         User user = modelMapper.map(dto, User.class);
 
         // Kiểm tra và xử lý null đối với department

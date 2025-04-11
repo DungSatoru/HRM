@@ -12,7 +12,7 @@ import java.util.Date;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserDTO {
+public class EmployeeDTO {
     Long userId;
     String username;
     String identity;

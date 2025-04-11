@@ -3,9 +3,8 @@ package tlu.finalproject.hrmanagement.service.iplm;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
 import tlu.finalproject.hrmanagement.dto.PositionDTO;
-import tlu.finalproject.hrmanagement.model.Department;
+import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.Position;
 import tlu.finalproject.hrmanagement.repository.PositionRepository;
 import tlu.finalproject.hrmanagement.service.PositionService;
@@ -46,11 +45,17 @@ public class PositionServiceIplm implements PositionService {
 
     @Override
     public PositionDTO updatePosition(Long id, PositionDTO positionDTO) {
-        return null;
+        Position position = positionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Position not found with ID: " + id));
+        position.setPositionName(positionDTO.getPositionName());
+        Position updatedPosition = positionRepository.save(position);
+        return modelMapper.map(updatedPosition, PositionDTO.class);
     }
 
     @Override
     public void deletePosition(Long id) {
-
+        Position position = positionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Position not found with ID: " + id));
+        positionRepository.deleteById(id);
     }
 }
