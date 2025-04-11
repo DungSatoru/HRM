@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import DataTable from '~/components/DataTable/DataTable';
 import Loading from '~/components/Loading/Loading';
 import { getAttendances } from '~/services/attendanceService';
+import EditAttendanceForm from './EditAttendanceForm';
 
 const Attendance = () => {
   const today = new Date().toISOString().split('T')[0];
@@ -11,6 +12,19 @@ const Attendance = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const [editingId, setEditingId] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  const handleEdit = (id) => {
+    setEditingId(id);
+    setShowEditForm(true);
+  };
+
+  const closeEditForm = () => {
+    setShowEditForm(false);
+    setEditingId(null);
+  };
 
   useEffect(() => {
     fetchAttendancesByDate(selectedDate);
@@ -71,7 +85,7 @@ const Attendance = () => {
       key: 'fullName',
       title: 'Họ tên',
       dataIndex: 'fullName',
-      width: '25%',
+      width: '20%',
     },
     {
       key: 'checkIn',
@@ -79,8 +93,6 @@ const Attendance = () => {
       dataIndex: 'checkIn',
       width: '15%',
       centerAlign: true,
-      type: 'badge',
-      badgeClass: 'bg-info',
     },
     {
       key: 'checkOut',
@@ -88,14 +100,12 @@ const Attendance = () => {
       dataIndex: 'checkOut',
       width: '15%',
       centerAlign: true,
-      type: 'badge',
-      badgeClass: 'bg-info',
     },
     {
       key: 'duration',
       title: 'Tổng giờ',
       dataIndex: 'duration',
-      width: '10%',
+      width: '15%',
       centerAlign: true,
     },
     {
@@ -122,17 +132,35 @@ const Attendance = () => {
   return (
     <div className="page-container attendance-container">
       <h2 className="page-title">Theo dõi chấm công theo ngày</h2>
-      <div style={{ marginBottom: '20px' }}>
-        <label htmlFor="date-picker" style={{ marginRight: '10px' }}>
-          Chọn ngày:
-        </label>
-        <input
-          id="date-picker"
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          style={{ padding: '5px' }}
-        />
+
+      <div className="card-container">
+        <div className="row">
+          <div className="col-md-4">
+            <div className="card">
+              <div className="card-header">
+                <h5 htmlFor="date-picker" className="card-title">
+                  Chọn ngày
+                </h5>
+              </div>
+              <div className="card-body">
+                <div className="form-group">
+                  <div className="input-group">
+                    <span className="input-group-text bg-light">
+                      <i className="fas fa-calendar-day"></i>
+                    </span>
+                    <input
+                      id="date-picker"
+                      type="date"
+                      className="form-control"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="card">
@@ -151,14 +179,17 @@ const Attendance = () => {
                 icon: 'fas fa-clock',
                 text: 'Không tìm thấy dữ liệu chấm công',
               }}
-              onEdit={(id) => navigate(`/attendances/${id}/edit`)}
+              onEdit={handleEdit}
+              // onEdit={(id) => navigate(`/attendances/${id}/edit`)}
               //   onDelete={openModal}
+
               detailsPa
               th="/attendance"
             />
           )}
         </div>
       </div>
+      <EditAttendanceForm visible={showEditForm} onClose={closeEditForm} attendanceId={editingId} />
     </div>
   );
 };
