@@ -1,4 +1,4 @@
-package tlu.finalproject.hrmanagement.service.iplm;
+package tlu.finalproject.hrmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PositionServiceIplm implements PositionService {
+public class PositionServiceImpl implements PositionService {
     private final PositionRepository positionRepository;
     private final ModelMapper modelMapper;
 

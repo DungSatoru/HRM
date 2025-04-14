@@ -1,7 +1,8 @@
-package tlu.finalproject.hrmanagement.service.iplm;
+package tlu.finalproject.hrmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
@@ -20,12 +21,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceIplm implements UserService {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final PositionRepository positionRepository;
     private final ModelMapper modelMapper;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<EmployeeDTO> getAllUsers() {
@@ -51,15 +54,22 @@ public class UserServiceIplm implements UserService {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public EmployeeDTO createUser(EmployeeDTO employeeDTO) {
-        // Chuyển từ UserDTO sang User entity
+        // Chuyển từ EmployeeDTO sang User entity
         User user = modelMapper.map(employeeDTO, User.class);
-        user.setPassword(Optional.ofNullable(user.getPassword()).orElse("123"));
+
+        // Băm mật khẩu trước khi lưu
+        if (user.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(user.getPassword())); // Băm mật khẩu
+        } else {
+            // Nếu không có mật khẩu, đặt mặc định
+            user.setPassword(passwordEncoder.encode("123"));
+        }
+
+        // Set giá trị mặc định cho các trường nếu chưa có giá trị
         user.setStatus(Optional.ofNullable(user.getStatus()).orElse(Status.ACTIVE));
         user.setCreatedAt(Optional.ofNullable(user.getCreatedAt()).orElse(new Date()));
-
 
         // Lưu User vào cơ sở dữ liệu
         User savedUser = userRepository.save(user);

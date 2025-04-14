@@ -1,4 +1,4 @@
-package tlu.finalproject.hrmanagement.service.iplm;
+package tlu.finalproject.hrmanagement.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @Service
-public class VideoServiceIplm implements VideoService {
+public class VideoServiceImpl implements VideoService {
     @Value("${face.recognition.script}")
     private String encoderFilePath;
 

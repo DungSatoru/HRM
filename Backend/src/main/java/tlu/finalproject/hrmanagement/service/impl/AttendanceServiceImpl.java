@@ -1,4 +1,4 @@
-package tlu.finalproject.hrmanagement.service.iplm;
+package tlu.finalproject.hrmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AttendanceServiceIplm implements AttendanceService {
+public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final SalaryConfigurationRepository salaryConfigurationRepository;
     private final OvertimeRecordRepository overtimeRecordRepository;
