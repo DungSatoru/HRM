@@ -89,4 +89,10 @@ public class JwtTokenProvider {
             }
         };
     }
+
+    public long getExpirationTime() {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + validityInMilliseconds);
+        return (expiry.getTime() - now.getTime()) / 1000; // Trả về thời gian còn lại tính bằng giây
+    }
 }
