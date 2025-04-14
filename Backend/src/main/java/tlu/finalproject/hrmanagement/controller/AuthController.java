@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.AuthRequestDTO;
+import tlu.finalproject.hrmanagement.dto.AuthResponseDTO;
 import tlu.finalproject.hrmanagement.service.AuthService;
 import tlu.finalproject.hrmanagement.config.JwtTokenProvider;
 
@@ -21,8 +22,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO authRequestDTO) {
         try {
-            String token = authService.login(authRequestDTO);
-            return ResponseEntity.ok(Collections.singletonMap("token", token));
+            AuthResponseDTO responseDTO = authService.login(authRequestDTO);
+            return ResponseEntity.ok(responseDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
