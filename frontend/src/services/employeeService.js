@@ -1,85 +1,119 @@
 import axios from "axios";
+import axiosClient from "./axiosClient";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 // Sử dụng template literals để chèn biến vào chuỗi
 const API_URL = `${apiUrl}/users`; // URL API của bạn
 
-// Lấy danh sách nhân viên
 export const getEmployees = async () => {
-  try {
-    const response = await axios.get(API_URL);
-    return response.data; // Trả về danh sách nhân viên
-  } catch (error) {
-    console.error("Lỗi khi lấy danh sách nhân viên:", error);
-    throw error;
-  }
+  const response = await axiosClient.get("/users");
+  return response.data;
 };
 
-// Lấy thông tin chi tiết nhân viên theo ID
 export const getEmployeeById = async (id) => {
-  try {
-    const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Lỗi khi lấy thông tin nhân viên ID: ${id}`, error);
-    throw error;
-  }
+  const response = await axiosClient.get(`/users/${id}`);
+  return response.data;
 };
 
-
-// Lấy thông tin chi tiết nhân viên theo ID
-export const getEmployeesByDepartmentId = async (id) => {
-  try {
-    const response = await axios.get(`${API_URL}/department/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Lỗi khi lấy danh sách nhân viên với ID phòng ban là: ${id}`, error);
-    throw error;
-  }
-};
-
-// Thêm nhân viên mới
 export const addEmployee = async (employeeData) => {
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/api/users",
-      employeeData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("User created:", response.data); // Dữ liệu trả về là UserDTO
-  } catch (error) {
-    console.error("Error adding user:", error);
-  }
+  const response = await axiosClient.post("/users", employeeData);
+  return response.data;
 };
+
 
 export const updateEmployee = async (id, updatedData) => {
-  try {
-    const response = await axios.put(`${API_URL}/${id}`, updatedData, {
-      headers: {
-        "Content-Type": "application/json", // Đảm bảo Content-Type là application/json
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(`Lỗi khi cập nhật nhân viên ID: ${id}`, error);
-    throw error;
-  }
+  const response = await axiosClient.put(`/users/${id}`, updatedData);
+  return response.data;
 };
 
-// Xóa nhân viên
 export const deleteEmployee = async (id) => {
-  try {
-    await axios.delete(`${API_URL}/${id}`);
+  const response = await axiosClient.delete(`/users/${id}`);
+  if (response.status === 200) {
     return { message: "Xóa nhân viên thành công" };
-  } catch (error) {
-    console.error(`Lỗi khi xóa nhân viên ID: ${id}`, error);
-    throw error;
   }
+  throw new Error("Xóa nhân viên thất bại");
 };
+
+// // Lấy danh sách nhân viên
+// export const getEmployees = async () => {
+//   try {
+//     const response = await axios.get(API_URL, {
+//       headers: {
+//         'Authorization': `Bearer ${token}`  // Thêm token vào header
+//       }
+//     });
+//     return response.data; // Trả về danh sách nhân viên
+//   } catch (error) {
+//     console.error("Lỗi khi lấy danh sách nhân viên:", error);
+//     throw error;
+//   }
+// };
+
+// // Lấy thông tin chi tiết nhân viên theo ID
+// export const getEmployeeById = async (id) => {
+//   try {
+//     const response = await axios.get(`${API_URL}/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Lỗi khi lấy thông tin nhân viên ID: ${id}`, error);
+//     throw error;
+//   }
+// };
+
+
+// // Lấy thông tin chi tiết nhân viên theo ID
+// export const getEmployeesByDepartmentId = async (id) => {
+//   try {
+//     const response = await axios.get(`${API_URL}/department/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Lỗi khi lấy danh sách nhân viên với ID phòng ban là: ${id}`, error);
+//     throw error;
+//   }
+// };
+
+// // Thêm nhân viên mới
+// export const addEmployee = async (employeeData) => {
+//   try {
+//     const response = await axios.post(
+//       "http://localhost:8080/api/users",
+//       employeeData,
+//       {
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     console.log("User created:", response.data); // Dữ liệu trả về là UserDTO
+//   } catch (error) {
+//     console.error("Error adding user:", error);
+//   }
+// };
+
+// export const updateEmployee = async (id, updatedData) => {
+//   try {
+//     const response = await axios.put(`${API_URL}/${id}`, updatedData, {
+//       headers: {
+//         "Content-Type": "application/json", // Đảm bảo Content-Type là application/json
+//       },
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Lỗi khi cập nhật nhân viên ID: ${id}`, error);
+//     throw error;
+//   }
+// };
+
+// // Xóa nhân viên
+// export const deleteEmployee = async (id) => {
+//   try {
+//     await axios.delete(`${API_URL}/${id}`);
+//     return { message: "Xóa nhân viên thành công" };
+//   } catch (error) {
+//     console.error(`Lỗi khi xóa nhân viên ID: ${id}`, error);
+//     throw error;
+//   }
+// };
 
 /*
 Các hàm này sẽ gọi API từ server để thực hiện các thao tác CRUD với dữ liệu nhân viên.

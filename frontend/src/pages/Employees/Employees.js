@@ -11,6 +11,15 @@ const Employees = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [employeeIdToDelete, setEmployeeIdToDelete] = useState(null); // Thêm state lưu id của nhân viên cần xóa
+  const [token, setToken] = useState(localStorage.getItem('token')); // Lưu token vào state
+
+  if (!token) {
+    // Nếu không có token, điều hướng đến trang đăng nhập
+    navigate('/login');
+  } else {
+    // Nếu có token, kiểm tra xem nó có hợp lệ không
+    console.log('Token:', token);
+  }
 
   // Pagination state
   const [rowsPerPage, setRowsPerPage] = useState(10);

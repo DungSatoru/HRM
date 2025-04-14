@@ -10,6 +10,7 @@ import Dashboard from '~/pages/Dashboard/Dashboard';
 import Role from '~/pages/Positions/Position';
 import Attendance from '~/pages/Attendances/Attendance';
 import UserAttendanceHistory from '~/pages/Attendances/UserAttendanceHistory';
+import Login from '~/pages/Login/Login';
 
 // Router ko cần đăng nhập
 const publicRoutes = [
@@ -27,6 +28,8 @@ const publicRoutes = [
 
   { path: '/settings', component: Settings },
   { path: '/face-training', component: FaceTrainingWrapper },
+
+  { path: '/login', component: Login },
 
   { path: '*', component: NotFoundPage },
 ];

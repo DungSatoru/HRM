@@ -12,3 +12,8 @@
   position: relative;
   width: 100%;
 }
+
+.page-content{
+  height: 100%; /* Chiếm 100% chiều cao */
+
+}
