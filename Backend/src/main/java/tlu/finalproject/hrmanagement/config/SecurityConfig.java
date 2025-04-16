@@ -1,5 +1,6 @@
 package tlu.finalproject.hrmanagement.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -8,30 +9,26 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.CorsFilter;
+import tlu.finalproject.hrmanagement.exception.CustomAuthenticationEntryPoint;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CorsFilter corsFilter;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomAuthenticationEntryPoint customAuthEntryPoint;
+
 
     private final String[] PUBLIC_ENDPOINT = {
             "/api/auth/login",  // Chỉ login là không cần token
             "/api/auth/token",  // Cấp token
             "/api/auth/introspect"  // Các endpoint public khác nếu cần
     };
-
-    public SecurityConfig(CorsFilter corsFilter, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
-        this.corsFilter = corsFilter;
-        this.userDetailsService = userDetailsService;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
 
     // Cung cấp AuthenticationManager Bean
     @Bean
@@ -52,9 +49,11 @@ public class SecurityConfig {
                 .authorizeRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
                         .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
+//                        .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtTokenProvider.jwtDecoder()))  // Sử dụng JwtDecoder để giải mã token
+                        .authenticationEntryPoint(customAuthEntryPoint) // Gắn xử lý lỗi ở đây
                 )
                 .httpBasic().disable();  // Tắt basic auth nếu không cần thiết
 

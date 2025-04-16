@@ -2,6 +2,7 @@ package tlu.finalproject.hrmanagement.config;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -13,9 +14,12 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
+    @Value("${jwt.secret}")
+    private String key;
     private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256); // Khóa bí mật
 
-    private final long validityInMilliseconds = 3600000; // 1 giờ
+    @Value("${jwt.expiration}")
+    private long validityInMilliseconds;
 
     // Phương thức tạo token
     public String generateToken(String username, String role) {
