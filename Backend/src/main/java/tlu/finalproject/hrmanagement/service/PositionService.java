@@ -9,9 +9,9 @@ public interface PositionService {
 
     PositionDTO getPositionById(Long id);
 
-    PositionDTO createPosition(PositionDTO positionDTO);
+    String createPosition(PositionDTO positionDTO);
 
-    PositionDTO updatePosition(Long id, PositionDTO positionDTO);
+    String updatePosition(Long id, PositionDTO positionDTO);
 
-    void deletePosition(Long id);
+    String deletePosition(Long id);
 }

@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
+import tlu.finalproject.hrmanagement.exception.BadRequestException;
+import tlu.finalproject.hrmanagement.exception.ConflictException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.*;
 import tlu.finalproject.hrmanagement.repository.DepartmentRepository;
@@ -24,7 +26,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
-    private final RoleRepository roleRepository;
     private final PositionRepository positionRepository;
     private final ModelMapper modelMapper;
 
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<EmployeeDTO> getUsersByDepartmentId(Long id) {  // ✅ Đổi kiểu trả về thành List<UserDTO>
+    public List<EmployeeDTO> getUsersByDepartmentId(Long id) {
         List<User> users = userRepository.findByDepartment_DepartmentId(id);
 
         return users.stream()
@@ -55,36 +56,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EmployeeDTO createUser(EmployeeDTO employeeDTO) {
-        // Chuyển từ EmployeeDTO sang User entity
+    public String createUser(EmployeeDTO employeeDTO) {
         User user = modelMapper.map(employeeDTO, User.class);
 
-        // Băm mật khẩu trước khi lưu
+        if (userRepository.existsByEmail(employeeDTO.getEmail())) {
+            throw new ConflictException("Email đã tồn tại trong hệ thống.");
+        }
+
+        if (userRepository.existsByUsername(employeeDTO.getUsername())) {
+            throw new ConflictException("Tên đăng nhập đã tồn tại.");
+        }
+
+        if (employeeDTO.getEmail() == null || employeeDTO.getUsername() == null || employeeDTO.getFullName() == null) {
+            throw new BadRequestException("Email, tên đăng nhập và họ tên không được để trống.");
+        }
+
         if (user.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(user.getPassword())); // Băm mật khẩu
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         } else {
-            // Nếu không có mật khẩu, đặt mặc định
             user.setPassword(passwordEncoder.encode("123"));
         }
 
-        // Set giá trị mặc định cho các trường nếu chưa có giá trị
         user.setStatus(Optional.ofNullable(user.getStatus()).orElse(Status.ACTIVE));
         user.setCreatedAt(Optional.ofNullable(user.getCreatedAt()).orElse(new Date()));
 
-        // Lưu User vào cơ sở dữ liệu
-        User savedUser = userRepository.save(user);
-
-        // Chuyển User entity thành UserDTO và trả về
-        return convertToDTO(savedUser);
+        userRepository.save(user);
+        return "Thêm nhân viên thành công";
     }
+
 
     @Override
     @Transactional
-    public EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO) {
+    public String updateUser(Long id, EmployeeDTO employeeDTO) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + id));
 
-        // Cập nhật từng trường riêng lẻ, bỏ qua khóa ngoại
         if (employeeDTO.getUsername() != null) existingUser.setUsername(employeeDTO.getUsername());
         if (employeeDTO.getEmail() != null) existingUser.setEmail(employeeDTO.getEmail());
         if (employeeDTO.getPhone() != null) existingUser.setPhone(employeeDTO.getPhone());
@@ -93,35 +99,39 @@ public class UserServiceImpl implements UserService {
         if (employeeDTO.getStatus() != null) existingUser.setStatus(employeeDTO.getStatus());
         if (employeeDTO.getHireDate() != null) existingUser.setHireDate(employeeDTO.getHireDate());
 
-        // Cập nhật Department nếu có
-        if (employeeDTO.getDepartment().getDepartmentId() != null) {
-            Department department = departmentRepository.findById(employeeDTO.getDepartment().getDepartmentId())
-                    .orElseThrow(() -> new RuntimeException("Department not found with ID: " + employeeDTO.getDepartment().getDepartmentId()));
-            existingUser.setDepartment(department);
+        if (employeeDTO.getDepartment() != null) {
+            Long deptId = employeeDTO.getDepartment().getDepartmentId();
+            if (deptId != null) {
+                Department department = departmentRepository.findById(deptId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + deptId));
+                existingUser.setDepartment(department);
+            } else {
+                throw new BadRequestException("Dữ liệu phòng ban không hợp lệ.");
+            }
         }
 
-        // Cập nhật Position nếu có
-        if (employeeDTO.getPosition().getPositionId() != null) {
-            Position position = positionRepository.findById(employeeDTO.getPosition().getPositionId())
-                    .orElseThrow(() -> new RuntimeException("Position not found with ID: " + employeeDTO.getPosition().getPositionId()));
-            existingUser.setPosition(position);
+        if (employeeDTO.getPosition() != null) {
+            Long posId = employeeDTO.getPosition().getPositionId();
+            if (posId != null) {
+                Position position = positionRepository.findById(posId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chức vụ với ID: " + posId));
+                existingUser.setPosition(position);
+            } else {
+                throw new BadRequestException("Dữ liệu chức vụ không hợp lệ.");
+            }
         }
-
-        // Cập nhật mật khẩu nếu có (phải mã hóa trước khi lưu)
-//        if (userDTO.getPassword() != null) {
-//            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-//        }
-
 
         existingUser = userRepository.save(existingUser);
-        return convertToDTO(existingUser);
+        return "Cập nhật nhân viên thnh công";
     }
 
+
     @Override
-    public void deleteUser(Long id) {
+    public String deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + id));
         userRepository.delete(user);
+        return "Xóa nhân viên thành công";
     }
 
     private EmployeeDTO convertToDTO(User user) {
@@ -130,25 +140,5 @@ public class UserServiceImpl implements UserService {
         dto.getDepartment().setDepartmentName(user.getDepartment() != null ? user.getDepartment().getDepartmentName() : null);
         dto.getPosition().setPositionName(user.getPosition() != null ? user.getPosition().getPositionName() : null);
         return dto;
-    }
-
-    private User convertToEntity(EmployeeDTO dto) {
-        User user = modelMapper.map(dto, User.class);
-
-        // Kiểm tra và xử lý null đối với department
-        if (dto.getDepartment() != null && dto.getDepartment().getDepartmentId() != null) {
-            Department department = departmentRepository.findById(dto.getDepartment().getDepartmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Department not found with ID: " + dto.getDepartment().getDepartmentId()));
-            user.setDepartment(department);
-        }
-
-        // Kiểm tra và xử lý null đối với position
-        if (dto.getPosition().getPositionId() != null) {
-            Position position = positionRepository.findById(dto.getPosition().getPositionId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Position not found with ID: " + dto.getPosition().getPositionId()));
-            user.setPosition(position);
-        }
-
-        return user;
     }
 }

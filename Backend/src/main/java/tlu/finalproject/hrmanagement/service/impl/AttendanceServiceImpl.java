@@ -3,6 +3,7 @@ package tlu.finalproject.hrmanagement.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.AttendanceDTO;
+import tlu.finalproject.hrmanagement.exception.BadRequestException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.Attendance;
 import tlu.finalproject.hrmanagement.model.OvertimeRecord;
@@ -28,150 +29,152 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final OvertimeRecordRepository overtimeRecordRepository;
     private final UserRepository userRepository;
 
-
     @Override
     public List<AttendanceDTO> getAttendancesByDate(LocalDate date) {
-        return  attendanceRepository.findByDate(date);
+        if (date == null) {
+            throw new BadRequestException("Ngày không được để trống.");
+        }
+        return attendanceRepository.findByDate(date);
     }
 
     @Override
     public List<AttendanceDTO> getAttendancesByUserAndDateRange(Long userId, LocalDate start, LocalDate end) {
+        if (userId == null || start == null || end == null) {
+            throw new BadRequestException("Thiếu thông tin truy vấn (ID nhân viên, ngày bắt đầu, ngày kết thúc).");
+        }
         return attendanceRepository.findAttendancesByUserAndDateRange(userId, start, end);
     }
 
     @Override
     public String processAttendance(Long userId, LocalDateTime time) {
+        if (userId == null || time == null) {
+            throw new BadRequestException("Thiếu thông tin chấm công.");
+        }
+
         LocalDate date = time.toLocalDate();
         LocalTime eventTime = time.toLocalTime();
 
-        // Kiểm tra nhân viên
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + userId));
 
-        // Lấy tất cả bản ghi chấm công của nhân viên trong ngày
         List<Attendance> todayRecords = attendanceRepository.findAttendancesByUserAndDate(userId, date);
 
         if (todayRecords.isEmpty()) {
-            // Nếu chưa có bản ghi hôm nay ==> Check in mới
             Attendance newAttendance = new Attendance();
             newAttendance.setUser(user);
             newAttendance.setDate(date);
             newAttendance.setCheckIn(eventTime);
             attendanceRepository.save(newAttendance);
-            return "Check-in recorded at " + eventTime;
+            return "Đã ghi nhận check-in lúc " + eventTime;
         } else {
-            Attendance lastRecord = todayRecords.get(0);
-
+            Attendance lastRecord = todayRecords.get(todayRecords.size() - 1);
             if (lastRecord.getCheckOut() == null) {
-                // Nếu bản ghi gần nhất chưa có check out => Check out
                 lastRecord.setCheckOut(eventTime);
                 attendanceRepository.save(lastRecord);
-                return "Check-out recorded at " + eventTime;
+                return "Đã ghi nhận check-out lúc " + eventTime;
             } else {
-                // Nếu bản ghi gần nhất đã có check out => Check in mới
                 Attendance newAttendance = new Attendance();
                 newAttendance.setUser(user);
                 newAttendance.setDate(date);
                 newAttendance.setCheckIn(eventTime);
                 attendanceRepository.save(newAttendance);
-                return "New Check-in recorded at " + eventTime;
+                return "Đã ghi nhận check-in mới lúc " + eventTime;
             }
         }
     }
 
     @Override
     public String checkIn(AttendanceDTO attendanceDTO) {
+        if (attendanceDTO.getUserId() == null || attendanceDTO.getDate() == null || attendanceDTO.getCheckIn() == null) {
+            throw new BadRequestException("Thiếu thông tin check-in (ID, ngày, giờ).");
+        }
+
         User user = userRepository.findById(attendanceDTO.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + attendanceDTO.getUserId()));
-        // Lấy tất cả bản ghi chấm công của nhân viên trong ngày
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + attendanceDTO.getUserId()));
+
         List<Attendance> todayRecords = attendanceRepository.findAttendancesByUserAndDate(attendanceDTO.getUserId(), attendanceDTO.getDate());
 
         if (todayRecords.isEmpty()) {
-            // Nếu chưa có bản ghi hôm nay ==> Check in mới
             Attendance newAttendance = new Attendance();
             newAttendance.setUser(user);
             newAttendance.setDate(attendanceDTO.getDate());
             newAttendance.setCheckIn(attendanceDTO.getCheckIn());
             attendanceRepository.save(newAttendance);
-            return "Check-in recorded at " + attendanceDTO.getCheckIn();
+            return "Đã ghi nhận check-in lúc " + attendanceDTO.getCheckIn();
         }
-        return "Check-in success for user " + user.getFullName();
+
+        return "Nhân viên " + user.getFullName() + " đã check-in hôm nay.";
     }
 
     @Override
     public String checkOut(AttendanceDTO attendanceDTO) {
+        if (attendanceDTO.getUserId() == null || attendanceDTO.getDate() == null || attendanceDTO.getCheckOut() == null) {
+            throw new BadRequestException("Thiếu thông tin check-out (ID, ngày, giờ).");
+        }
+
         Long userId = attendanceDTO.getUserId();
         LocalTime checkOutTime = attendanceDTO.getCheckOut();
-
-        // Lấy thông tin của nhân viên và bản ghi chấm công
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + userId));
-
-        // Lấy tất cả các bản ghi attendance của nhân viên trong ngày
         LocalDate date = attendanceDTO.getDate();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + userId));
+
         List<Attendance> todayRecords = attendanceRepository.findAttendancesByUserAndDate(userId, date);
 
         if (!todayRecords.isEmpty()) {
             Attendance lastRecord = todayRecords.get(todayRecords.size() - 1);
 
-            // Nếu nhân viên đã có check-in và chưa có check-out
             if (lastRecord.getCheckOut() == null) {
-                // Cập nhật giờ check-out
                 lastRecord.setCheckOut(checkOutTime);
                 attendanceRepository.save(lastRecord);
 
-                // Kiểm tra giờ làm thêm
-                LocalTime overtimeStartTime = LocalTime.of(17, 30); // Giới hạn giờ làm thêm bắt đầu từ 17h30
+                LocalTime overtimeStartTime = LocalTime.of(17, 30);
 
-                // Chỉ tính làm thêm nếu giờ check-out sau 17h30
                 if (checkOutTime.isAfter(overtimeStartTime)) {
-                    LocalTime overtimeStart = overtimeStartTime;
-                    LocalTime overtimeEnd = checkOutTime;
-
-                    // Gọi processOvertime để tính và lưu giờ làm thêm
-                    String message = processOvertime(userId, overtimeStart, overtimeEnd);
-
-                    return "Check-out recorded and " + message;
+                    String message = processOvertime(userId, overtimeStartTime, checkOutTime);
+                    return "Đã check-out và " + message;
                 }
 
-                return "Check-out recorded";
+                return "Đã ghi nhận check-out lúc " + checkOutTime;
             }
         }
-        return "No check-in record found for today";
+
+        return "Không tìm thấy bản ghi check-in nào hôm nay.";
     }
 
     @Override
     public String processOvertime(Long userId, LocalTime overtimeStart, LocalTime overtimeEnd) {
-        // Lấy thông tin người dùng
+        if (userId == null || overtimeStart == null || overtimeEnd == null) {
+            throw new BadRequestException("Thiếu thông tin làm thêm giờ.");
+        }
+
+        if (overtimeEnd.isBefore(overtimeStart)) {
+            throw new BadRequestException("Thời gian kết thúc làm thêm không được trước thời gian bắt đầu.");
+        }
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + userId));
 
-        // Lấy cấu hình lương của nhân viên
         SalaryConfiguration salaryConfiguration = salaryConfigurationRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Salary configuration not found for Employee with ID: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cấu hình lương của nhân viên với ID: " + userId));
 
-        // Tính toán số giờ làm thêm
-//        long overtimeHours = Duration.between(overtimeStart, overtimeEnd).toHours(); // Chuyển đổi thời gian thành số giờ
         long overtimeMinutes = Duration.between(overtimeStart, overtimeEnd).toMinutes();
         double overtimeHours = overtimeMinutes / 60.0;
 
-        // Tính toán tiền làm thêm
         double basicSalary = salaryConfiguration.getBasicSalary();
         double hourSalary = basicSalary / 22 / 8;
         double overtimeRate = salaryConfiguration.getOvertimeRate();
-        double overtimePay = overtimeHours * overtimeRate * hourSalary; // Tiền làm thêm = số giờ * rate
+        double overtimePay = overtimeHours * overtimeRate * hourSalary;
 
-        // Tạo bản ghi làm thêm giờ
         OvertimeRecord overtimeRecord = new OvertimeRecord();
         overtimeRecord.setUser(user);
-        overtimeRecord.setOvertimeStart(overtimeStart);  // Thời gian bắt đầu
-        overtimeRecord.setOvertimeEnd(overtimeEnd);      // Thời gian kết thúc
-        overtimeRecord.setOvertimeHour((double) overtimeHours);       // Số giờ làm thêm
-        overtimeRecord.setOvertimePay(overtimePay);                    // Tiền làm thêm
+        overtimeRecord.setOvertimeStart(overtimeStart);
+        overtimeRecord.setOvertimeEnd(overtimeEnd);
+        overtimeRecord.setOvertimeHour(overtimeHours);
+        overtimeRecord.setOvertimePay(overtimePay);
 
-        // Lưu vào cơ sở dữ liệu
         overtimeRecordRepository.save(overtimeRecord);
 
-        return "Overtime recorded successfully";
+        return "đã ghi nhận làm thêm giờ thành công (" + String.format("%.2f", overtimeHours) + " giờ).";
     }
 }

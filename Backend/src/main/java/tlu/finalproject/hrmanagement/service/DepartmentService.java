@@ -10,9 +10,9 @@ public interface DepartmentService {
 
     List<EmployeeByDepartmentDTO> getDepartmentById(Long id);
 
-    DepartmentDTO createDepartment(DepartmentDTO departmentDTO);
+    String createDepartment(DepartmentDTO departmentDTO);
 
-    DepartmentDTO updateDepartment(Long id, DepartmentDTO departmentDTO);
+    String updateDepartment(Long id, DepartmentDTO departmentDTO);
 
-    void deleteDepartment(Long id);
+    String deleteDepartment(Long id);
 }

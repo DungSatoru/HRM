@@ -32,30 +32,26 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public PositionDTO createPosition(PositionDTO positionDTO) {
-        // Chuyển đổi DTO sang Entity
+    public String createPosition(PositionDTO positionDTO) {
         Position position = modelMapper.map(positionDTO, Position.class);
-
-        // Lưu Department vào cơ sở dữ liệu
-        Position savedPosition = positionRepository.save(position);
-
-        // Chuyển đổi Entity đã lưu thành DTO và trả về
-        return modelMapper.map(position, PositionDTO.class);
+        positionRepository.save(position);
+        return "Tạo mới vị trí " + position.getPositionName() + " thành công!";
     }
 
     @Override
-    public PositionDTO updatePosition(Long id, PositionDTO positionDTO) {
+    public String updatePosition(Long id, PositionDTO positionDTO) {
         Position position = positionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Position not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vị trí với ID: " + id));
         position.setPositionName(positionDTO.getPositionName());
-        Position updatedPosition = positionRepository.save(position);
-        return modelMapper.map(updatedPosition, PositionDTO.class);
+        positionRepository.save(position);
+        return "Cập nhật vị trí " + position.getPositionName() + " thành công!";
     }
 
     @Override
-    public void deletePosition(Long id) {
+    public String deletePosition(Long id) {
         Position position = positionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Position not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vị trí với ID: " + id));
         positionRepository.deleteById(id);
+        return "Đã xóa vị trí thành công";
     }
 }

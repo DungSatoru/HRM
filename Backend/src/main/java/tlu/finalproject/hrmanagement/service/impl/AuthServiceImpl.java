@@ -6,12 +6,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.config.JwtTokenProvider;
 import tlu.finalproject.hrmanagement.dto.AuthRequestDTO;
 import tlu.finalproject.hrmanagement.dto.AuthResponseDTO;
 import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
+import tlu.finalproject.hrmanagement.exception.BadRequestException;
+import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.User;
 import tlu.finalproject.hrmanagement.repository.UserRepository;
 import tlu.finalproject.hrmanagement.service.AuthService;
@@ -27,8 +28,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
+        if (authRequestDTO.getUsername() == null || authRequestDTO.getPassword() == null) {
+            throw new BadRequestException("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
+        }
+
         try {
-            // Thực hiện xác thực với username và password
+            // Xác thực username + password
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             authRequestDTO.getUsername(),
@@ -36,27 +41,20 @@ public class AuthServiceImpl implements AuthService {
                     )
             );
 
-            // Lấy userDetails sau khi xác thực
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            // Lấy user sau xác thực
+            User user = userRepository.findByUsername(authRequestDTO.getUsername())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với tên đăng nhập: " + authRequestDTO.getUsername()));
 
-            // Chuyển đổi từ User sang EmployeeDTO (sử dụng ModelMapper nếu cần)
-            EmployeeDTO employeeDTO = modelMapper.map(user, EmployeeDTO.class);  // Sử dụng ModelMapper để chuyển User thành EmployeeDTO
+            // Chuyển sang DTO
+            EmployeeDTO employeeDTO = modelMapper.map(user, EmployeeDTO.class);
 
-            // Lấy role và loại bỏ prefix "ROLE_"
-            String role = userDetails.getAuthorities().stream()
-                    .findFirst()
-                    .map(grantedAuthority -> grantedAuthority.getAuthority().replace("ROLE_", ""))
-                    .orElse("EMPLOYEE");
+            // Lấy role trực tiếp từ User entity
+            String role = user.getRole().getRoleName();
 
-            // Tạo token bằng JwtTokenProvider
-            String token = jwtTokenProvider.generateToken(userDetails.getUsername(), role);
-
-            // Lấy thời gian hết hạn token (ví dụ: 1 giờ)
+            // Sinh token
+            String token = jwtTokenProvider.generateToken(user.getUsername(), role);
             long expiresIn = jwtTokenProvider.getExpirationTime();
 
-            // Trả về AuthResponseDTO với token, thông tin người dùng và thời gian hết hạn
             return AuthResponseDTO.builder()
                     .token(token)
                     .user(employeeDTO)
@@ -64,8 +62,9 @@ public class AuthServiceImpl implements AuthService {
                     .build();
 
         } catch (AuthenticationException e) {
-            // Quản lý lỗi xác thực: trả về thông báo rõ ràng hơn
-            throw new RuntimeException("Invalid username or password", e);
+            throw new BadRequestException("Tên đăng nhập hoặc mật khẩu không đúng.");
+        } catch (Exception e) {
+            throw new RuntimeException("Đã xảy ra lỗi trong quá trình đăng nhập: " + e.getMessage());
         }
     }
 }
