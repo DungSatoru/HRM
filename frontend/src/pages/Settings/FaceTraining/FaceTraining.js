@@ -109,7 +109,6 @@ const FaceTraining = () => {
 
       const response = await uploadVideo(file, selectedEmployee);
       setUploadStatus({ type: "success", message: "Tải video lên thành công!" });
-      console.log("📥 Response từ server:", response);
     } catch (error) {
       setUploadStatus({ type: "error", message: "Lỗi khi tải video lên. Vui lòng thử lại." });
       console.error("⚠️ Chi tiết lỗi:", error);

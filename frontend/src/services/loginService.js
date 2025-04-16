@@ -1,9 +1,8 @@
-import axios from "axios";
+import axios from 'axios';
 const apiUrl = process.env.REACT_APP_API_URL;
 
 // Sử dụng template literals để chèn biến vào chuỗi
 const API_URL = `${apiUrl}/auth/login`; // URL API của bạn
-
 
 // Tạo một axios instance để gửi yêu cầu HTTP
 const axiosInstance = axios.create({
@@ -27,6 +26,9 @@ const loginService = {
       // Nếu đăng nhập thành công, lưu token vào localStorage hoặc sessionStorage
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('fullName', response.data.user.fullName);
+        localStorage.setItem('position', response.data.user.position.positionName);
+
         return response.data;
       }
     } catch (error) {
@@ -48,7 +50,7 @@ const loginService = {
 
   // Hàm logout: xóa token khỏi localStorage
   logout: () => {
-    localStorage.removeItem('token');
+    localStorage.clear();
   },
 };
 

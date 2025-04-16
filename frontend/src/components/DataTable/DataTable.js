@@ -79,7 +79,8 @@ const renderCellContent = (item, column, detailsPath, onEdit, onDelete) => {
 
       return (
         <span className={`badge ${value ? badgeClass : 'bg-secondary'}`}>
-          {value || column.defaultValue || 'Chưa có'}
+          {value || column.defaultValue}
+          {/* {value || column.defaultValue || 'Chưa có'} */}
         </span>
       );
     case 'actions':

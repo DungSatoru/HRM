@@ -3,8 +3,6 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'; // S�
 import { publicRoutes } from './routes'; // Sửa lỗi chính tả từ 'Rountes' thành 'Routes'
 
 function App() {
-  // Kiểm tra xem publicRoutes có phải là một mảng không
-  console.log(publicRoutes);
 
   if (!Array.isArray(publicRoutes)) {
     console.error('publicRoutes không phải là một mảng hợp lệ');

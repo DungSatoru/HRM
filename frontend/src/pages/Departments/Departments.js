@@ -53,8 +53,6 @@ const Departments = () => {
     (department.departmentName ? department.departmentName.toLowerCase() : '').includes(searchTerm.toLowerCase()),
   );
 
-  console.log('Filtered Departments:', filteredDepartments);
-
   // Định nghĩa cấu trúc cột
   const columns = [
     {
@@ -189,8 +187,8 @@ const Departments = () => {
                       value={newDepartmentName}
                       onChange={(e) => setNewDepartmentName(e.target.value)}
                     />
-                    <button type="submit" className="btn-save m-0">
-                      <i className="fas fa-save me-1"></i> Save
+                    <button type="submit" className="btn-save m-0 border-0 btn btn-primary">
+                      <i className="fas fa-save me-1"></i> Thêm mới
                     </button>
                   </div>
                 </form>

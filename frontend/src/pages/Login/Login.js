@@ -16,11 +16,9 @@ export default function Login() {
     try {
       // Gọi loginService để thực hiện đăng nhập
       const data = await loginService.login(username, password);
-      console.log('Đăng nhập thành công:', data);
 
       // Sau khi đăng nhập thành công, chuyển hướng đến trang chính
       window.location.href = '/dashboard'; // Hoặc dùng `useNavigate` từ react-router-dom
-
     } catch (err) {
       // Xử lý lỗi khi đăng nhập
       setError('Tên đăng nhập hoặc mật khẩu không đúng');

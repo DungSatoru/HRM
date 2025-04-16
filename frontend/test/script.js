@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Lắng nghe sự kiện click
     item.addEventListener('click', function () {
       const icon = this.querySelector('.dropdown-icon i'); // Lấy icon bên trong span
-      console.log(icon);
 
       if (icon) {
         // Kiểm tra nếu icon tồn tại

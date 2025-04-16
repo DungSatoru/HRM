@@ -3,6 +3,10 @@ import { NavLink } from 'react-router-dom';
 import './Sidebar2.css';
 
 const Sidebar = () => {
+  // Lấy thông tin người dùng từ localStorage
+  const fullName = localStorage.getItem('fullName') || 'Người dùng';
+  const position = localStorage.getItem('position') || 'Nhân viên';
+
   // Tạo trạng thái cho các icon (tắt/mở)
   const [openSections, setOpenSections] = useState({
     collapseNhanVien: false,
@@ -35,8 +39,8 @@ const Sidebar = () => {
             />
           </div>
           <div className="col-md-9">
-            <p className="username">HẠ QUANG DŨNG</p>
-            <p className="role">Quản lý nhân sự</p>
+            <p className="username">{fullName}</p>
+            <p className="role">{position}</p>
           </div>
         </div>
       </div>
@@ -275,6 +279,18 @@ const Sidebar = () => {
                 </li>
                 <li>
                   <NavLink to="/settings/security">Cấu hình bảo mật</NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/login" // Điều hướng thủ công
+                    onClick={(e) => {
+                      e.preventDefault(); // Ngăn điều hướng mặc định
+                      localStorage.clear(); // Hoặc gọi loginService.logout()
+                      window.location.href = '/login'; // Reload + redirect về login
+                    }}
+                  >
+                    Đăng xuất
+                  </NavLink>
                 </li>
               </ul>
             </div>

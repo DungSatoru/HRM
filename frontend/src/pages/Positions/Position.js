@@ -30,7 +30,6 @@ const Positions = () => {
     }
   };
 
-
   const handleSavePosition = async (e) => {
     e.preventDefault();
     if (!newPositionName.trim()) {
@@ -55,8 +54,6 @@ const Positions = () => {
     (position.positionName ? position.positionName.toLowerCase() : '').includes(searchTerm.toLowerCase()),
   );
 
-  console.log('Filtered Positions:', filteredPositions);
-
   // Định nghĩa cấu trúc cột
   const columns = [
     {
@@ -68,7 +65,7 @@ const Positions = () => {
     },
     {
       key: 'name',
-      title: 'Tên phòng ban',
+      title: 'Tên chức vụ',
       dataIndex: 'positionName',
       width: '30%',
       type: 'link',
@@ -103,15 +100,15 @@ const Positions = () => {
       idField: 'positionId',
     },
   ];
-  const [modalAction, setModalAction] = useState(""); // Lưu hành động hiện tại (Edit hoặc Delete)
+  const [modalAction, setModalAction] = useState(''); // Lưu hành động hiện tại (Edit hoặc Delete)
   const [positionId, setPositionId] = useState(null); // Thêm state lưu id của nhân viên cần xóa
   const [positionName, setPositionName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = (actionType, id, name = "") => {
+  const openModal = (actionType, id, name = '') => {
     setModalAction(actionType);
     setPositionId(id);
-    setPositionName(name); // Nếu là sửa, đặt tên phòng ban vào input
+    setPositionName(name); // Nếu là sửa, đặt tên chức vụ vào input
     setIsModalOpen(true);
   };
 
@@ -120,52 +117,56 @@ const Positions = () => {
   };
 
   const handleSave = async () => {
-    if (modalAction === "Edit") {
+    if (modalAction === 'Edit') {
       if (!positionName.trim()) {
-        alert("Vui lòng nhập tên phòng ban mới");
+        alert('Vui lòng nhập tên chức vụ mới');
         return;
       }
-  
+
       try {
         await updatePosition(positionId, { positionName });
-        fetchPositions(); // Reload danh sách phòng ban
+        fetchPositions(); // Reload danh sách chức vụ
       } catch (error) {
-        console.error("Lỗi khi cập nhật phòng ban:", error);
+        console.error('Lỗi khi cập nhật chức vụ:', error);
       }
-    } else if (modalAction === "Delete") {
+    } else if (modalAction === 'Delete') {
       try {
         await deletePosition(positionId);
         fetchPositions();
       } catch (error) {
-        console.error("Lỗi khi xóa phòng ban:", error);
+        console.error('Lỗi khi xóa chức vụ:', error);
       }
     }
     closeModal();
   };
-  
 
   return (
     <div className="page-container position-container">
-      <h2 className="page-title">Quản lý phòng ban</h2>
+      <h2 className="page-title">Quản lý chức vụ</h2>
 
       {/* Modal Component */}
       <Modal
-        title="Chỉnh sửa phòng ban"
+        title={modalAction === 'Edit' ? 'Chỉnh sửa chức vụ' : 'Xóa chức vụ'}
         showModal={isModalOpen}
         onClose={closeModal}
-        onSave={() => handleSave(positionName)}
-        saveButtonText="Xóa phòng ban"
+        onSave={handleSave} // Chỉ gọi handleSave mà không cần truyền positionName
+        saveButtonText={modalAction === 'Edit' ? 'Lưu' : 'Xóa'}
         closeButtonText="Hủy"
       >
-        <label htmlFor="positionName">Nhập tên phòng ban mới:</label>
-        <input
-          type="text"
-          id="positionName"
-          value={positionName}
-          onChange={(e) => setPositionName(e.target.value)}
-          className="border rounded p-2 w-full mt-2"
-          placeholder="Nhập tên phòng ban..."
-        />
+        {modalAction === 'Edit' && (
+          <>
+            <label htmlFor="positionName">Nhập tên chức vụ mới:</label>
+            <input
+              type="text"
+              id="positionName"
+              value={positionName}
+              onChange={(e) => setPositionName(e.target.value)}
+              className="border rounded p-2 w-full mt-2"
+              placeholder="Nhập tên chức vụ..."
+            />
+          </>
+        )}
+        {modalAction === 'Delete' && <p>Bạn có chắc chắn muốn xóa chức vụ "{positionName}" không?</p>}
       </Modal>
 
       <div className="card-container">
@@ -174,7 +175,7 @@ const Positions = () => {
           <div className="col-md-6 mb-4">
             <div className="card">
               <div className="card-header">
-                <h5 className="card-title">Thêm phòng ban mới</h5>
+                <h5 className="card-title">Thêm chức vụ mới</h5>
               </div>
               <div className="card-body">
                 <form onSubmit={handleSavePosition}>
@@ -182,11 +183,11 @@ const Positions = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Nhập tên phòng ban..."
+                      placeholder="Nhập tên chức vụ..."
                       value={newPositionName}
                       onChange={(e) => setNewPositionName(e.target.value)}
                     />
-                    <button type="submit" className="btn-save m-0">
+                    <button type="submit" className="btn-save m-0 btn btn-primary">
                       <i className="fas fa-save me-1"></i> Save
                     </button>
                   </div>
@@ -199,7 +200,7 @@ const Positions = () => {
           <div className="col-md-6 mb-4">
             <div className="card">
               <div className="card-header">
-                <h5 className="card-title">Tìm kiếm phòng ban</h5>
+                <h5 className="card-title">Tìm kiếm chức vụ</h5>
               </div>
               <div className="card-body">
                 <div className="input-group">
@@ -209,7 +210,7 @@ const Positions = () => {
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Nhập tên phòng ban..."
+                    placeholder="Nhập tên chức vụ..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -223,8 +224,8 @@ const Positions = () => {
       {/* Position Table Card */}
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="card-title m-0">Danh sách phòng ban</h5>
-          <span className="badge bg-primary">{filteredPositions.length} phòng ban</span>
+          <h5 className="card-title m-0">Danh sách chức vụ</h5>
+          <span className="badge bg-primary">{filteredPositions.length} chức vụ</span>
         </div>
         <div className="card-body">
           {loading ? (
@@ -235,10 +236,10 @@ const Positions = () => {
               data={filteredPositions}
               emptyMessage={{
                 icon: 'fas fa-folder-open',
-                text: 'Không tìm thấy phòng ban',
+                text: 'Không tìm thấy chức vụ',
               }}
-              onEdit={(id) => openModal("Edit", id)}
-              onDelete={(id) => openModal("Delete", id)}
+              onEdit={(id) => openModal('Edit', id)}
+              onDelete={(id) => openModal('Delete', id)}
               detailsPath="/positions"
             />
           )}
