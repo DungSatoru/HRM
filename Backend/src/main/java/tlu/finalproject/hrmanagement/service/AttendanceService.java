@@ -24,4 +24,6 @@ public interface AttendanceService {
     List<AttendanceDTO> getAttendancesByDate(LocalDate date);
 
     List<AttendanceDTO> getAttendancesByUserAndDateRange(Long userId, LocalDate start, LocalDate end);
+
+    AttendanceDTO getAttendanceById(Long id);
 }
