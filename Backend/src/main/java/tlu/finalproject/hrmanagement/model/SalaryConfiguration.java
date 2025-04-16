@@ -19,7 +19,7 @@ public class SalaryConfiguration {
     Long salaryConfigId;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     User user;
 
     @Column(name = "basic_salary")

@@ -22,7 +22,7 @@ public class SalaryBonus {
     Long bonusId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     User user;
 
     @Column(name = "bonus_type")

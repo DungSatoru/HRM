@@ -22,7 +22,7 @@ public class SalaryDeduction {
     Long deductionId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     User user;
 
     @Column(name = "deduction_type")

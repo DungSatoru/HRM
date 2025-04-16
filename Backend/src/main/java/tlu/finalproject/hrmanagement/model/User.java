@@ -14,7 +14,8 @@ import java.util.Date;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User{
+public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long userId;
@@ -37,16 +38,16 @@ public class User{
     @Column(name = "full_name", length = 100)
     String fullName;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false, referencedColumnName = "roleId")
     Role role;
 
-    @ManyToOne
-    @JoinColumn(name = "department_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false, referencedColumnName = "departmentId")
     Department department;
 
-    @ManyToOne
-    @JoinColumn(name = "position_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "position_id", nullable = false, referencedColumnName = "positionId")
     Position position;
 
     @Enumerated(EnumType.STRING)
@@ -54,10 +55,11 @@ public class User{
     private Status status;
 
     @Temporal(TemporalType.DATE)
+    @Column(name = "hire_date")
     private Date hireDate;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name = "created_at")
     private Date createdAt = new Date();
 
 }
