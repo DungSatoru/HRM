@@ -26,4 +26,10 @@ public interface AttendanceService {
     List<AttendanceDTO> getAttendancesByUserAndDateRange(Long userId, LocalDate start, LocalDate end);
 
     AttendanceDTO getAttendanceById(Long id);
+
+    String updateAttendance(Long id, AttendanceDTO attendanceDTO);
+
+    String createAttendance(AttendanceDTO attendanceDTO);
+
+    String deleteAttendance(Long id);
 }

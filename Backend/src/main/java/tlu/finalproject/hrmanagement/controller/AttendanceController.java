@@ -26,7 +26,7 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceList);
     }
 
-    @GetMapping("/Id")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getAttendanceById(@PathVariable Long id) {
         return ResponseEntity.ok(attendanceService.getAttendanceById(id));
     }
@@ -38,6 +38,27 @@ public class AttendanceController {
             @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         List<AttendanceDTO> attendanceList = attendanceService.getAttendancesByUserAndDateRange(userId, start, end);
         return ResponseEntity.ok(attendanceList);
+    }
+
+    // Thêm dữ liệu chấm công mới
+    @PostMapping("/create")
+    public ResponseEntity<?> createAttendance(@RequestBody AttendanceDTO attendanceDTO) {
+        // Gọi service để thêm mới dữ liệu chấm công
+        String message = attendanceService.createAttendance(attendanceDTO);
+        return ResponseEntity.ok(message);
+    }
+
+    // Xóa dữ liệu chấm công theo ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteAttendance(@PathVariable Long id) {
+        // Gọi service để xóa dữ liệu chấm công
+        String message = attendanceService.deleteAttendance(id);
+        return ResponseEntity.ok(message);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
+        return ResponseEntity.ok(attendanceService.updateAttendance(id, attendanceDTO)); // Trả về đối tượng đã cập nhật
     }
 
 

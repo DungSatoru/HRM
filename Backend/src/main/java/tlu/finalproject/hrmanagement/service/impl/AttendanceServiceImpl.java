@@ -2,6 +2,7 @@ package tlu.finalproject.hrmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.AttendanceDTO;
 import tlu.finalproject.hrmanagement.exception.BadRequestException;
@@ -45,6 +46,42 @@ public class AttendanceServiceImpl implements AttendanceService {
         Attendance attendance = attendanceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công"));
         return modelMapper.map(attendance, AttendanceDTO.class);
+    }
+
+    @Override
+    public String updateAttendance(Long id, AttendanceDTO attendanceDTO) {
+        try {
+            // Kiểm tra xem bản ghi chấm công có tồn tại không
+            Attendance attendance = attendanceRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
+
+            // Cập nhật các trường dữ liệu từ DTO vào bản ghi
+            attendance.setCheckIn(attendanceDTO.getCheckIn());
+            attendance.setCheckOut(attendanceDTO.getCheckOut());
+            attendance.setDate(attendanceDTO.getDate());
+
+            attendanceRepository.save(attendance);
+
+            return "Cập nhật chấm công thành công với ID: " + id;
+        } catch (Exception e) {
+            // Xử lý lỗi khác nếu có
+            return "Đã xảy ra lỗi trong quá trình cập nhật.";
+        }
+    }
+
+    @Override
+    public String createAttendance(AttendanceDTO attendanceDTO) {
+        Attendance attendance = modelMapper.map(attendanceDTO, Attendance.class);
+        attendanceRepository.save(attendance);
+        return "Tạo mới chấm công thành công";
+    }
+
+    @Override
+    public String deleteAttendance(Long id) {
+        Attendance attendance = attendanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
+        attendanceRepository.delete(attendance);
+        return "Xóa chấm công thành công với ID: " + id;
     }
 
 
