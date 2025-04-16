@@ -20,14 +20,14 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @GetMapping()
-    public ResponseEntity<List<AttendanceDTO>> getAttendancesByDate(
+    public ResponseEntity<?> getAttendancesByDate(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<AttendanceDTO> attendanceList = attendanceService.getAttendancesByDate(date);
         return ResponseEntity.ok(attendanceList);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<AttendanceDTO>> getAttendancesByUserAndDateRange(
+    public ResponseEntity<?> getAttendancesByUserAndDateRange(
             @PathVariable Long userId,
             @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
@@ -37,20 +37,20 @@ public class AttendanceController {
 
 
     @PostMapping("/check")
-    public ResponseEntity<String> checkAttendance(@RequestBody AttendanceByFaceDTO attendanceDTO) {
+    public ResponseEntity<?> checkAttendance(@RequestBody AttendanceByFaceDTO attendanceDTO) {
         LocalDateTime eventTime = LocalDateTime.parse(attendanceDTO.getTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String message = attendanceService.processAttendance(attendanceDTO.getUserId(), eventTime);
         return ResponseEntity.ok(message);
     }
 
     @PostMapping("/check-in")
-    public ResponseEntity<String> checkIn(@RequestBody AttendanceDTO attendanceDTO) {
+    public ResponseEntity<?> checkIn(@RequestBody AttendanceDTO attendanceDTO) {
         String message = attendanceService.checkIn(attendanceDTO);
         return ResponseEntity.ok(message);
     }
 
     @PostMapping("/check-out")
-    public ResponseEntity<String> checkOut(@RequestBody AttendanceDTO attendanceDTO) {
+    public ResponseEntity<?> checkOut(@RequestBody AttendanceDTO attendanceDTO) {
         String message = attendanceService.checkOut(attendanceDTO);
         return ResponseEntity.ok(message);
     }

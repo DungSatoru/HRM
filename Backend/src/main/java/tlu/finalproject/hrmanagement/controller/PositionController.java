@@ -21,29 +21,27 @@ public class PositionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PositionDTO>> getAllDepartments() {
+    public ResponseEntity<?> getAllDepartments() {
         return ResponseEntity.ok(positionService.getAllPosition());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PositionDTO> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(positionService.getPositionById(id));
     }
 
     @PostMapping
-    public ResponseEntity<PositionDTO> createDepartment(@RequestBody PositionDTO userDTO) {
-        PositionDTO createdUser = positionService.createPosition(userDTO);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    public ResponseEntity<?> createDepartment(@RequestBody PositionDTO userDTO) {
+        return new ResponseEntity<>(positionService.createPosition(userDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PositionDTO> updateDepartment(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
+    public ResponseEntity<?> updateDepartment(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
         return ResponseEntity.ok(positionService.updatePosition(id, positionDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
-        positionService.deletePosition(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteDepartment(@PathVariable Long id) {
+        return ResponseEntity.ok(positionService.deletePosition(id));
     }
 }

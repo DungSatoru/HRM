@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
+import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.service.UserService;
 
 import java.util.List;
@@ -19,36 +20,39 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EmployeeDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<?> getAllUsers() {
+        List<EmployeeDTO> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDTO> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        EmployeeDTO user = userService.getUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found with id " + id);  // Ném ResourceNotFoundException
+        }
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/department/{departmentId}")
-    public ResponseEntity<List<EmployeeDTO>> getUsersByDepartment(@PathVariable Long departmentId) {
+    public ResponseEntity<?> getUsersByDepartment(@PathVariable Long departmentId) {
         List<EmployeeDTO> users = userService.getUsersByDepartmentId(departmentId);
         return ResponseEntity.ok(users);
     }
 
 
     @PostMapping
-    public ResponseEntity<EmployeeDTO> createUser(@RequestBody EmployeeDTO employeeDTO) {
-        // Gọi service để thêm User
-        EmployeeDTO createdUser = userService.createUser(employeeDTO);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    public ResponseEntity<?> createUser(@RequestBody EmployeeDTO employeeDTO) {
+        return new ResponseEntity<>(userService.createUser(employeeDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeDTO> updateUser(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
         return ResponseEntity.ok(userService.updateUser(id, employeeDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }

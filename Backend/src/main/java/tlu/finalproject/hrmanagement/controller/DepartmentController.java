@@ -20,28 +20,27 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DepartmentDTO>> getAllDepartments() {
+    public ResponseEntity<?> getAllDepartments() {
         return ResponseEntity.ok(departmentService.getAllDepartment());
     }
 
     @GetMapping("/{departmentId}")
-    public ResponseEntity<List<EmployeeByDepartmentDTO>> getUserById(@PathVariable Long departmentId) {
+    public ResponseEntity<?> getUserById(@PathVariable Long departmentId) {
         return ResponseEntity.ok(departmentService.getDepartmentById(departmentId));
     }
 
     @PostMapping
-    public ResponseEntity<DepartmentDTO> createDepartment(@RequestBody DepartmentDTO userDTO) {
-        DepartmentDTO createdUser = departmentService.createDepartment(userDTO);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    public ResponseEntity<?> createDepartment(@RequestBody DepartmentDTO userDTO) {
+        return new ResponseEntity<>(departmentService.createDepartment(userDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DepartmentDTO> updateDepartment(@PathVariable Long id, @RequestBody DepartmentDTO departmentDTO) {
+    public ResponseEntity<?> updateDepartment(@PathVariable Long id, @RequestBody DepartmentDTO departmentDTO) {
         return ResponseEntity.ok(departmentService.updateDepartment(id, departmentDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
+    public ResponseEntity<?> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();
     }
