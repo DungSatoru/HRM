@@ -1,6 +1,7 @@
 package tlu.finalproject.hrmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.AttendanceDTO;
 import tlu.finalproject.hrmanagement.exception.BadRequestException;
@@ -28,6 +29,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final SalaryConfigurationRepository salaryConfigurationRepository;
     private final OvertimeRecordRepository overtimeRecordRepository;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<AttendanceDTO> getAttendancesByDate(LocalDate date) {
@@ -36,6 +38,15 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
         return attendanceRepository.findByDate(date);
     }
+
+
+    @Override
+    public AttendanceDTO getAttendanceById(Long id) {
+        Attendance attendance = attendanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công"));
+        return modelMapper.map(attendance, AttendanceDTO.class);
+    }
+
 
     @Override
     public List<AttendanceDTO> getAttendancesByUserAndDateRange(Long userId, LocalDate start, LocalDate end) {
