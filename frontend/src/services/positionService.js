@@ -3,69 +3,75 @@ import axiosClient from './axiosClient';
 import { toast } from 'react-toastify';
 
 export const getPositions = async () => {
-  const response = await axiosClient.get('/positions');
-  return response.data; // Dữ liệu danh sách vị trí
+  try {
+    const response = await axiosClient.get('/positions');
+    if (response.status !== 200) {
+      throw new Error('Không thể lấy danh sách vị trí');
+    }
+    return response.data;
+  } catch (error) {
+    toast.error(error.message || 'Đã xảy ra lỗi khi lấy danh sách vị trí.');
+    console.error('Lỗi khi lấy danh sách vị trí:', error);
+    throw error;
+  }
 };
 
 export const getPositionById = async (id) => {
-  const response = await axiosClient.get(`/positions/${id}`);
-  return response.data; // Dữ liệu vị trí theo ID
-}
+  try {
+    const response = await axiosClient.get(`/positions/${id}`);
+    if (response.status !== 200) {
+      throw new Error('Không thể lấy vị trí theo ID');
+    }
+    toast.success('Lấy thông tin vị trí thành công!');
+    return response.data;
+  } catch (error) {
+    toast.error(error.message || 'Đã xảy ra lỗi khi lấy vị trí.');
+    console.error('Lỗi khi lấy vị trí theo ID:', error);
+    throw error;
+  }
+};
 
 export const addPosition = async (positionData) => {
   try {
     const response = await axiosClient.post('/positions', positionData);
-    return response.data; // Dữ liệu vị trí mới sau khi thêm
-  }
-  catch (error) {
-    toast.error(error.message || "Đã xảy ra lỗi.");
+    if (response.status !== 201) {
+      throw new Error('Không thể thêm vị trí mới');
+    }
+    toast.success('Thêm vị trí thành công!');
+    return response.data;
+  } catch (error) {
+    toast.error(error.message || 'Đã xảy ra lỗi khi thêm vị trí.');
     console.error('Lỗi khi thêm vị trí:', error);
     throw error;
   }
-}
+};
 
 export const updatePosition = async (id, updatedData) => {
-  const response = await axiosClient.put(`/positions/${id}`, updatedData);
-  return response.data; // Dữ liệu vị trí đã cập nhật
-}
+  try {
+    const response = await axiosClient.put(`/positions/${id}`, updatedData);
+    if (response.status !== 200) {
+      throw new Error('Không thể cập nhật vị trí');
+    }
+    toast.success('Cập nhật vị trí thành công!');
+    return response.data;
+  } catch (error) {
+    toast.error(error.message || 'Đã xảy ra lỗi khi cập nhật vị trí.');
+    console.error(`Lỗi khi cập nhật vị trí ID: ${id}`, error);
+    throw error;
+  }
+};
 
 export const deletePosition = async (id) => {
-  const response = await axiosClient.delete(`/positions/${id}`);
-  if (response.status === 200) {
-    return { message: 'Xóa vị trí thành công' };
+  try {
+    const response = await axiosClient.delete(`/positions/${id}`);
+    if (response.status === 200) {
+      toast.success('Xóa vị trí thành công!');
+      return { message: 'Xóa vị trí thành công' };
+    }
+    throw new Error('Xóa vị trí thất bại');
+  } catch (error) {
+    toast.error(error.message || 'Đã xảy ra lỗi khi xóa vị trí.');
+    console.error(`Lỗi khi xóa vị trí ID: ${id}`, error);
+    throw error;
   }
-  throw new Error('Xóa vị trí thất bại');
-}
-
-// Thêm vị trí mới
-// export const addPosition = async (positionData) => {
-//   try {
-//     const response = await axios.post(API_URL, positionData);
-//     return response.data; // Dữ liệu vị trí mới sau khi thêm
-//   } catch (error) {
-//     console.error('Lỗi khi thêm vị trí:', error);
-//     throw error;
-//   }
-// };
-
-// // Cập nhật thông tin chức vụ
-// export const updatePosition = async (id, updatedData) => {
-//   try {
-//     const response = await axios.put(`${API_URL}/${id}`, updatedData);
-//     return response.data;
-//   } catch (error) {
-//     console.error(`Lỗi khi cập nhật vị trí ID: ${id}`, error);
-//     throw error;
-//   }
-// };
-
-// // Xóa vị trí
-// export const deletePosition = async (id) => {
-//   try {
-//     await axios.delete(`${API_URL}/${id}`);
-//     return { message: 'Xóa vị trí thành công' };
-//   } catch (error) {
-//     console.error(`Lỗi khi xóa vị trí ID: ${id}`, error);
-//     throw error;
-//   }
-// };
+};

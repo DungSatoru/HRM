@@ -1,9 +1,10 @@
 import MainLayout from './layouts/MainLayout/MainLayout';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'; // Sử dụng BrowserRouter thay vì Router
 import { publicRoutes } from './routes'; // Sửa lỗi chính tả từ 'Rountes' thành 'Routes'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-
   if (!Array.isArray(publicRoutes)) {
     console.error('publicRoutes không phải là một mảng hợp lệ');
   }
@@ -19,6 +20,7 @@ function App() {
             })}
           </Routes>
         </MainLayout>
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </Router>
   );

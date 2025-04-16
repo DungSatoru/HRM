@@ -1,31 +1,64 @@
-import axiosClient from "./axiosClient";
-const apiUrl = process.env.REACT_APP_API_URL;
+import axiosClient from './axiosClient';
+import { toast } from 'react-toastify'; // Thêm toast
 
 export const getEmployees = async () => {
-  const response = await axiosClient.get("/users");
-  return response.data;
+  try {
+    const response = await axiosClient.get('/users');
+    return response.data;
+  } catch (error) {
+    toast.error('Đã xảy ra lỗi khi lấy danh sách nhân viên!');
+    console.error('Lỗi khi lấy danh sách nhân viên:', error);
+    throw error;
+  }
 };
 
 export const getEmployeeById = async (id) => {
-  const response = await axiosClient.get(`/users/${id}`);
-  return response.data;
+  try {
+    const response = await axiosClient.get(`/users/${id}`);
+    toast.success(`Lấy thông tin nhân viên ${id} thành công!`);
+    return response.data;
+  } catch (error) {
+    toast.error(`Lỗi khi lấy thông tin nhân viên với ID: ${id}`);
+    console.error(`Lỗi khi lấy thông tin nhân viên với ID: ${id}`, error);
+    throw error;
+  }
 };
 
 export const addEmployee = async (employeeData) => {
-  const response = await axiosClient.post("/users", employeeData);
-  return response.data;
+  try {
+    const response = await axiosClient.post('/users', employeeData);
+    toast.success('Thêm nhân viên thành công!');
+    return response.data;
+  } catch (error) {
+    toast.error('Đã xảy ra lỗi khi thêm nhân viên!');
+    console.error('Lỗi khi thêm nhân viên:', error);
+    throw error;
+  }
 };
 
-
 export const updateEmployee = async (id, updatedData) => {
-  const response = await axiosClient.put(`/users/${id}`, updatedData);
-  return response.data;
+  try {
+    const response = await axiosClient.put(`/users/${id}`, updatedData);
+    toast.success(`Cập nhật thông tin nhân viên ${id} thành công!`);
+    return response.data;
+  } catch (error) {
+    toast.error(`Đã xảy ra lỗi khi cập nhật nhân viên với ID: ${id}`);
+    console.error(`Lỗi khi cập nhật nhân viên với ID: ${id}`, error);
+    throw error;
+  }
 };
 
 export const deleteEmployee = async (id) => {
-  const response = await axiosClient.delete(`/users/${id}`);
-  if (response.status === 200) {
-    return { message: "Xóa nhân viên thành công" };
+  try {
+    const response = await axiosClient.delete(`/users/${id}`);
+    if (response.status === 200) {
+      toast.success('Xóa nhân viên thành công!');
+      return { message: 'Xóa nhân viên thành công' };
+    }
+    throw new Error('Xóa nhân viên thất bại');
+  } catch (error) {
+    toast.error(`Đã xảy ra lỗi khi xóa nhân viên với ID: ${id}`);
+    console.error(`Lỗi khi xóa nhân viên với ID: ${id}`, error);
+    throw error;
   }
-  throw new Error("Xóa nhân viên thất bại");
 };

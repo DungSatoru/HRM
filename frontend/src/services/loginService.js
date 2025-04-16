@@ -1,10 +1,9 @@
 import axios from 'axios';
+import { toast } from 'react-toastify'; // Thêm toast
 const apiUrl = process.env.REACT_APP_API_URL;
 
-// Sử dụng template literals để chèn biến vào chuỗi
-const API_URL = `${apiUrl}/auth/login`; // URL API của bạn
+const API_URL = `${apiUrl}/auth/login`;
 
-// Tạo một axios instance để gửi yêu cầu HTTP
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
@@ -12,45 +11,45 @@ const axiosInstance = axios.create({
   },
 });
 
-// LoginService
 const loginService = {
-  // Hàm login
   login: async (username, password) => {
     try {
-      // Gửi yêu cầu POST đến API
       const response = await axiosInstance.post('', {
         username: username,
         password: password,
       });
 
-      // Nếu đăng nhập thành công, lưu token vào localStorage hoặc sessionStorage
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('fullName', response.data.user.fullName);
         localStorage.setItem('position', response.data.user.position.positionName);
 
+        toast.success("Đăng nhập thành công!");
         return response.data;
+      } else {
+        toast.error("Không nhận được token từ máy chủ!");
+        throw new Error("Không nhận được token từ máy chủ.");
       }
     } catch (error) {
+      const message = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra thông tin!";
+      toast.error(message);
       console.error('Login failed:', error.response ? error.response.data : error.message);
       throw error;
     }
   },
 
-  // Hàm để kiểm tra xem token có hợp lệ không
   isAuthenticated: () => {
     const token = localStorage.getItem('token');
-    return token ? true : false;
+    return !!token;
   },
 
-  // Hàm để lấy token từ localStorage
   getToken: () => {
     return localStorage.getItem('token');
   },
 
-  // Hàm logout: xóa token khỏi localStorage
   logout: () => {
     localStorage.clear();
+    toast.info("Đã đăng xuất!");
   },
 };
 
