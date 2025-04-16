@@ -12,8 +12,14 @@ import Attendance from '~/pages/Attendances/Attendance';
 import UserAttendanceHistory from '~/pages/Attendances/UserAttendanceHistory';
 import Login from '~/pages/Login/Login';
 
-// Router ko cần đăng nhập
+// ✅ Các route không cần đăng nhập
 const publicRoutes = [
+  { path: '/login', component: Login },
+  { path: '*', component: NotFoundPage }, // fallback 404
+];
+
+// ✅ Các route cần đăng nhập
+const privateRoutes = [
   { path: '/', component: Dashboard },
   { path: '/employees', component: Employees },
   { path: '/employees/add', component: EmployeeCreate },
@@ -28,13 +34,6 @@ const publicRoutes = [
 
   { path: '/settings', component: Settings },
   { path: '/face-training', component: FaceTrainingWrapper },
-
-  { path: '/login', component: Login },
-
-  { path: '*', component: NotFoundPage },
 ];
-
-// Router cần đăng nhập
-const privateRoutes = {};
 
 export { publicRoutes, privateRoutes };
