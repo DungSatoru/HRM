@@ -5,6 +5,7 @@ import Loading from '~/components/Loading/Loading';
 import DataTable from '~/components/DataTable/DataTable';
 import { useNavigate } from 'react-router-dom';
 import Modal from '~/components/Modal/Modal';
+import { toast } from 'react-toastify';
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
@@ -23,7 +24,7 @@ const Departments = () => {
       const data = await getDepartments();
       setDepartments(data || []);
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      toast.error('Có lỗi khi lấy dữ liệu');
     } finally {
       setLoading(false);
     }
@@ -32,7 +33,7 @@ const Departments = () => {
   const handleSaveDepartment = async (e) => {
     e.preventDefault();
     if (!newDepartmentName.trim()) {
-      alert('Please enter a department name');
+      toast.info('Vui lòng nhập tên phòng ban');
       return;
     }
 
@@ -118,7 +119,7 @@ const Departments = () => {
   const handleSave = async () => {
     if (modalAction === 'Edit') {
       if (!departmentName.trim()) {
-        alert('Vui lòng nhập tên phòng ban mới');
+        toast.info('Vui lòng nhập tên phòng ban mới');
         return;
       }
 
@@ -149,7 +150,7 @@ const Departments = () => {
         showModal={isModalOpen}
         onClose={closeModal}
         onSave={() => handleSave(departmentName)}
-        saveButtonText="Xóa phòng ban"
+        saveButtonText={modalAction === 'Edit' ? 'Lưu' : 'Xóa'}
         closeButtonText="Hủy"
       >
         {modalAction === 'Edit' ? (
@@ -160,7 +161,7 @@ const Departments = () => {
               id="departmentName"
               value={departmentName}
               onChange={(e) => setDepartmentName(e.target.value)}
-              className="border rounded p-2 w-full mt-2"
+              className="border rounded p-2 w-full mt-2 ms-3"
               placeholder="Nhập tên phòng ban..."
             />
           </>

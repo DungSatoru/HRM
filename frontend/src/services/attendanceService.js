@@ -60,6 +60,19 @@ export const updateAttendance = async (id, data) => {
   }
 };
 
+// Tạo mới chấm công
+export const createAttendance = async (data) => {
+  try {
+    const response = await axiosClient.post('/attendance', data);
+    toast.success("Tạo mới chấm công thành công!");
+    return response.data;
+  } catch (error) {
+    toast.error("Đã xảy ra lỗi khi tạo mới chấm công!");
+    console.error('Lỗi khi tạo mới chấm công:', error);
+    throw error;
+  }
+};
+
 // Xóa chấm công
 export const deleteAttendance = async (id) => {
   try {

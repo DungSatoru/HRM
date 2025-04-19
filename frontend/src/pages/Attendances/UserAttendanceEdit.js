@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAttendanceById, updateAttendance } from '~/services/attendanceService';
 import Loading from '~/components/Loading/Loading';
+import { toast } from 'react-toastify';
 
 function UserAttendanceEdit() {
   const { id } = useParams(); // Lấy id từ URL
@@ -46,11 +47,10 @@ function UserAttendanceEdit() {
     e.preventDefault();
     try {
       await updateAttendance(id, form);
-      alert('Cập nhật thành công!');
+      toast.success('Cập nhật thành công!');
       navigate('/attendance');
     } catch (error) {
-      console.error('Lỗi khi cập nhật:', error);
-      alert('Cập nhật thất bại!');
+      toast.error('Cập nhật thất bại!');
     }
   };
 

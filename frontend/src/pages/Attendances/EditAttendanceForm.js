@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import './EditAttendanceForm.css';
 import { getAttendanceById, updateAttendance } from '~/services/attendanceService';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Loading from '~/components/Loading/Loading';
 
-const EditAttendanceForm = ({ visible, onClose, attendanceId }) => {
+const EditAttendanceForm = ({ visible, onClose, attendanceId , onSuccess}) => {
   const [show, setShow] = useState(false);
   const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -11,7 +13,6 @@ const EditAttendanceForm = ({ visible, onClose, attendanceId }) => {
     date: '',
     checkIn: '',
     checkOut: '',
-    note: '',
   });
 
   const navigate = useNavigate();
@@ -62,11 +63,11 @@ const EditAttendanceForm = ({ visible, onClose, attendanceId }) => {
     e.preventDefault();
     try {
       await updateAttendance(attendanceId, form);
-      alert('Cập nhật chấm công thành công!');
+      toast.success('Cập nhật chấm công thành công!');
+      onSuccess();  // Gọi onSuccess để làm mới dữ liệu
       onClose();
     } catch (error) {
-      console.error('Lỗi khi cập nhật chấm công:', error);
-      alert('Đã có lỗi xảy ra khi cập nhật');
+      toast.error('Đã có lỗi xảy ra khi cập nhật');
     }
   };
 
@@ -83,9 +84,8 @@ const EditAttendanceForm = ({ visible, onClose, attendanceId }) => {
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="offcanvas-body">
-              <h3>Chỉnh sửa chấm công</h3>
               {loading ? (
-                <p>Đang tải dữ liệu...</p>
+                <Loading />
               ) : (
                 <form onSubmit={handleSubmit}>
                   <div className="form-group mb-3">
@@ -116,15 +116,6 @@ const EditAttendanceForm = ({ visible, onClose, attendanceId }) => {
                       name="checkOut"
                       className="form-control"
                       value={form.checkOut}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="form-group mb-3">
-                    <label>Ghi chú</label>
-                    <textarea
-                      name="note"
-                      className="form-control"
-                      value={form.note}
                       onChange={handleChange}
                     />
                   </div>

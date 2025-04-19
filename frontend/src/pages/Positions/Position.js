@@ -6,6 +6,7 @@ import DataTable from '~/components/DataTable/DataTable';
 import { useNavigate } from 'react-router-dom';
 import Modal from '~/components/Modal/Modal';
 import { addPosition, deletePosition, getPositions, updatePosition } from '~/services/positionService';
+import { toast } from 'react-toastify';
 
 const Positions = () => {
   const [positions, setPositions] = useState([]);
@@ -33,7 +34,7 @@ const Positions = () => {
   const handleSavePosition = async (e) => {
     e.preventDefault();
     if (!newPositionName.trim()) {
-      alert('Please enter a position name');
+      toast.info('Vui lòng nhập tên chức vụ');
       return;
     }
 
@@ -119,7 +120,7 @@ const Positions = () => {
   const handleSave = async () => {
     if (modalAction === 'Edit') {
       if (!positionName.trim()) {
-        alert('Vui lòng nhập tên chức vụ mới');
+        toast.info('Vui lòng nhập tên chức vụ mới');
         return;
       }
 
@@ -166,7 +167,7 @@ const Positions = () => {
             />
           </>
         )}
-        {modalAction === 'Delete' && <p>Bạn có chắc chắn muốn xóa chức vụ "{positionName}" không?</p>}
+        {modalAction === 'Delete' && <p>Bạn có chắc chắn muốn xóa chức vụ này không?</p>}
       </Modal>
 
       <div className="card-container">

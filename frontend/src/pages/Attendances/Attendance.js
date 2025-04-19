@@ -1,24 +1,62 @@
-import { type } from '@testing-library/user-event/dist/type';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '~/components/DataTable/DataTable';
 import Loading from '~/components/Loading/Loading';
-import { getAttendances } from '~/services/attendanceService';
+import { deleteAttendance, getAttendances } from '~/services/attendanceService';
 import EditAttendanceForm from './EditAttendanceForm';
+import Modal from '~/components/Modal/Modal';
+import CreateAttendanceForm from './CreateAttendanceForm';
+import { toast } from 'react-toastify';
 
 const Attendance = () => {
   const today = new Date().toISOString().split('T')[0];
   const [attendances, setAttendances] = useState([]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
+
+  // ✅ Fetch lại dữ liệu sau khi thêm, sửa
+  const refreshData = () => fetchAttendancesByDate(selectedDate);
+
+  const handleAddSuccess = () => {
+    refreshData();
+    setShowAddModal(false);
+  };
 
   const handleEdit = (id) => {
     setEditingId(id);
     setShowEditForm(true);
+  };
+
+  const handleEditSuccess = () => {
+    refreshData();
+    closeEditForm();
+  };
+
+  const handleDelete = (id) => {
+    console.log('id', id);
+    setShowDeleteModal(true);
+    setDeleteId(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      setLoading(true);
+      await deleteAttendance(deleteId);
+      toast.success('Xóa chấm công thành công!');
+      await refreshData();
+      setShowDeleteModal(false);
+      setDeleteId(null);
+    } catch (error) {
+      console.error('Error deleting attendance:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeEditForm = () => {
@@ -72,7 +110,6 @@ const Attendance = () => {
     status: item.checkOut ? 'Đã chấm công' : 'Chưa checkout',
   }));
 
-  // Định nghĩa cấu trúc cột
   const columns = [
     {
       key: 'stt',
@@ -115,7 +152,7 @@ const Attendance = () => {
       width: '15%',
       centerAlign: true,
       type: 'badge',
-      badgeClass: (row) => (row.checkOut != '-' ? 'bg-success' : 'bg-danger'),
+      badgeClass: (row) => (row.checkOut !== '-' ? 'bg-success' : 'bg-danger'),
     },
     {
       key: 'actions',
@@ -138,9 +175,7 @@ const Attendance = () => {
           <div className="col-md-4">
             <div className="card">
               <div className="card-header">
-                <h5 htmlFor="date-picker" className="card-title">
-                  Chọn ngày
-                </h5>
+                <h5 className="card-title">Chọn ngày</h5>
               </div>
               <div className="card-body">
                 <div className="form-group">
@@ -149,7 +184,6 @@ const Attendance = () => {
                       <i className="fas fa-calendar-day"></i>
                     </span>
                     <input
-                      id="date-picker"
                       type="date"
                       className="form-control"
                       value={selectedDate}
@@ -157,6 +191,17 @@ const Attendance = () => {
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-md-4">
+            <div className="card">
+              <div className="card-body">
+                <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+                  <i className="fas fa-plus-circle me-2"></i>
+                  Thêm dữ liệu chấm công
+                </button>
               </div>
             </div>
           </div>
@@ -180,16 +225,38 @@ const Attendance = () => {
                 text: 'Không tìm thấy dữ liệu chấm công',
               }}
               onEdit={handleEdit}
-              // onEdit={(id) => navigate(`/attendances/${id}/edit`)}
-              //   onDelete={openModal}
-
-              detailsPa
-              th="/attendance"
+              onDelete={handleDelete}
             />
           )}
         </div>
       </div>
-      <EditAttendanceForm visible={showEditForm} onClose={closeEditForm} attendanceId={editingId} />
+
+      {/* Form thêm */}
+      <CreateAttendanceForm
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={handleAddSuccess}
+      />
+
+      {/* Form sửa */}
+      <EditAttendanceForm
+        visible={showEditForm}
+        onClose={closeEditForm}
+        attendanceId={editingId}
+        onSuccess={handleEditSuccess}
+      />
+
+      {/* Modal xác nhận xóa */}
+      <Modal
+        showModal={showDeleteModal}
+        title="Xác nhận xóa"
+        onClose={() => setShowDeleteModal(false)}
+        onSave={handleDeleteConfirm}
+        saveButtonText="Xóa"
+        closeButtonText="Hủy"
+      >
+        <p>Bạn có chắc chắn muốn xóa bản chấm công này không?</p>
+      </Modal>
     </div>
   );
 };
