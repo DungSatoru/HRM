@@ -41,7 +41,7 @@ public class AttendanceController {
     }
 
     // Thêm dữ liệu chấm công mới
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> createAttendance(@RequestBody AttendanceDTO attendanceDTO) {
         // Gọi service để thêm mới dữ liệu chấm công
         String message = attendanceService.createAttendance(attendanceDTO);
