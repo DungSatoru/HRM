@@ -11,6 +11,8 @@ import tlu.finalproject.hrmanagement.repository.SalaryConfigurationRepository;
 import tlu.finalproject.hrmanagement.repository.UserRepository;
 import tlu.finalproject.hrmanagement.service.SalaryConfigurationService;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SalaryConfigurationServiceImpl implements SalaryConfigurationService {
@@ -20,6 +22,14 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
     private final ModelMapper modelMapper;
 
     @Override
+    public List<SalaryConfigurationDTO> getAllSalaryConfig() {
+        List<SalaryConfiguration> salaryConfigurations = salaryConfigurationRepository.findAll();
+        return salaryConfigurations.stream()
+                .map(salaryConfiguration -> modelMapper.map(salaryConfiguration, SalaryConfigurationDTO.class))
+                .toList();
+    }
+
+    @Override
     public SalaryConfigurationDTO getByUserId(Long userId) {
         SalaryConfiguration salaryConfiguration = salaryConfigurationRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cấu hình lương không tồn tại cho người dùng với ID: " + userId));
@@ -27,7 +37,7 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
     }
 
     @Override
-    public String createOrUpdate(SalaryConfigurationDTO dto) {
+    public String createSalaryConfiguration(SalaryConfigurationDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại với ID: " + dto.getUserId()));
 

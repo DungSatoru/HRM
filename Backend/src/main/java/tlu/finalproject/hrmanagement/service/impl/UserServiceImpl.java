@@ -6,14 +6,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
+import tlu.finalproject.hrmanagement.dto.SalaryConfigurationDTO;
 import tlu.finalproject.hrmanagement.exception.BadRequestException;
 import tlu.finalproject.hrmanagement.exception.ConflictException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.*;
-import tlu.finalproject.hrmanagement.repository.DepartmentRepository;
-import tlu.finalproject.hrmanagement.repository.PositionRepository;
-import tlu.finalproject.hrmanagement.repository.RoleRepository;
-import tlu.finalproject.hrmanagement.repository.UserRepository;
+import tlu.finalproject.hrmanagement.repository.*;
+import tlu.finalproject.hrmanagement.service.SalaryConfigurationService;
 import tlu.finalproject.hrmanagement.service.UserService;
 
 import java.util.Date;
@@ -28,7 +27,8 @@ public class UserServiceImpl implements UserService {
     private final DepartmentRepository departmentRepository;
     private final PositionRepository positionRepository;
     private final ModelMapper modelMapper;
-
+    private final SalaryConfigurationService salaryConfigurationService;
+    private final SalaryConfigurationRepository salaryConfigurationRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -80,7 +80,20 @@ public class UserServiceImpl implements UserService {
         user.setStatus(Optional.ofNullable(user.getStatus()).orElse(Status.ACTIVE));
         user.setCreatedAt(Optional.ofNullable(user.getCreatedAt()).orElse(new Date()));
 
-        userRepository.save(user);
+        User usersaved = userRepository.save(user);
+
+        // Sử dụng Builder Lombok để tạo mới cấu hình lương
+        SalaryConfigurationDTO salaryConfigurationDTO = SalaryConfigurationDTO.builder()
+                .userId(usersaved.getUserId())
+                .basicSalary(0.0)
+                .bonusRate(0.0)
+                .overtimeRate(0.0)
+                .otherAllowances(0.0)
+                .build();
+
+        // Gọi service để tạo cấu hình lương
+        salaryConfigurationService.createSalaryConfiguration(salaryConfigurationDTO);
+
         return "Thêm nhân viên thành công";
     }
 

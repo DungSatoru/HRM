@@ -6,11 +6,18 @@ import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.SalaryConfigurationDTO;
 import tlu.finalproject.hrmanagement.service.SalaryConfigurationService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/salary-config")
 @RequiredArgsConstructor
 public class SalaryConfigurationController {
     private final SalaryConfigurationService service;
+
+    @GetMapping
+    public ResponseEntity<List<SalaryConfigurationDTO>> getAllSalaryConfig() {
+        return ResponseEntity.ok(service.getAllSalaryConfig());
+    }
 
     @GetMapping("/{userId}")
     public ResponseEntity<SalaryConfigurationDTO> getByUserId(@PathVariable Long userId) {
@@ -18,8 +25,8 @@ public class SalaryConfigurationController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createOrUpdate(@RequestBody SalaryConfigurationDTO dto) {
-        String message = service.createOrUpdate(dto);
+    public ResponseEntity<String> createSalaryConfiguration(@RequestBody SalaryConfigurationDTO dto) {
+        String message = service.createSalaryConfiguration(dto);
         return ResponseEntity.ok(message);
     }
 
