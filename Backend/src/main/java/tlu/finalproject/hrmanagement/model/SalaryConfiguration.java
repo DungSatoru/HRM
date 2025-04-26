@@ -33,4 +33,8 @@ public class SalaryConfiguration {
 
     @Column(name = "other_allowances")
     Double otherAllowances;
+
+    @Column(name = "insurance_base_salary")
+    Double insuranceBaseSalary;
+
 }
