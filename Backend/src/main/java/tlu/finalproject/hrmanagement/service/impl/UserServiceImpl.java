@@ -29,13 +29,14 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final SalaryConfigurationService salaryConfigurationService;
     private final SalaryConfigurationRepository salaryConfigurationRepository;
+    private final OvertimeRecordRepository overtimeRecordRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<EmployeeDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(this::convertToDTO)
+                .map(user -> modelMapper.map(user, EmployeeDTO.class))
                 .collect(Collectors.toList());
     }
 
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
     public EmployeeDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
-        return convertToDTO(user);
+        return modelMapper.map(user, EmployeeDTO.class);
     }
 
     @Override
@@ -112,8 +113,8 @@ public class UserServiceImpl implements UserService {
         if (employeeDTO.getStatus() != null) existingUser.setStatus(employeeDTO.getStatus());
         if (employeeDTO.getHireDate() != null) existingUser.setHireDate(employeeDTO.getHireDate());
 
-        if (employeeDTO.getDepartment() != null) {
-            Long deptId = employeeDTO.getDepartment().getDepartmentId();
+        if (employeeDTO.getDepartmentId() != null) {
+            Long deptId = employeeDTO.getDepartmentId();
             if (deptId != null) {
                 Department department = departmentRepository.findById(deptId)
                         .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + deptId));
@@ -123,8 +124,8 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if (employeeDTO.getPosition() != null) {
-            Long posId = employeeDTO.getPosition().getPositionId();
+        if (employeeDTO.getPositionId() != null) {
+            Long posId = employeeDTO.getPositionId();
             if (posId != null) {
                 Position position = positionRepository.findById(posId)
                         .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chức vụ với ID: " + posId));
@@ -145,13 +146,5 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + id));
         userRepository.delete(user);
         return "Xóa nhân viên thành công";
-    }
-
-    private EmployeeDTO convertToDTO(User user) {
-        EmployeeDTO dto = modelMapper.map(user, EmployeeDTO.class);
-        dto.getRole().setRoleName(user.getRole() != null ? user.getRole().getRoleName() : null);
-        dto.getDepartment().setDepartmentName(user.getDepartment() != null ? user.getDepartment().getDepartmentName() : null);
-        dto.getPosition().setPositionName(user.getPosition() != null ? user.getPosition().getPositionName() : null);
-        return dto;
     }
 }
