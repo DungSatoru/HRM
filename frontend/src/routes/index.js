@@ -11,6 +11,9 @@ import Role from '~/pages/Positions/Position';
 import Attendance from '~/pages/Attendances/Attendance';
 import UserAttendanceHistory from '~/pages/Attendances/UserAttendanceHistory';
 import Login from '~/pages/Login/Login';
+import PayrollManagement from '~/pages/Payroll/PayrollManagement';
+import Payroll from '~/pages/Payroll/Payroll';
+import SalaryReport from '~/pages/Reports/salaryReport';
 
 // ✅ Các route không cần đăng nhập
 const publicRoutes = [
@@ -31,6 +34,13 @@ const privateRoutes = [
 
   { path: '/attendances', component: Attendance },
   { path: '/attendance-history', component: UserAttendanceHistory },
+
+  { path: '/payroll', component: Payroll },
+  { path: '/manage-payroll', component: PayrollManagement },
+
+  { path: '/salary-reports', component: SalaryReport },
+
+  
 
   { path: '/settings', component: Settings },
   { path: '/face-training', component: FaceTrainingWrapper },

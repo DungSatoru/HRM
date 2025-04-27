@@ -1,251 +1,190 @@
 import { useEffect, useState } from 'react';
-// import { getPositions, deletePosition, addPosition, updatePosition } from '~/services/positionService';
-import './Positions.css';
+import { Table, Input, Button, Modal, Form, Card, Space, Badge, message } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { getPositions, deletePosition, addPosition, updatePosition } from '~/services/positionService';
 import Loading from '~/components/Loading/Loading';
-import DataTable from '~/components/DataTable/DataTable';
-import { useNavigate } from 'react-router-dom';
-import Modal from '~/components/Modal/Modal';
-import { addPosition, deletePosition, getPositions, updatePosition } from '~/services/positionService';
-import { toast } from 'react-toastify';
+import './Positions.css';
 
 const Positions = () => {
   const [positions, setPositions] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [newPositionName, setNewPositionName] = useState('');
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState(''); // 'Add', 'Edit', 'Delete'
+  const [selectedPosition, setSelectedPosition] = useState({});
+  const [form] = Form.useForm();
 
   useEffect(() => {
     fetchPositions();
   }, []);
 
   const fetchPositions = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await getPositions();
       setPositions(data || []);
     } catch (error) {
       console.error('Error fetching positions:', error);
+      message.error('Không thể tải danh sách chức vụ');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSavePosition = async (e) => {
-    e.preventDefault();
-    if (!newPositionName.trim()) {
-      toast.info('Vui lòng nhập tên chức vụ');
-      return;
-    }
-
-    const positionData = {
-      positionName: newPositionName,
-    };
-
-    try {
-      await addPosition(positionData);
-      setNewPositionName('');
-      fetchPositions();
-    } catch (error) {
-      console.error('Error adding position:', error);
-    }
-  };
-
-  const filteredPositions = positions.filter((position) =>
-    (position.positionName ? position.positionName.toLowerCase() : '').includes(searchTerm.toLowerCase()),
+  const filteredPositions = positions.filter((pos) =>
+    pos.positionName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Định nghĩa cấu trúc cột
-  const columns = [
-    {
-      key: 'id',
-      title: 'ID',
-      dataIndex: 'positionId',
-      width: '10%',
-      centerAlign: true,
-    },
-    {
-      key: 'name',
-      title: 'Tên chức vụ',
-      dataIndex: 'positionName',
-      width: '30%',
-      type: 'link',
-      defaultValue: 'No Name',
-      idField: 'positionId',
-    },
-    {
-      key: 'manager',
-      title: 'Trưởng phòng',
-      dataIndex: 'positionManager',
-      width: '25%',
-      defaultValue: 'Chưa có',
-    },
-    {
-      key: 'employeeCount',
-      title: 'Số nhân viên',
-      dataIndex: 'totalEmployees',
-      width: '15%',
-      centerAlign: true,
-      type: 'badge',
-      badgeClass: 'bg-info',
-      defaultValue: 0,
-    },
-    {
-      key: 'actions',
-      title: 'Thao tác',
-      width: '20%',
-      centerAlign: true,
-      type: 'actions',
-      showEdit: true,
-      showDelete: true,
-      idField: 'positionId',
-    },
-  ];
-  const [modalAction, setModalAction] = useState(''); // Lưu hành động hiện tại (Edit hoặc Delete)
-  const [positionId, setPositionId] = useState(null); // Thêm state lưu id của nhân viên cần xóa
-  const [positionName, setPositionName] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = (actionType, id, name = '') => {
-    setModalAction(actionType);
-    setPositionId(id);
-    setPositionName(name); // Nếu là sửa, đặt tên chức vụ vào input
+  const openModal = (action, position = {}) => {
+    setModalAction(action);
+    setSelectedPosition(position);
     setIsModalOpen(true);
+    if (action === 'Edit') {
+      form.setFieldsValue({ positionName: position.positionName });
+    } else {
+      form.resetFields();
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setSelectedPosition({});
+    form.resetFields();
   };
 
-  const handleSave = async () => {
-    if (modalAction === 'Edit') {
-      if (!positionName.trim()) {
-        toast.info('Vui lòng nhập tên chức vụ mới');
-        return;
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      if (modalAction === 'Add') {
+        await addPosition({ positionName: values.positionName });
+        message.success('Thêm chức vụ thành công!');
+      } else if (modalAction === 'Edit') {
+        await updatePosition(selectedPosition.positionId, { positionName: values.positionName });
+        message.success('Cập nhật chức vụ thành công!');
       }
-
-      try {
-        await updatePosition(positionId, { positionName });
-        fetchPositions(); // Reload danh sách chức vụ
-      } catch (error) {
-        console.error('Lỗi khi cập nhật chức vụ:', error);
-      }
-    } else if (modalAction === 'Delete') {
-      try {
-        await deletePosition(positionId);
-        fetchPositions();
-      } catch (error) {
-        console.error('Lỗi khi xóa chức vụ:', error);
-      }
+      fetchPositions();
+      closeModal();
+    } catch (error) {
+      console.error('Lỗi xử lý chức vụ:', error);
+      message.error('Xử lý thất bại!');
     }
-    closeModal();
   };
+
+  const handleDelete = async () => {
+    try {
+      await deletePosition(selectedPosition.positionId);
+      message.success('Xóa chức vụ thành công!');
+      fetchPositions();
+      closeModal();
+    } catch (error) {
+      console.error('Lỗi khi xóa chức vụ:', error);
+      message.error('Không thể xóa chức vụ');
+    }
+  };
+
+  const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'positionId',
+      key: 'positionId',
+      width: 80,
+    },
+    {
+      title: 'Tên chức vụ',
+      dataIndex: 'positionName',
+      key: 'positionName',
+      render: (text) => <b>{text}</b>,
+    },
+    {
+      title: 'Trưởng phòng',
+      dataIndex: 'positionManager',
+      key: 'positionManager',
+      render: (manager) => manager || 'Chưa có',
+    },
+    {
+      title: 'Số nhân viên',
+      dataIndex: 'totalEmployees',
+      key: 'totalEmployees',
+      render: (count) => <Badge count={count || 0} style={{ backgroundColor: '#52c41a' }} />,
+    },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      render: (_, record) => (
+        <Space>
+          <Button
+            icon={<EditOutlined />}
+            type="primary"
+            onClick={() => openModal('Edit', record)}
+          >
+            Sửa
+          </Button>
+          <Button
+            icon={<DeleteOutlined />}
+            danger
+            onClick={() => openModal('Delete', record)}
+          >
+            Xóa
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="page-container position-container">
       <h2 className="page-title">Quản lý chức vụ</h2>
 
-      {/* Modal Component */}
-      <Modal
-        title={modalAction === 'Edit' ? 'Chỉnh sửa chức vụ' : 'Xóa chức vụ'}
-        showModal={isModalOpen}
-        onClose={closeModal}
-        onSave={handleSave} // Chỉ gọi handleSave mà không cần truyền positionName
-        saveButtonText={modalAction === 'Edit' ? 'Lưu' : 'Xóa'}
-        closeButtonText="Hủy"
-      >
-        {modalAction === 'Edit' && (
-          <>
-            <label htmlFor="positionName">Nhập tên chức vụ mới:</label>
-            <input
-              type="text"
-              id="positionName"
-              value={positionName}
-              onChange={(e) => setPositionName(e.target.value)}
-              className="border rounded p-2 w-full mt-2"
-              placeholder="Nhập tên chức vụ..."
-            />
-          </>
+      <Card style={{ marginBottom: 24 }}>
+        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Tìm kiếm chức vụ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 300 }}
+          />
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('Add')}>
+            Thêm chức vụ
+          </Button>
+        </Space>
+      </Card>
+
+      <Card>
+        {loading ? (
+          <Loading />
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={filteredPositions}
+            rowKey="positionId"
+            pagination={{ pageSize: 10 }}
+          />
         )}
-        {modalAction === 'Delete' && <p>Bạn có chắc chắn muốn xóa chức vụ này không?</p>}
+      </Card>
+
+      <Modal
+        title={modalAction === 'Delete' ? 'Xóa chức vụ' : modalAction === 'Edit' ? 'Sửa chức vụ' : 'Thêm chức vụ'}
+        visible={isModalOpen}
+        onCancel={closeModal}
+        onOk={modalAction === 'Delete' ? handleDelete : handleSubmit}
+        okText={modalAction === 'Delete' ? 'Xóa' : 'Lưu'}
+        cancelText="Hủy"
+      >
+        {modalAction === 'Delete' ? (
+          <p>Bạn có chắc chắn muốn xóa chức vụ <b>{selectedPosition.positionName}</b> không?</p>
+        ) : (
+          <Form form={form} layout="vertical">
+            <Form.Item
+              label="Tên chức vụ"
+              name="positionName"
+              rules={[{ required: true, message: 'Vui lòng nhập tên chức vụ' }]}
+            >
+              <Input placeholder="Nhập tên chức vụ..." />
+            </Form.Item>
+          </Form>
+        )}
       </Modal>
-
-      <div className="card-container">
-        <div className="row">
-          {/* Add New Position Card */}
-          <div className="col-md-6 mb-4">
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title">Thêm chức vụ mới</h5>
-              </div>
-              <div className="card-body">
-                <form onSubmit={handleSavePosition}>
-                  <div className="input-group">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Nhập tên chức vụ..."
-                      value={newPositionName}
-                      onChange={(e) => setNewPositionName(e.target.value)}
-                    />
-                    <button type="submit" className="btn-save m-0 btn btn-primary">
-                      <i className="fas fa-save me-1"></i> Save
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          {/* Search Position Card */}
-          <div className="col-md-6 mb-4">
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title">Tìm kiếm chức vụ</h5>
-              </div>
-              <div className="card-body">
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="fas fa-search mx-2"></i>
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Nhập tên chức vụ..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Position Table Card */}
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="card-title m-0">Danh sách chức vụ</h5>
-          <span className="badge bg-primary">{filteredPositions.length} chức vụ</span>
-        </div>
-        <div className="card-body">
-          {loading ? (
-            <Loading />
-          ) : (
-            <DataTable
-              columns={columns}
-              data={filteredPositions}
-              emptyMessage={{
-                icon: 'fas fa-folder-open',
-                text: 'Không tìm thấy chức vụ',
-              }}
-              onEdit={(id) => openModal('Edit', id)}
-              onDelete={(id) => openModal('Delete', id)}
-              detailsPath="/positions"
-            />
-          )}
-        </div>
-      </div>
     </div>
   );
 };

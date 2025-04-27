@@ -1,251 +1,190 @@
 import { useEffect, useState } from 'react';
 import { getDepartments, deleteDepartment, addDepartment, updateDepartment } from '~/services/departmentService';
-import './Departments.css';
+import { Table, Input, Button, Modal, Form, Card, Space, Badge, message } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import Loading from '~/components/Loading/Loading';
-import DataTable from '~/components/DataTable/DataTable';
-import { useNavigate } from 'react-router-dom';
-import Modal from '~/components/Modal/Modal';
-import { toast } from 'react-toastify';
+import './Departments.css';
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [newDepartmentName, setNewDepartmentName] = useState('');
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState(''); // 'Add', 'Edit', 'Delete'
+  const [selectedDepartment, setSelectedDepartment] = useState({});
+  const [form] = Form.useForm();
 
   useEffect(() => {
     fetchDepartments();
   }, []);
 
   const fetchDepartments = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await getDepartments();
       setDepartments(data || []);
     } catch (error) {
-      toast.error('Có lỗi khi lấy dữ liệu');
+      console.error('Error fetching departments:', error);
+      message.error('Không thể tải danh sách phòng ban');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveDepartment = async (e) => {
-    e.preventDefault();
-    if (!newDepartmentName.trim()) {
-      toast.info('Vui lòng nhập tên phòng ban');
-      return;
-    }
-
-    const departmentData = {
-      departmentName: newDepartmentName,
-    };
-
-    try {
-      await addDepartment(departmentData);
-      setNewDepartmentName('');
-      fetchDepartments();
-    } catch (error) {
-      console.error('Error adding department:', error);
-    }
-  };
-
-  const filteredDepartments = departments.filter((department) =>
-    (department.departmentName ? department.departmentName.toLowerCase() : '').includes(searchTerm.toLowerCase()),
+  const filteredDepartments = departments.filter((dep) =>
+    dep.departmentName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Định nghĩa cấu trúc cột
-  const columns = [
-    {
-      key: 'id',
-      title: 'ID',
-      dataIndex: 'departmentId',
-      width: '10%',
-      centerAlign: true,
-    },
-    {
-      key: 'name',
-      title: 'Tên phòng ban',
-      dataIndex: 'departmentName',
-      width: '30%',
-      type: 'link',
-      defaultValue: 'No Name',
-      idField: 'departmentId',
-    },
-    {
-      key: 'manager',
-      title: 'Trưởng phòng',
-      dataIndex: 'departmentManager',
-      width: '25%',
-      defaultValue: 'Chưa có',
-    },
-    {
-      key: 'employeeCount',
-      title: 'Số nhân viên',
-      dataIndex: 'totalEmployees',
-      width: '15%',
-      centerAlign: true,
-      type: 'badge',
-      badgeClass: 'bg-info',
-      defaultValue: 0,
-    },
-    {
-      key: 'actions',
-      title: 'Thao tác',
-      width: '20%',
-      centerAlign: true,
-      type: 'actions',
-      showEdit: true,
-      showDelete: true,
-      idField: 'departmentId',
-    },
-  ];
-  const [modalAction, setModalAction] = useState(''); // Lưu hành động hiện tại (Edit hoặc Delete)
-  const [departmentId, setDepartmentId] = useState(null); // Thêm state lưu id của nhân viên cần xóa
-  const [departmentName, setDepartmentName] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = (actionType, id, name = '') => {
-    setModalAction(actionType);
-    setDepartmentId(id);
-    setDepartmentName(name); // Nếu là sửa, đặt tên phòng ban vào input
+  const openModal = (action, department = {}) => {
+    setModalAction(action);
+    setSelectedDepartment(department);
     setIsModalOpen(true);
+    if (action === 'Edit') {
+      form.setFieldsValue({ departmentName: department.departmentName });
+    } else {
+      form.resetFields();
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setSelectedDepartment({});
+    form.resetFields();
   };
 
-  const handleSave = async () => {
-    if (modalAction === 'Edit') {
-      if (!departmentName.trim()) {
-        toast.info('Vui lòng nhập tên phòng ban mới');
-        return;
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      if (modalAction === 'Add') {
+        await addDepartment({ departmentName: values.departmentName });
+        message.success('Thêm phòng ban thành công!');
+      } else if (modalAction === 'Edit') {
+        await updateDepartment(selectedDepartment.departmentId, { departmentName: values.departmentName });
+        message.success('Cập nhật phòng ban thành công!');
       }
-
-      try {
-        await updateDepartment(departmentId, { departmentName });
-        fetchDepartments(); // Reload danh sách phòng ban
-      } catch (error) {
-        console.error('Lỗi khi cập nhật phòng ban:', error);
-      }
-    } else if (modalAction === 'Delete') {
-      try {
-        await deleteDepartment(departmentId);
-        fetchDepartments();
-      } catch (error) {
-        console.error('Lỗi khi xóa phòng ban:', error);
-      }
+      fetchDepartments();
+      closeModal();
+    } catch (error) {
+      console.error('Lỗi xử lý phòng ban:', error);
+      message.error('Xử lý thất bại!');
     }
-    closeModal();
   };
+
+  const handleDelete = async () => {
+    try {
+      await deleteDepartment(selectedDepartment.departmentId);
+      message.success('Xóa phòng ban thành công!');
+      fetchDepartments();
+      closeModal();
+    } catch (error) {
+      console.error('Lỗi khi xóa phòng ban:', error);
+      message.error('Không thể xóa phòng ban');
+    }
+  };
+
+  const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'departmentId',
+      key: 'departmentId',
+      width: 80,
+    },
+    {
+      title: 'Tên phòng ban',
+      dataIndex: 'departmentName',
+      key: 'departmentName',
+      render: (text) => <b>{text}</b>,
+    },
+    {
+      title: 'Trưởng phòng',
+      dataIndex: 'departmentManager',
+      key: 'departmentManager',
+      render: (manager) => manager || 'Chưa có',
+    },
+    {
+      title: 'Số nhân viên',
+      dataIndex: 'totalEmployees',
+      key: 'totalEmployees',
+      render: (count) => <Badge count={count || 0} style={{ backgroundColor: '#1890ff' }} />,
+    },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      render: (_, record) => (
+        <Space>
+          <Button
+            icon={<EditOutlined />}
+            type="primary"
+            onClick={() => openModal('Edit', record)}
+          >
+            Sửa
+          </Button>
+          <Button
+            icon={<DeleteOutlined />}
+            danger
+            onClick={() => openModal('Delete', record)}
+          >
+            Xóa
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="page-container department-container">
       <h2 className="page-title">Quản lý phòng ban</h2>
 
-      {/* Modal Component */}
-      <Modal
-        title="Chỉnh sửa phòng ban"
-        showModal={isModalOpen}
-        onClose={closeModal}
-        onSave={() => handleSave(departmentName)}
-        saveButtonText={modalAction === 'Edit' ? 'Lưu' : 'Xóa'}
-        closeButtonText="Hủy"
-      >
-        {modalAction === 'Edit' ? (
-          <>
-            <label htmlFor="departmentName">Nhập tên phòng ban mới:</label>
-            <input
-              type="text"
-              id="departmentName"
-              value={departmentName}
-              onChange={(e) => setDepartmentName(e.target.value)}
-              className="border rounded p-2 w-full mt-2 ms-3"
-              placeholder="Nhập tên phòng ban..."
-            />
-          </>
+      <Card style={{ marginBottom: 24 }}>
+        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Tìm kiếm phòng ban..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 300 }}
+          />
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('Add')}>
+            Thêm phòng ban
+          </Button>
+        </Space>
+      </Card>
+
+      <Card>
+        {loading ? (
+          <Loading />
         ) : (
-          <>Bạn chắc chắn muốn xóa phòng ban này</>
+          <Table
+            columns={columns}
+            dataSource={filteredDepartments}
+            rowKey="departmentId"
+            pagination={{ pageSize: 10 }}
+          />
+        )}
+      </Card>
+
+      <Modal
+        title={modalAction === 'Delete' ? 'Xóa phòng ban' : modalAction === 'Edit' ? 'Sửa phòng ban' : 'Thêm phòng ban'}
+        visible={isModalOpen}
+        onCancel={closeModal}
+        onOk={modalAction === 'Delete' ? handleDelete : handleSubmit}
+        okText={modalAction === 'Delete' ? 'Xóa' : 'Lưu'}
+        cancelText="Hủy"
+      >
+        {modalAction === 'Delete' ? (
+          <p>Bạn có chắc chắn muốn xóa phòng ban <b>{selectedDepartment.departmentName}</b> không?</p>
+        ) : (
+          <Form form={form} layout="vertical">
+            <Form.Item
+              label="Tên phòng ban"
+              name="departmentName"
+              rules={[{ required: true, message: 'Vui lòng nhập tên phòng ban' }]}
+            >
+              <Input placeholder="Nhập tên phòng ban..." />
+            </Form.Item>
+          </Form>
         )}
       </Modal>
-
-      <div className="card-container">
-        <div className="row">
-          {/* Add New Department Card */}
-          <div className="col-md-6 mb-4">
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title">Thêm phòng ban mới</h5>
-              </div>
-              <div className="card-body">
-                <form onSubmit={handleSaveDepartment}>
-                  <div className="input-group">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Nhập tên phòng ban..."
-                      value={newDepartmentName}
-                      onChange={(e) => setNewDepartmentName(e.target.value)}
-                    />
-                    <button type="submit" className="btn-save m-0 border-0 btn btn-primary">
-                      <i className="fas fa-save me-1"></i> Thêm mới
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          {/* Search Department Card */}
-          <div className="col-md-6 mb-4">
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title">Tìm kiếm phòng ban</h5>
-              </div>
-              <div className="card-body">
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="fas fa-search mx-2"></i>
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Nhập tên phòng ban..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Department Table Card */}
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="card-title m-0">Danh sách phòng ban</h5>
-          <span className="badge bg-primary">{filteredDepartments.length} phòng ban</span>
-        </div>
-        <div className="card-body">
-          {loading ? (
-            <Loading />
-          ) : (
-            <DataTable
-              columns={columns}
-              data={filteredDepartments}
-              emptyMessage={{
-                icon: 'fas fa-folder-open',
-                text: 'Không tìm thấy phòng ban',
-              }}
-              onEdit={(id) => openModal('Edit', id)}
-              onDelete={(id) => openModal('Delete', id)}
-              detailsPath="/departments"
-            />
-          )}
-        </div>
-      </div>
     </div>
   );
 };

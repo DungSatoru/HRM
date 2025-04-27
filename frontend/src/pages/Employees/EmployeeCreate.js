@@ -1,204 +1,216 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Form, Input, Select, Button, DatePicker, message, Card, Spin } from 'antd';
 import { addEmployee } from '~/services/employeeService';
 import { getDepartments } from '~/services/departmentService';
 import { getPositions } from '~/services/positionService';
-import './EmployeeCreate.css';
+import './EmployeeCreate.css'; // Nếu bạn có CSS phụ trợ
+
+const { Option } = Select;
 
 const EmployeeCreate = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
   const [departments, setDepartments] = useState([]);
-  const [positions, setPositions] = useState([]); // Danh sách vị trí
-  const [selectedPosition, setSelectedPosition] = useState(''); // Để lưu vị trí đã chọn
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchDepartments();
-    fetchPositions();
+    fetchData();
   }, []);
 
-  const fetchDepartments = async () => {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await getDepartments();
-      setDepartments(data || []);
-      setLoading(false);
+      const [depData, posData] = await Promise.all([getDepartments(), getPositions()]);
+      setDepartments(depData || []);
+      setPositions(posData || []);
     } catch (error) {
-      console.error('Lỗi khi tải danh sách phòng ban:', error);
+      console.error('Lỗi khi tải dữ liệu:', error);
+      message.error('Lỗi tải dữ liệu');
+    } finally {
       setLoading(false);
     }
   };
 
-  const fetchPositions = async () => {
-    try {
-      const data = await getPositions();
-      setPositions(data || []);
-    } catch (error) {
-      console.error('Lỗi khi tải danh sách vị trí:', error);
-    }
-  };
-
-  const handleSelectPosition = (e) => {
-    setSelectedPosition(e.target.value); // Lấy vị trí đã chọn từ dropdown
-  };
-
-  const handleSaveEmployee = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-
-    let selectedPositionId = positions.find((pos) => pos.positionName === selectedPosition)?.positionId;
+  const handleSaveEmployee = async (values) => {
+    const selectedPosition = positions.find((pos) => pos.positionId === values.positionId);
+    const selectedDepartment = departments.find((dep) => dep.departmentId === values.departmentId);
 
     const data = {
-      username: formData.get('username'),
-      identity: formData.get('identity'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      fullName: formData.get('fullName'),
-      role: {
-        roleId: 5, // Vai trò Nhân viên mặc định
-        roleName: 'Nhân viên',
-      },
-      department: {
-        departmentId: formData.get('departmentName'), // Giả định ID phòng ban mặc định
-        departmentName: formData.get('departmentName'),
-      },
-      position: {
-        positionId: selectedPositionId || null, // Sử dụng ID vị trí đã được chọn
-        positionName: selectedPosition,
-      },
-      status: formData.get('status'),
-      hireDate: formData.get('hireDate'),
+      username: values.username,
+      identity: values.identity,
+      email: values.email,
+      phone: values.phone,
+      fullName: values.fullName,
+      roleId: 5,
+      departmentId: selectedDepartment?.departmentId,
+      positionId: selectedPosition?.positionId,
+      status: values.status,
+      hireDate: values.hireDate.format('YYYY-MM-DD'), // Format ngày
     };
 
     try {
       await addEmployee(data);
+      message.success('Thêm nhân viên thành công!');
       navigate('/employees');
     } catch (error) {
       console.error('Lỗi khi thêm nhân viên:', error);
+      message.error('Thêm nhân viên thất bại!');
     }
   };
 
   return (
-    <div className="form-container">
-      <h2 className="form-title">Thêm Nhân Viên</h2>
-      <form onSubmit={handleSaveEmployee} className="form-content">
-        <div className="row">
-          {/* Cột trái */}
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Tên tài khoản</label>
-              <div className="input-container">
-                <input type="text" name="username" placeholder="Tên tài khoản" className="form-input" required />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Họ và Tên</label>
-              <div className="input-container">
-                <input type="text" name="fullName" placeholder="Họ và Tên" className="form-input" required />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Căn cước công dân</label>
-              <div className="input-container">
-                <input type="text" name="identity" placeholder="Căn cước công dân" className="form-input" required />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <div className="input-container">
-                <input type="email" name="email" placeholder="Email" className="form-input" required />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Số điện thoại</label>
-              <div className="input-container">
-                <input type="text" name="phone" placeholder="Số điện thoại" className="form-input" required />
-              </div>
-            </div>
-          </div>
+    <div className="page-container employees-container">
+      <h2 className="page-title">Thêm Nhân Viên</h2>
 
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Vai trò</label>
-              <div className="input-container">
-                <input type="text" name="roleName" className="form-input" value="Nhân viên" disabled />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Chức vụ</label>
-              <div className="input-container">
-                <select
-                  name="positionName"
-                  className="form-input"
-                  onChange={handleSelectPosition}
-                  value={selectedPosition}
-                  required
+      <Card>
+        {loading ? (
+          <Spin />
+        ) : (
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSaveEmployee}
+            initialValues={{
+              roleName: 'Nhân viên',
+              status: 'ACTIVE',
+            }}
+          >
+            <div className="row">
+              {/* Tên tài khoản */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Tên tài khoản"
+                  name="username"
+                  rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản' }]}
                 >
-                  <option value="">Chọn chức vụ</option>
-                  {positions.map((position) => (
-                    <option key={position.positionId} value={position.positionName}>
-                      {position.positionName}
-                    </option>
-                  ))}
-                </select>
+                  <Input placeholder="Tên tài khoản" />
+                </Form.Item>
               </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Phòng ban</label>
-              <div className="input-container">
-                <select name="departmentName" className="form-input">
-                  {departments.map((dep) => (
-                    <option key={dep.departmentId} value={dep.departmentId}>
-                      {dep.departmentName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Trạng thái</label>
-              <div className="input-container">
-                <select name="status" className="form-input">
-                  <option value="ACTIVE">Đang làm việc</option>
-                  <option value="INACTIVE">Nghỉ việc</option>
-                  <option value="BANNED">Cấm hoạt động</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="form-group">
-              <label className="form-label">Ngày vào làm</label>
-              <div className="input-container">
-                <input type="date" name="hireDate" className="form-input" required />
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="form-actions">
-          <button type="submit" className="btn-submit">
-            Lưu
-          </button>
-          <button type="button" className="btn-cancel" onClick={() => navigate('/employees')}>
-            Hủy
-          </button>
-        </div>
-      </form>
+              {/* Họ và tên */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Họ và Tên"
+                  name="fullName"
+                  rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+                >
+                  <Input placeholder="Họ và Tên" />
+                </Form.Item>
+              </div>
+
+              {/* Căn cước công dân */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Căn cước công dân"
+                  name="identity"
+                  rules={[{ required: true, message: 'Vui lòng nhập căn cước công dân' }]}
+                >
+                  <Input placeholder="Căn cước công dân" />
+                </Form.Item>
+              </div>
+
+              {/* Email */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[{ required: true, message: 'Vui lòng nhập email', type: 'email' }]}
+                >
+                  <Input placeholder="Email" />
+                </Form.Item>
+              </div>
+
+              {/* Số điện thoại */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Số điện thoại"
+                  name="phone"
+                  rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                >
+                  <Input placeholder="Số điện thoại" />
+                </Form.Item>
+              </div>
+
+              {/* Vai trò */}
+              <div className="col-md-4">
+                <Form.Item label="Vai trò" name="roleName">
+                  <Input value="Nhân viên" disabled />
+                </Form.Item>
+              </div>
+
+              {/* Chức vụ */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Chức vụ"
+                  name="positionId"
+                  rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
+                >
+                  <Select placeholder="Chọn chức vụ">
+                    {positions.map((pos) => (
+                      <Option key={pos.positionId} value={pos.positionId}>
+                        {pos.positionName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+
+              {/* Phòng ban */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Phòng ban"
+                  name="departmentId"
+                  rules={[{ required: true, message: 'Vui lòng chọn phòng ban' }]}
+                >
+                  <Select placeholder="Chọn phòng ban">
+                    {departments.map((dep) => (
+                      <Option key={dep.departmentId} value={dep.departmentId}>
+                        {dep.departmentName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+
+              {/* Trạng thái */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Trạng thái"
+                  name="status"
+                  rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+                >
+                  <Select>
+                    <Option value="ACTIVE">Đang làm việc</Option>
+                    <Option value="INACTIVE">Nghỉ việc</Option>
+                    <Option value="BANNED">Cấm hoạt động</Option>
+                  </Select>
+                </Form.Item>
+              </div>
+
+              {/* Ngày vào làm */}
+              <div className="col-md-4">
+                <Form.Item
+                  label="Ngày vào làm"
+                  name="hireDate"
+                  rules={[{ required: true, message: 'Vui lòng chọn ngày vào làm' }]}
+                >
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+              </div>
+            </div>
+
+            {/* Button actions */}
+            <Form.Item style={{ textAlign: 'center', marginTop: 20 }}>
+              <Button type="primary" htmlType="submit" style={{ marginRight: 10 }}>
+                Lưu
+              </Button>
+              <Button onClick={() => navigate('/employees')}>Hủy</Button>
+            </Form.Item>
+          </Form>
+        )}
+      </Card>
     </div>
   );
 };

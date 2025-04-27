@@ -22,7 +22,7 @@ const loginService = {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('fullName', response.data.user.fullName);
-        localStorage.setItem('position', response.data.user.position.positionName);
+        localStorage.setItem('position', response.data.user.positionId);
 
         toast.success("Đăng nhập thành công!");
         return response.data;

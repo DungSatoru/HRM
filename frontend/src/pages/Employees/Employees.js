@@ -1,245 +1,198 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { getEmployees, deleteEmployee } from '~/services/employeeService';
-import './Employees.css';
+import { useNavigate } from 'react-router-dom';
+import { deleteEmployee } from '~/services/employeeService';
+import { fetchEmpDepPos } from '~/utils/fetchData';
+import { Table, Button, Modal, Input, Tag, Space, message } from 'antd';
 import Loading from '~/components/Loading/Loading';
-import DataTable from '~/components/DataTable/DataTable';
-import Modal from '~/components/Modal/Modal';
+import './Employees.css';
+import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const Employees = () => {
+  const navigate = useNavigate();
+
   const [employees, setEmployees] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [positions, setPositions] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [employeeIdToDelete, setEmployeeIdToDelete] = useState(null); // Thêm state lưu id của nhân viên cần xóa
-  const [token, setToken] = useState(localStorage.getItem('token')); // Lưu token vào state
-
-  if (!token) {
-    // Nếu không có token, điều hướng đến trang đăng nhập
-    navigate('/login');
-  } else {
-    // Nếu có token, kiểm tra xem nó có hợp lệ không
-    console.log('Token:', token);
-  }
-
-  // Pagination state
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const navigate = useNavigate();
-  const location = useLocation(); // Hook to track current location (URL)
-
-  // Calculate the range of employees for current page
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const currentEmployees = employees.slice(startIndex, endIndex);
-
-  const handleRowsPerPageChange = (e) => {
-    setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to the first page
-  };
-
-  const handleNextPage = () => {
-    if (currentPage * rowsPerPage < employees.length) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
-    }
-  };
-
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const fetchEmployees = async () => {
-    try {
-      setLoading(true);
-      const data = await getEmployees();
-      setEmployees(data || []);
-      setLoading(false);
-    } catch (error) {
-      console.error('Lỗi khi tải danh sách nhân viên:', error);
-      setLoading(false);
-    }
-  };
-
-  const filteredEmployees = employees.filter(
-    (emp) =>
-      (emp.fullName ? emp.fullName.toLowerCase() : '').includes(searchTerm.toLowerCase()) ||
-      (emp.email ? emp.email.toLowerCase() : '').includes(searchTerm.toLowerCase()),
-  );
-
-  const columns = [
-    {
-      key: 'id',
-      title: 'ID',
-      dataIndex: 'userId',
-      width: '10%',
-      centerAlign: true,
-    },
-    {
-      key: 'name',
-      title: 'Tên nhân viên',
-      dataIndex: 'fullName',
-      width: '20%',
-      type: 'link',
-      defauleValue: 'No Name',
-      idField: 'userId',
-    },
-    {
-      key: 'position',
-      title: 'Chức vụ',
-      dataIndex: 'position',
-      width: '20%',
-      render: (value) => (value ? value.positionName : 'Chưa có chức vụ'), // Lấy giá trị của positionName từ đối tượng position
-    },
-    {
-      key: 'hireDate',
-      title: 'Ngày gia nhập',
-      dataIndex: 'hireDate',
-      width: '20%',
-    },
-    {
-      key: 'status',
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      width: '20%',
-      centerAlign: true,
-      render: (value) => (value === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ việc'),
-    },
-    {
-      key: 'actions',
-      title: 'Thao tác',
-      width: '10%',
-      centerAlign: true,
-      type: 'actions',
-      showEdit: true,
-      showDelete: true,
-      idField: 'userId',
-    },
-  ];
-
+  const [employeeIdToDelete, setEmployeeIdToDelete] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const { mappedEmployees, departmentsData, positionsData } = await fetchEmpDepPos();
+        setEmployees(mappedEmployees);
+        setDepartments(departmentsData);
+        setPositions(positionsData);
+        setFilteredEmployees(mappedEmployees);
+      } catch (error) {
+        console.error('Lỗi khi tải dữ liệu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleSearch = (e) => {
+    const { value } = e.target;
+    setSearchTerm(value);
+    const filtered = employees.filter((emp) =>
+      emp.fullName?.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredEmployees(filtered);
+  };
+
   const openModal = (id) => {
-    setEmployeeIdToDelete(id); // Lưu id nhân viên vào state khi mở modal
+    setEmployeeIdToDelete(id);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setEmployeeIdToDelete(null);
   };
 
-  const handleSave = async (employeeIdToDelete) => {
+  const handleDelete = async () => {
     try {
       await deleteEmployee(employeeIdToDelete);
-      fetchEmployees();
+      message.success('Xóa nhân viên thành công!');
+      const { mappedEmployees } = await fetchEmpDepPos();
+      setEmployees(mappedEmployees);
+      setFilteredEmployees(mappedEmployees);
     } catch (error) {
       console.error('Lỗi khi xóa nhân viên:', error);
+      message.error('Xóa nhân viên thất bại!');
+    } finally {
+      closeModal();
     }
-    setEmployeeIdToDelete(null); // Reset lại id sau khi xóa
-    closeModal();
   };
+
+  const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'userId',
+      key: 'userId',
+      width: 80,
+    },
+    {
+      title: 'Tên nhân viên',
+      dataIndex: 'fullName',
+      key: 'fullName',
+      render: (text, record) => (
+        <Button type="link" onClick={() => navigate(`/employees/${record.userId}/edit`)}>
+          {text}
+        </Button>
+      ),
+    },
+    {
+      title: 'Phòng ban',
+      dataIndex: 'departmentName',
+      key: 'departmentName',
+      filters: departments.map((dep) => ({ text: dep.departmentName, value: dep.departmentName })),
+      onFilter: (value, record) => record.departmentName === value,
+    },
+    {
+      title: 'Chức vụ',
+      dataIndex: 'positionName',
+      key: 'positionName',
+      filters: positions.map((pos) => ({ text: pos.positionName, value: pos.positionName })),
+      onFilter: (value, record) => record.positionName === value,
+    },
+    {
+      title: 'Ngày gia nhập',
+      dataIndex: 'hireDate',
+      key: 'hireDate',
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      filters: [
+        { text: 'Đang làm việc', value: 'ACTIVE' },
+        { text: 'Đã nghỉ việc', value: 'INACTIVE' },
+      ],
+      onFilter: (value, record) => record.status === value,
+      render: (status) =>
+        status === 'ACTIVE' ? (
+          <Tag color="green">Đang làm việc</Tag>
+        ) : (
+          <Tag color="red">Đã nghỉ việc</Tag>
+        ),
+    },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/employees/${record.userId}/edit`)}
+          >
+            Sửa
+          </Button>
+          <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => openModal(record.userId)}
+          >
+            Xóa
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="page-container employees-container">
       <h2 className="page-title">Danh sách nhân viên</h2>
 
-      {/* Modal Component */}
-      <Modal
-        title="Modal title"
-        showModal={isModalOpen}
-        onClose={closeModal}
-        onSave={() => handleSave(employeeIdToDelete)}
-        saveButtonText="Save changes"
-        closeButtonText="Close"
-      >
-        Xác nhận xóa nhân viên này?
-      </Modal>
-
-      <div className="card-container">
-        <div className="row">
-          {/* Search Department Card */}
-          <div className="col-md-8">
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title">Tìm kiếm nhân viên</h5>
-              </div>
-              <div className="card-body">
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="fas fa-search mx-2"></i>
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Nhập tên nhân viên..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Add New Employee Card */}
-          <div className="col-md-4">
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title">Thêm mới nhân viên</h5>
-              </div>
-              <div className="card-body">
-                <button className="btn btn-primary" onClick={() => navigate('/employees/add')}>
-                  Tới trang thêm nhân viên...
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="card mb-3">
+        <div className="card-body d-flex justify-content-between align-items-center">
+          <Input
+            placeholder="Tìm kiếm theo tên nhân viên..."
+            value={searchTerm}
+            onChange={handleSearch}
+            prefix={<SearchOutlined />}
+            style={{ width: 300 }}
+          />
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/employees/add')}>
+            Thêm mới
+          </Button>
         </div>
       </div>
 
-      {/* Department Table Card */}
       <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="card-title m-0">Danh sách nhân viên</h5>
-          <span className="badge bg-primary">{filteredEmployees.length} nhân viên</span>
-        </div>
         <div className="card-body">
           {loading ? (
             <Loading />
           ) : (
-            <DataTable
+            <Table
               columns={columns}
-              data={filteredEmployees}
-              emptyMessage={{
-                icon: 'fas fa-folder-open',
-                text: 'Không tìm thấy nhân viên',
-              }}
-              onEdit={(id) => navigate(`/employees/${id}/edit`)}
-              onDelete={openModal}
-              detailsPath="/employees"
+              dataSource={filteredEmployees}
+              rowKey="userId"
+              pagination={{ pageSize: 10 }}
             />
           )}
-          {/* Pagination Controls */}
-          <div className="pagination">
-            <span>Số nhân viên mỗi trang: </span>
-            <select value={rowsPerPage} onChange={handleRowsPerPageChange}>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-            </select>
-            <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-              Trang trước
-            </button>
-            <button onClick={handleNextPage} disabled={currentPage * rowsPerPage >= filteredEmployees.length}>
-              Trang sau
-            </button>
-          </div>
         </div>
       </div>
+
+      {/* Modal xác nhận xóa */}
+      <Modal
+        title="Xác nhận xóa"
+        visible={isModalOpen}
+        onOk={handleDelete}
+        onCancel={closeModal}
+        okText="Xóa"
+        cancelText="Hủy"
+      >
+        Bạn có chắc chắn muốn xóa nhân viên này?
+      </Modal>
     </div>
   );
 };

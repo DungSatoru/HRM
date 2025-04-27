@@ -50,7 +50,7 @@ const Sidebar = () => {
         <ul className="list-unstyled">
           {/* Tổng quan */}
           <li>
-            <NavLink to="/dashboard" activeClassName="active">
+            <NavLink to="/dashboard">
               <i className="fas fa-tachometer-alt"></i> Tổng quan
             </NavLink>
           </li>
