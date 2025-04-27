@@ -2,6 +2,7 @@ package tlu.finalproject.hrmanagement.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -61,5 +62,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAll(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<Object> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

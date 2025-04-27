@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -18,11 +19,11 @@ import java.util.Date;
 public class SalarySlip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long SalarySlipId;
+    Long salarySlipId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    User userId;
+    User user;
 
     @Column(name = "basic_salary")
     Double basicSalary;
@@ -40,5 +41,8 @@ public class SalarySlip {
     Double totalSalary;
 
     @Column(name = "payment_date")
-    Date paymentDate;
+    LocalDate paymentDate;
+
+    @Column(name = "month")
+    String month;
 }

@@ -19,9 +19,9 @@ public class EmployeeDTO {
     String email;
     String phone;
     String fullName;
-    RoleDTO role;
-    DepartmentDTO department;
-    PositionDTO position;
+    Long roleId;
+    Long departmentId;
+    Long positionId;
     Status status;
     Date hireDate;
     Date createdAt;

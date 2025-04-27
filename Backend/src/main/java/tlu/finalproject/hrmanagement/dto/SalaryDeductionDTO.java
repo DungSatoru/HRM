@@ -3,7 +3,7 @@ package tlu.finalproject.hrmanagement.dto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -11,11 +11,10 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OvertimeDTO {
+public class SalaryDeductionDTO {
+    Long deductionId;
     Long userId;
-    LocalDateTime overtimeStart;
-    LocalDateTime overtimeEnd;
-    Double overtimeHours;
-    Double overtimePay;
-    String month;
+    String deductionType;
+    Double amount;
+    LocalDate deductionDate;
 }
