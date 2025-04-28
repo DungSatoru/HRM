@@ -130,66 +130,6 @@ public class AttendanceServiceImpl implements AttendanceService {
             }
         }
     }
-
-    @Override
-    public String checkIn(AttendanceDTO attendanceDTO) {
-        if (attendanceDTO.getUserId() == null || attendanceDTO.getDate() == null || attendanceDTO.getCheckIn() == null) {
-            throw new BadRequestException("Thiếu thông tin check-in (ID, ngày, giờ).");
-        }
-
-        User user = userRepository.findById(attendanceDTO.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + attendanceDTO.getUserId()));
-
-        List<Attendance> todayRecords = attendanceRepository.findAttendancesByUserAndDate(attendanceDTO.getUserId(), attendanceDTO.getDate());
-
-        if (todayRecords.isEmpty()) {
-            Attendance newAttendance = new Attendance();
-            newAttendance.setUser(user);
-            newAttendance.setDate(attendanceDTO.getDate());
-            newAttendance.setCheckIn(attendanceDTO.getCheckIn());
-            attendanceRepository.save(newAttendance);
-            return "Đã ghi nhận check-in lúc " + attendanceDTO.getCheckIn();
-        }
-
-        return "Nhân viên " + user.getFullName() + " đã check-in hôm nay.";
-    }
-
-    @Override
-    public String checkOut(AttendanceDTO attendanceDTO) {
-        if (attendanceDTO.getUserId() == null || attendanceDTO.getDate() == null || attendanceDTO.getCheckOut() == null) {
-            throw new BadRequestException("Thiếu thông tin check-out (ID, ngày, giờ).");
-        }
-
-        Long userId = attendanceDTO.getUserId();
-        LocalTime checkOutTime = attendanceDTO.getCheckOut();
-        LocalDate date = attendanceDTO.getDate();
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + userId));
-
-        List<Attendance> todayRecords = attendanceRepository.findAttendancesByUserAndDate(userId, date);
-
-        if (!todayRecords.isEmpty()) {
-            Attendance lastRecord = todayRecords.get(todayRecords.size() - 1);
-
-            if (lastRecord.getCheckOut() == null) {
-                lastRecord.setCheckOut(checkOutTime);
-                attendanceRepository.save(lastRecord);
-
-                LocalTime overtimeStartTime = LocalTime.of(17, 30);
-
-                if (checkOutTime.isAfter(overtimeStartTime)) {
-                    String message = processOvertime(userId, overtimeStartTime, checkOutTime);
-                    return "Đã check-out và " + message;
-                }
-
-                return "Đã ghi nhận check-out lúc " + checkOutTime;
-            }
-        }
-
-        return "Không tìm thấy bản ghi check-in nào hôm nay.";
-    }
-
     @Override
     public String processOvertime(Long userId, LocalTime overtimeStart, LocalTime overtimeEnd) {
         if (userId == null || overtimeStart == null || overtimeEnd == null) {

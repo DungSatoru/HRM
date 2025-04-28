@@ -29,8 +29,12 @@ public class SalaryConfiguration {
     Double overtimeRate;
 
     @Column(name = "bonus_rate")
-    Double bonus;
+    Double bonusRate;
 
     @Column(name = "other_allowances")
     Double otherAllowances;
+
+    @Column(name = "insurance_base_salary")
+    Double insuranceBaseSalary;
+
 }

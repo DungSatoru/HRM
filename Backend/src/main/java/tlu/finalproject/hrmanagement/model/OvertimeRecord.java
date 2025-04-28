@@ -36,4 +36,7 @@ public class OvertimeRecord {
 
     @Column(name = "overtime_pay")
     Double overtimePay;
+
+    @Column(name = "month")
+    String month;
 }

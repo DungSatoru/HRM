@@ -12,9 +12,9 @@ import tlu.finalproject.hrmanagement.model.User;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SalaryConfigurationDTO {
     Long salaryConfigId;
-    User user;
+    Long userId;
     Double basicSalary;
     Double overtimeRate;
-    Double bonus;
+    Double bonusRate;
     Double otherAllowances;
 }

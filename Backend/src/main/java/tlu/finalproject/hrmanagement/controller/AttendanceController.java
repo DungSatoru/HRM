@@ -41,7 +41,7 @@ public class AttendanceController {
     }
 
     // Thêm dữ liệu chấm công mới
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> createAttendance(@RequestBody AttendanceDTO attendanceDTO) {
         // Gọi service để thêm mới dữ liệu chấm công
         String message = attendanceService.createAttendance(attendanceDTO);
@@ -51,7 +51,6 @@ public class AttendanceController {
     // Xóa dữ liệu chấm công theo ID
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAttendance(@PathVariable Long id) {
-        // Gọi service để xóa dữ liệu chấm công
         String message = attendanceService.deleteAttendance(id);
         return ResponseEntity.ok(message);
     }
@@ -61,23 +60,10 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceService.updateAttendance(id, attendanceDTO)); // Trả về đối tượng đã cập nhật
     }
 
-
     @PostMapping("/check")
     public ResponseEntity<?> checkAttendance(@RequestBody AttendanceByFaceDTO attendanceDTO) {
         LocalDateTime eventTime = LocalDateTime.parse(attendanceDTO.getTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String message = attendanceService.processAttendance(attendanceDTO.getUserId(), eventTime);
-        return ResponseEntity.ok(message);
-    }
-
-    @PostMapping("/check-in")
-    public ResponseEntity<?> checkIn(@RequestBody AttendanceDTO attendanceDTO) {
-        String message = attendanceService.checkIn(attendanceDTO);
-        return ResponseEntity.ok(message);
-    }
-
-    @PostMapping("/check-out")
-    public ResponseEntity<?> checkOut(@RequestBody AttendanceDTO attendanceDTO) {
-        String message = attendanceService.checkOut(attendanceDTO);
         return ResponseEntity.ok(message);
     }
 }
