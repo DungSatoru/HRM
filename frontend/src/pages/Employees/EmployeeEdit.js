@@ -37,8 +37,8 @@ const EmployeeEdit = () => {
             identity: employeeData.identity || '',
             email: employeeData.email || '',
             phone: employeeData.phone || '',
-            positionId: employeeData.position?.positionId || '',
-            departmentId: employeeData.department?.departmentId || '',
+            positionId: employeeData.positionId || '',
+            departmentId: employeeData.departmentId || '',
             status: employeeData.status || 'ACTIVE',
             hireDate: employeeData.hireDate?.split('T')[0] || '',
           });
@@ -73,16 +73,9 @@ const EmployeeEdit = () => {
         identity: formData.identity,
         email: formData.email,
         phone: formData.phone,
-        role: {
-          roleId: 5,
-          roleName: 'Nhân viên',
-        },
-        department: {
-          departmentId: formData.departmentId,
-        },
-        position: {
-          positionId: formData.positionId,
-        },
+        roleId: 5,
+        departmentId: formData.departmentId,
+        positionId: formData.positionId,
         status: formData.status,
         hireDate: formData.hireDate,
       };

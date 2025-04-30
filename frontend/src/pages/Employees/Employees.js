@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { deleteEmployee } from '~/services/employeeService';
 import { fetchEmpDepPos } from '~/utils/fetchData';
@@ -129,14 +129,14 @@ const Employees = () => {
       render: (_, record) => (
         <Space size="middle">
           <Button
-            type="primary"
+            type="default"
             icon={<EditOutlined />}
             onClick={() => navigate(`/employees/${record.userId}/edit`)}
           >
             Sửa
           </Button>
           <Button
-            type="primary"
+            type="default"
             danger
             icon={<DeleteOutlined />}
             onClick={() => openModal(record.userId)}

@@ -31,6 +31,7 @@ import { getSalaryConfigByUserId, getSalaryConfigList, updateSalaryConfig } from
 import { fetchAllDataForPayroll } from '~/utils/fetchData';
 import { createSalaryBonus } from '~/services/salaryBonusService';
 import { createSalaryDeduction } from '~/services/deductionService';
+import { calculateSalary } from '~/services/salaryCalculationService';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -178,15 +179,44 @@ const PayrollManagement = () => {
     },
   ];
 
-  // Tính toán lương
-  const handleCalculatePayroll = () => {
-    message.loading('Đang tính toán lương cho tháng ' + selectedMonth);
+  // Tính toán lương cho tất cả nhân viên, bỏ qua những nhân viên có lương cơ bản = 0 hoặc gặp lỗi
+const handleCalculatePayroll = async () => {
+  try {
+    setLoading(true); // Hiển thị loading khi tính toán lương
 
-    // Giả lập cuộc gọi API
-    setTimeout(() => {
-      message.success('Đã hoàn thành tính lương cho ' + employees.length + ' nhân viên');
-    }, 2000);
-  };
+    // Lặp qua tất cả các nhân viên
+    for (let employee of mappedEmployees) {
+      // Kiểm tra xem nhân viên có lương cơ bản = 0, bỏ qua nếu có
+      if (employee.status === 'ACTIVE' && employee.basicSalary > 0) {
+        const salaryData = {
+          userId: employee.id,
+          month: selectedMonth,  // Lưu ý là giá trị này cần theo định dạng "yyyy-MM"
+        };
+
+        try {
+          // Gọi API tính lương cho mỗi nhân viên có lương cơ bản > 0
+          const result = await calculateSalary(salaryData.userId, salaryData.month);
+          console.log(`Tính toán lương thành công cho nhân viên ${employee.name}:`, result);
+        } catch (error) {
+          // Nếu xảy ra lỗi với nhân viên này (ví dụ lỗi từ API), thông báo lỗi nhưng tiếp tục tính cho nhân viên khác
+          console.error(`Lỗi khi tính lương cho nhân viên ${employee.name}:`, error);
+          message.error(`Lỗi khi tính lương cho nhân viên ${employee.name}`);
+        }
+      } else {
+        // Nếu nhân viên có lương cơ bản = 0, bỏ qua và log lại
+        console.log(`Nhân viên ${employee.name} bị bỏ qua do lương cơ bản = 0.`);
+      }
+    }
+
+    message.success('Đã tính toán lương cho tất cả nhân viên có lương cơ bản hợp lệ!');
+  } catch (error) {
+    console.error('Lỗi khi tính lương:', error);
+    message.error('Đã xảy ra lỗi khi tính toán lương cho nhân viên.');
+  } finally {
+    setLoading(false); // Dừng loading sau khi hoàn thành tính toán
+  }
+};
+
 
   // Mẫu cấu hình lương
   const handleSalaryConfigSubmit = async (values) => {
@@ -265,22 +295,6 @@ const PayrollManagement = () => {
                 <Card title="Danh sách nhân viên">
                   <Space style={{ marginBottom: 16 }}>
                     <Input.Search placeholder="Tìm kiếm nhân viên" style={{ width: 300 }} />
-                    <Select placeholder="Phòng ban" style={{ width: 200 }}>
-                      <Option value="">Tất cả phòng ban</Option>
-                      {departments.map((dept) => (
-                        <Option key={dept.departmentId} value={dept.id}>
-                          {dept.departmentName}
-                        </Option>
-                      ))}
-                    </Select>
-                    <Select placeholder="Vị trí" style={{ width: 200 }}>
-                      <Option value="">Tất cả vị trí</Option>
-                      {positions.map((pos) => (
-                        <Option key={pos.positionId} value={pos.positionId}>
-                          {pos.positionName}
-                        </Option>
-                      ))}
-                    </Select>
                   </Space>
 
                   <Table
@@ -428,10 +442,6 @@ const PayrollManagement = () => {
 
           <Form.Item name="deductionDate" label="Ngày khấu trừ" rules={[{ required: true }]}>
             <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item name="description" label="Lý do">
-            <Input.TextArea rows={3} />
           </Form.Item>
 
           <Form.Item>

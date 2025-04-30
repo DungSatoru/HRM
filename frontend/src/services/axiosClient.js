@@ -23,17 +23,24 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+let isLoggedOut = false; // Biến để theo dõi trạng thái đăng xuất
+let hasToastShown = false; // Biến để đảm bảo chỉ hiển thị toast 1 lần
+
 // Thêm interceptor để xử lý lỗi từ response
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      toast.error('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
-      // Đợi 1 giây rồi mới redirect để toast hiển thị
+    if (error.response && error.response.status === 401 && !isLoggedOut) {
       setTimeout(() => {
+        if (!hasToastShown) {
+          toast.error('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+          hasToastShown = true; // Đánh dấu đã hiển thị toast
+        }
+
+        isLoggedOut = true; // Đánh dấu là đã đăng xuất
         localStorage.clear();
         window.location.href = '/login';
-      }, 1000); // 1000ms = 1 giây
+      }, 1000);
     }
     return Promise.reject(error);
   },

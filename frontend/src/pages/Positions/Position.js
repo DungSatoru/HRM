@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Table, Input, Button, Modal, Form, Card, Space, Badge, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { getPositions, deletePosition, addPosition, updatePosition } from '~/services/positionService';
+import { getEmployees } from '~/services/employeeService'; // Giả sử bạn có service này
 import Loading from '~/components/Loading/Loading';
 import './Positions.css';
 
 const Positions = () => {
   const [positions, setPositions] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,26 +16,38 @@ const Positions = () => {
   const [selectedPosition, setSelectedPosition] = useState({});
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    fetchPositions();
-  }, []);
-
-  const fetchPositions = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await getPositions();
-      setPositions(data || []);
+      // Lấy danh sách vị trí
+      const positionData = await getPositions();
+      setPositions(positionData || []);
+
+      // Lấy danh sách nhân viên
+      const employeeData = await getEmployees();
+      setEmployees(employeeData || []);
     } catch (error) {
-      console.error('Error fetching positions:', error);
-      message.error('Không thể tải danh sách chức vụ');
+      console.error('Error fetching data:', error);
+      message.error('Không thể tải danh sách chức vụ hoặc nhân viên');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchData(); // Gọi hàm fetchData trong useEffect
+  }, []); // Chỉ gọi khi component mount
+
+  // Lọc danh sách chức vụ theo tên
   const filteredPositions = positions.filter((pos) =>
-    pos.positionName?.toLowerCase().includes(searchTerm.toLowerCase())
+    pos.positionName?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  // Tính số nhân viên cho mỗi chức vụ
+  const positionsWithEmployeeCount = filteredPositions.map((pos) => {
+    const totalEmployees = employees.filter((emp) => emp.positionId === pos.positionId).length;
+    return { ...pos, totalEmployees };
+  });
 
   const openModal = (action, position = {}) => {
     setModalAction(action);
@@ -62,7 +76,7 @@ const Positions = () => {
         await updatePosition(selectedPosition.positionId, { positionName: values.positionName });
         message.success('Cập nhật chức vụ thành công!');
       }
-      fetchPositions();
+      fetchData(); // Gọi lại fetchData sau khi thêm hoặc sửa
       closeModal();
     } catch (error) {
       console.error('Lỗi xử lý chức vụ:', error);
@@ -74,7 +88,7 @@ const Positions = () => {
     try {
       await deletePosition(selectedPosition.positionId);
       message.success('Xóa chức vụ thành công!');
-      fetchPositions();
+      fetchData(); // Gọi lại fetchData sau khi xóa
       closeModal();
     } catch (error) {
       console.error('Lỗi khi xóa chức vụ:', error);
@@ -88,42 +102,32 @@ const Positions = () => {
       dataIndex: 'positionId',
       key: 'positionId',
       width: 80,
+      align: 'center',
     },
     {
       title: 'Tên chức vụ',
       dataIndex: 'positionName',
       key: 'positionName',
+      align: 'center',
       render: (text) => <b>{text}</b>,
-    },
-    {
-      title: 'Trưởng phòng',
-      dataIndex: 'positionManager',
-      key: 'positionManager',
-      render: (manager) => manager || 'Chưa có',
     },
     {
       title: 'Số nhân viên',
       dataIndex: 'totalEmployees',
       key: 'totalEmployees',
+      align: 'center',
       render: (count) => <Badge count={count || 0} style={{ backgroundColor: '#52c41a' }} />,
     },
     {
       title: 'Thao tác',
       key: 'actions',
+      align: 'center',
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            type="primary"
-            onClick={() => openModal('Edit', record)}
-          >
+          <Button icon={<EditOutlined />} onClick={() => openModal('Edit', record)}>
             Sửa
           </Button>
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={() => openModal('Delete', record)}
-          >
+          <Button icon={<DeleteOutlined />} danger onClick={() => openModal('Delete', record)}>
             Xóa
           </Button>
         </Space>
@@ -156,7 +160,7 @@ const Positions = () => {
         ) : (
           <Table
             columns={columns}
-            dataSource={filteredPositions}
+            dataSource={positionsWithEmployeeCount}
             rowKey="positionId"
             pagination={{ pageSize: 10 }}
           />
@@ -172,7 +176,9 @@ const Positions = () => {
         cancelText="Hủy"
       >
         {modalAction === 'Delete' ? (
-          <p>Bạn có chắc chắn muốn xóa chức vụ <b>{selectedPosition.positionName}</b> không?</p>
+          <p>
+            Bạn có chắc chắn muốn xóa chức vụ <b>{selectedPosition.positionName}</b> không?
+          </p>
         ) : (
           <Form form={form} layout="vertical">
             <Form.Item

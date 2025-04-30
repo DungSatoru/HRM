@@ -12,31 +12,29 @@ export const fetchAllDataForPayroll = async () => {
       getSalaryConfigList(),
     ]);
 
-    // Xử lý dữ liệu
-    const departmentMap = Object.fromEntries(departmentsData.map((d) => [d.departmentId, d.departmentName]));
-    const positionMap = Object.fromEntries(positionsData.map((p) => [p.positionId, p.positionName]));
     const salaryConfigMap = Object.fromEntries(salaryConfigData.map((s) => [s.userId, s]));
 
-    // Trả về dữ liệu đã xử lý
-    // return { employeesData, departmentMap, positionMap, salaryConfigMap };
-
     const mappedEmployees = employeesData.map((emp) => {
+      const department = departmentsData.find((d) => d.departmentId === emp.departmentId);
+      const position = positionsData.find((p) => p.positionId === emp.positionId);
       const salaryConfig = salaryConfigMap[emp.userId];
 
       return {
         id: emp.userId,
-        name: emp.fullName,
-        department: departmentMap[emp.department?.departmentId] || 'Không xác định',
-        position: positionMap[emp.position?.positionId] || 'Không xác định',
+        name: emp.fullName || 'No Name',
+        department: department ? department.departmentName : 'Chưa có phòng ban',
+        position: position ? position.positionName : 'Chưa có chức vụ',
         basicSalary: typeof salaryConfig?.basicSalary === 'number' ? salaryConfig.basicSalary : 0,
         status: emp.status,
       };
     });
 
+    console.log(mappedEmployees);
+
     return [mappedEmployees, departmentsData, positionsData];
   } catch (error) {
     console.error('Lỗi khi tải dữ liệu:', error);
-    throw error; // Hoặc có thể trả về giá trị mặc định như { employeesData: [], departmentMap: {}, positionMap: {} }
+    throw error;
   }
 };
 
