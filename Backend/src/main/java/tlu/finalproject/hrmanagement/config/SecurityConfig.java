@@ -7,9 +7,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.CorsFilter;
 import tlu.finalproject.hrmanagement.exception.CustomAuthenticationEntryPoint;
 
@@ -47,8 +49,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // Disable CSRF
                 .addFilterBefore(corsFilter, CorsFilter.class)  // Thêm CORS filter
                 .authorizeRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
-                        .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
+                                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
+                                .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
 //                        .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -58,5 +60,11 @@ public class SecurityConfig {
                 .httpBasic().disable();  // Tắt basic auth nếu không cần thiết
 
         return http.build();
+    }
+
+    // Bỏ qua Spring Security cho WebSocket
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(new AntPathRequestMatcher("/ws/**"));
     }
 }
