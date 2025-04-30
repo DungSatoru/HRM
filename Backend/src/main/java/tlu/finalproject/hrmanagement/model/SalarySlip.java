@@ -28,6 +28,9 @@ public class SalarySlip {
     @Column(name = "basic_salary")
     Double basicSalary;
 
+    @Column(name = "other_allowances")
+    Double otherAllowances;
+
     @Column(name = "overtime_pay")
     Double overTimePay;
 

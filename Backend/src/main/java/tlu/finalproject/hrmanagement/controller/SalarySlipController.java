@@ -1,25 +1,31 @@
 package tlu.finalproject.hrmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.service.SalaryCalculationService;
+import tlu.finalproject.hrmanagement.service.SalarySlipService;
 
 import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/salaries")
 @RequiredArgsConstructor
-public class SalaryCalculationController {
+public class SalarySlipController {
 
     private final SalaryCalculationService salaryCalculationService;
+    private final SalarySlipService salarySlipService;
+
+    @GetMapping()
+    public ResponseEntity<?> getSalarySlipsByMonth(@RequestParam String month) {
+        return ResponseEntity.ok(salarySlipService.getAllSalarySlipsByMonth(month));
+    }
 
     /**
      * Tính toán và lưu Salary Slip cho nhân viên
      *
      * @param userId ID của nhân viên
-     * @param month Tháng tính lương (yyyy-MM format)
+     * @param month  Tháng tính lương (yyyy-MM format)
      * @return Message thành công
      */
     @PostMapping("/calculate")

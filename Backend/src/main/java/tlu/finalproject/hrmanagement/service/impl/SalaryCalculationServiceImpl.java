@@ -109,6 +109,7 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
                 .user(user)
                 .paymentDate(month.withDayOfMonth(month.lengthOfMonth()))
                 .basicSalary(basicSalary)
+                .otherAllowances(otherAllowances)
                 .bonus(totalBonus)
                 .deductions(totalDeductions)
                 .overTimePay(overtimeSalary)
