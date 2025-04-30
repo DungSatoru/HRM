@@ -24,6 +24,7 @@ const publicRoutes = [
 // ✅ Các route cần đăng nhập
 const privateRoutes = [
   { path: '/', component: Dashboard },
+  { path: '/dashboard', component: Dashboard },
   { path: '/employees', component: Employees },
   { path: '/employees/add', component: EmployeeCreate },
   { path: '/employees/:id', component: EmployeeDetail },
