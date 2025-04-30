@@ -114,7 +114,6 @@ const Departments = () => {
         <Space>
           <Button
             icon={<EditOutlined />}
-            type="primary"
             onClick={() => openModal('Edit', record)}
           >
             Sửa
