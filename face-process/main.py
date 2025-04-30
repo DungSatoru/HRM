@@ -12,7 +12,7 @@ from src.utils.utils import create_directory
 def main():
     # Configuration parameters
     encoding_file = r"data\encodings.txt"
-    rtsp_url = "rtsp://admin:L23F65D3@192.168.2.109:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
+    rtsp_url = "rtsp://admin:L23F65D3@192.168.0.108:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
     yolo_model_path = r"data\yolov8n-face.pt"
     checkin_folder = r"src\attendance\checkin"
     frame_resize_width = 640

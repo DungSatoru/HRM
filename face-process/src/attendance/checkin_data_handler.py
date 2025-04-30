@@ -8,13 +8,14 @@ class CheckInDataHandler:
 
     def load_check_in_data(self, name):
         """
-        Load check-in data for a specific person
-        
-        Args:
-            name (str): Name of the person
-            
-        Returns:
-            tuple: (dict of check-in data, path to check-in file)
+        Tải dữ liệu điểm danh cho một người cụ thể
+
+        Tham số:
+            name (str): Tên của người đó
+
+        Trả về:
+            tuple: (dict chứa dữ liệu điểm danh, đường dẫn đến tệp điểm danh)
+
         """
         check_in_data = {}
         check_in_file = os.path.join(self.checkin_folder, f"{name}_check_in.csv")
@@ -36,12 +37,12 @@ class CheckInDataHandler:
 
     def create_check_in_file(self, check_in_file, name, check_in_time):
         """
-        Create or append check-in data to file
-        
-        Args:
-            check_in_file (str): Path to the check-in file
-            name (str): Name of the person
-            check_in_time (str): Time the person checked in
+        Tạo mới hoặc thêm dữ liệu điểm danh vào tệp
+
+        Tham số:
+            check_in_file (str): Đường dẫn đến tệp điểm danh
+            name (str): Tên của người đó
+            check_in_time (str): Thời gian người đó điểm danh
         """
         if not os.path.exists(check_in_file):
             with open(check_in_file, mode='w', newline='') as file:
