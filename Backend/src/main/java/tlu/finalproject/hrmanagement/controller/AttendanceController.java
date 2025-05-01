@@ -57,7 +57,7 @@ public class AttendanceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
-        return ResponseEntity.ok(attendanceService.updateAttendance(id, attendanceDTO)); // Trả về đối tượng đã cập nhật
+        return ResponseEntity.ok(attendanceService.updateAttendance(id, attendanceDTO));
     }
 
     @PostMapping("/check")

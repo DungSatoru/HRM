@@ -49,38 +49,54 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    public String createAttendance(AttendanceDTO attendanceDTO) {
+        Attendance attendance = modelMapper.map(attendanceDTO, Attendance.class);
+        attendanceRepository.save(attendance);
+
+        // Nếu có giờ checkOut và sau 17:30 thì xử lý OT
+        if (attendance.getCheckOut() != null && attendance.getCheckOut().isAfter(LocalTime.of(17, 30))) {
+            Long userId = attendanceDTO.getUserId(); // Lấy userId từ DTO
+            processOvertime(userId, LocalTime.of(17, 30), attendance.getCheckOut());
+        }
+        return "Tạo mới chấm công thành công";
+    }
+
+    @Override
     public String updateAttendance(Long id, AttendanceDTO attendanceDTO) {
         try {
-            // Kiểm tra xem bản ghi chấm công có tồn tại không
             Attendance attendance = attendanceRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
 
-            // Cập nhật các trường dữ liệu từ DTO vào bản ghi
+            // Xóa OT cũ nếu muốn cập nhật lại
+            overtimeRecordRepository.deleteByUser_UserIdAndDate(attendance.getUser().getUserId(), attendance.getDate());
+
             attendance.setCheckIn(attendanceDTO.getCheckIn());
             attendance.setCheckOut(attendanceDTO.getCheckOut());
             attendance.setDate(attendanceDTO.getDate());
 
             attendanceRepository.save(attendance);
 
-            return "Cập nhật chấm công thành công với ID: " + id;
+            // Tính lại OT nếu có checkOut sau 17h30
+            if (attendanceDTO.getCheckOut() != null && attendanceDTO.getCheckOut().isAfter(LocalTime.of(17, 30))) {
+                processOvertime(attendance.getUser().getUserId(), LocalTime.of(17, 30), attendanceDTO.getCheckOut());
+            }
+
+            return "Cập nhật chấm công và xóa dữ liệu OT cũ thành công với ID: " + id;
         } catch (Exception e) {
             // Xử lý lỗi khác nếu có
             return "Đã xảy ra lỗi trong quá trình cập nhật.";
         }
     }
 
-    @Override
-    public String createAttendance(AttendanceDTO attendanceDTO) {
-        Attendance attendance = modelMapper.map(attendanceDTO, Attendance.class);
-        attendanceRepository.save(attendance);
-        return "Tạo mới chấm công thành công";
-    }
 
     @Override
     public String deleteAttendance(Long id) {
         Attendance attendance = attendanceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
+        // Xóa OT liên quan nếu có
+        overtimeRecordRepository.deleteByUser_UserIdAndDate(attendance.getUser().getUserId(), attendance.getDate());
         attendanceRepository.delete(attendance);
+
         return "Xóa chấm công thành công với ID: " + id;
     }
 
@@ -130,6 +146,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             }
         }
     }
+
     @Override
     public String processOvertime(Long userId, LocalTime overtimeStart, LocalTime overtimeEnd) {
         if (userId == null || overtimeStart == null || overtimeEnd == null) {
