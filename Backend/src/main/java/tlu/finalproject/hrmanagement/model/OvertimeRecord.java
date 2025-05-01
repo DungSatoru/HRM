@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
@@ -37,6 +38,6 @@ public class OvertimeRecord {
     @Column(name = "overtime_pay")
     Double overtimePay;
 
-    @Column(name = "month")
-    String month;
+    @Column(name = "overtime_date")
+    LocalDate overtimeDate;
 }

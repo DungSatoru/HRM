@@ -3,6 +3,7 @@ package tlu.finalproject.hrmanagement.dto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -17,5 +18,5 @@ public class OvertimeDTO {
     LocalDateTime overtimeEnd;
     Double overtimeHours;
     Double overtimePay;
-    String month;
+    LocalDate overtimeDate;
 }

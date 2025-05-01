@@ -56,7 +56,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Nếu có giờ checkOut và sau 17:30 thì xử lý OT
         if (attendance.getCheckOut() != null && attendance.getCheckOut().isAfter(LocalTime.of(17, 30))) {
             Long userId = attendanceDTO.getUserId(); // Lấy userId từ DTO
-            processOvertime(userId, LocalTime.of(17, 30), attendance.getCheckOut());
+            processOvertime(userId, attendance.getDate(),LocalTime.of(17, 30), attendance.getCheckOut());
         }
         return "Tạo mới chấm công thành công";
     }
@@ -68,7 +68,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
 
             // Xóa OT cũ nếu muốn cập nhật lại
-            overtimeRecordRepository.deleteByUser_UserIdAndDate(attendance.getUser().getUserId(), attendance.getDate());
+            overtimeRecordRepository.deleteByUser_UserIdAndOvertimeDate(attendance.getUser().getUserId(), attendance.getDate());
 
             attendance.setCheckIn(attendanceDTO.getCheckIn());
             attendance.setCheckOut(attendanceDTO.getCheckOut());
@@ -78,7 +78,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
             // Tính lại OT nếu có checkOut sau 17h30
             if (attendanceDTO.getCheckOut() != null && attendanceDTO.getCheckOut().isAfter(LocalTime.of(17, 30))) {
-                processOvertime(attendance.getUser().getUserId(), LocalTime.of(17, 30), attendanceDTO.getCheckOut());
+                processOvertime(attendance.getUser().getUserId(), attendance.getDate(), LocalTime.of(17, 30), attendanceDTO.getCheckOut());
             }
 
             return "Cập nhật chấm công và xóa dữ liệu OT cũ thành công với ID: " + id;
@@ -94,7 +94,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         Attendance attendance = attendanceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
         // Xóa OT liên quan nếu có
-        overtimeRecordRepository.deleteByUser_UserIdAndDate(attendance.getUser().getUserId(), attendance.getDate());
+//        overtimeRecordRepository.deleteByUser_UserIdAndDate(attendance.getUser().getUserId(), attendance.getDate());
         attendanceRepository.delete(attendance);
 
         return "Xóa chấm công thành công với ID: " + id;
@@ -148,7 +148,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public String processOvertime(Long userId, LocalTime overtimeStart, LocalTime overtimeEnd) {
+    public String processOvertime(Long userId, LocalDate date, LocalTime overtimeStart, LocalTime overtimeEnd) {
         if (userId == null || overtimeStart == null || overtimeEnd == null) {
             throw new BadRequestException("Thiếu thông tin làm thêm giờ.");
         }
@@ -177,6 +177,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         overtimeRecord.setOvertimeEnd(overtimeEnd);
         overtimeRecord.setOvertimeHour(overtimeHours);
         overtimeRecord.setOvertimePay(overtimePay);
+        overtimeRecord.setOvertimeDate(date);
 
         overtimeRecordRepository.save(overtimeRecord);
 
