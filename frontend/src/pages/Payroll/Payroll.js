@@ -1,68 +1,43 @@
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  DatePicker,
-  Tabs,
-  Card,
-  Modal,
-  Form,
-  message,
-  Tooltip,
-  Badge,
-  Space,
-  Tag,
-  Divider,
-} from 'antd';
-import {
-  DollarOutlined,
-  UserOutlined,
-  CalculatorOutlined,
-  SettingOutlined,
-  TrophyOutlined,
-  FileTextOutlined,
-  BarChartOutlined,
-  CheckCircleOutlined,
-} from '@ant-design/icons';
+import { Table, Button, Select, Card, Space } from 'antd';
+import { FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { fetchAllDataForPayroll } from '~/utils/fetchData';
 
-const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 function Payroll() {
-  // States
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
   const [mappedEmployees, setMappedEmployees] = useState([]);
-  const [salaryConfig, setSalaryConfig] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState(moment().format('YYYY-MM'));
-  const [salaryConfigModalVisible, setSalaryConfigModalVisible] = useState(false);
-  const [bonusModalVisible, setBonusModalVisible] = useState(false);
-  const [deductionModalVisible, setDeductionModalVisible] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(moment().format('MM'));
+  const [selectedYear, setSelectedYear] = useState(moment().format('YYYY'));
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [mappedEmployees, dept, posi] = await fetchAllDataForPayroll();
-        setMappedEmployees(mappedEmployees);
-        setDepartments(dept);
-        setPositions(posi);
-      } catch (error) {
-        console.error('Lỗi khi tải dữ liệu:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleMonthChange = (value) => {
+    setSelectedMonth(value);
+  };
 
-    loadData();
-  }, []);
-  // Render salary slips table
+  const handleYearChange = (value) => {
+    setSelectedYear(value);
+  };
+
+  const handleSearch = async () => {
+    const monthString = `${selectedYear}-${selectedMonth}`;
+    setLoading(true);
+    try {
+      const [employees, dept, pos] = await fetchAllDataForPayroll(monthString);
+      setMappedEmployees(employees);
+      setDepartments(dept);
+      setPositions(pos);
+    } catch (error) {
+      console.error('Lỗi khi tải dữ liệu:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const salarySlipsColumns = [
     {
       title: 'ID',
@@ -83,41 +58,60 @@ function Payroll() {
       title: 'Lương cơ bản',
       dataIndex: 'basicSalary',
       key: 'basicSalary',
-      render: (salary) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary),
+      render: (salary) => (
+        <span style={{ color: 'blue' }}>
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
+        </span>
+      ),
+    },
+    {
+      title: 'Phụ cấp',
+      dataIndex: 'otherAllowance',
+      key: 'otherAllowance',
+      render: (allowance) => (
+        <span style={{ color: 'blue' }}>
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(allowance)}
+        </span>
+      ),
     },
     {
       title: 'Lương thêm giờ',
-      dataIndex: 'overtimeSalary',
-      key: 'overtimeSalary',
-      render: (salary) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary),
+      dataIndex: 'overTimePay',
+      key: 'overTimePay',
+      render: (salary) => (
+        <span style={{ color: 'orange' }}>
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
+        </span>
+      ),
     },
     {
       title: 'Thưởng',
       dataIndex: 'bonus',
       key: 'bonus',
-      render: (bonus) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bonus),
+      render: (bonus) => (
+        <span style={{ color: 'green' }}>
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bonus)}
+        </span>
+      ),
     },
     {
       title: 'Khấu trừ',
       dataIndex: 'deduction',
       key: 'deduction',
-      render: (deduction) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(deduction),
+      render: (deduction) => (
+        <span style={{ color: 'red' }}>
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(deduction)}
+        </span>
+      ),
     },
     {
       title: 'Tổng lương',
       dataIndex: 'totalSalary',
       key: 'totalSalary',
-      render: (salary) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary),
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Badge
-          status={status === 'APPROVED' ? 'success' : status === 'PENDING' ? 'processing' : 'default'}
-          text={status === 'APPROVED' ? 'Đã phê duyệt' : status === 'PENDING' ? 'Chờ phê duyệt' : 'Bản nháp'}
-        />
+      render: (salary) => (
+        <span style={{ color: 'green', fontWeight: 'bold' }}>
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
+        </span>
       ),
     },
     {
@@ -147,17 +141,40 @@ function Payroll() {
     <div className="payroll p-3">
       <Card title="Danh sách phiếu lương">
         <Space style={{ marginBottom: 16 }}>
-          <RangePicker placeholder={['Từ ngày', 'Đến ngày']} />
-          <Select defaultValue="" style={{ width: 200 }}>
-            <Option value="">Tất cả trạng thái</Option>
-            <Option value="APPROVED">Đã phê duyệt</Option>
-            <Option value="PENDING">Chờ phê duyệt</Option>
-            <Option value="DRAFT">Bản nháp</Option>
+          <Select value={selectedMonth} onChange={handleMonthChange} style={{ width: 120 }}>
+            {Array.from({ length: 12 }, (_, i) => {
+              const month = (i + 1).toString().padStart(2, '0');
+              return (
+                <Option key={month} value={month}>
+                  Tháng {month}
+                </Option>
+              );
+            })}
           </Select>
-          <Button type="primary">Tìm kiếm</Button>
+
+          <Select value={selectedYear} onChange={handleYearChange} style={{ width: 120 }}>
+            {Array.from({ length: 10 }, (_, i) => {
+              const year = (moment().year() - 5 + i).toString();
+              return (
+                <Option key={year} value={year}>
+                  Năm {year}
+                </Option>
+              );
+            })}
+          </Select>
+
+          <Button type="primary" onClick={handleSearch} loading={loading}>
+            Tìm kiếm
+          </Button>
         </Space>
 
-        <Table columns={salarySlipsColumns} dataSource={mappedEmployees} rowKey="id" pagination={{ pageSize: 10 }} />
+        <Table
+          columns={salarySlipsColumns}
+          dataSource={mappedEmployees}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+          loading={loading}
+        />
       </Card>
     </div>
   );
