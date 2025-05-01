@@ -167,7 +167,7 @@ const FaceTraining = () => {
                           e.target.value
                             ? allEmployees.filter(
                                 (emp) =>
-                                  emp.department.departmentId.toString() ===
+                                  emp.departmentId.toString() ===
                                   e.target.value.toString()
                               )
                             : allEmployees

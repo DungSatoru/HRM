@@ -15,6 +15,7 @@ import {
   Space,
   Tag,
   Divider,
+  InputNumber,
 } from 'antd';
 import {
   DollarOutlined,
@@ -28,35 +29,37 @@ import {
 } from '@ant-design/icons';
 import moment from 'moment';
 import { getSalaryConfigByUserId, getSalaryConfigList, updateSalaryConfig } from '~/services/salaryConfigService';
-import { fetchAllDataForPayroll } from '~/utils/fetchData';
+import { fetchAllDataForPayroll, fetchAllDataForPayrollManagement } from '~/utils/fetchData';
 import { createSalaryBonus } from '~/services/salaryBonusService';
 import { createSalaryDeduction } from '~/services/deductionService';
-import { calculateSalary } from '~/services/salaryCalculationService';
+import { calculateSalary } from '~/services/salarySlipService';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 const PayrollManagement = () => {
-  // Các trạng thái
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
   const [mappedEmployees, setMappedEmployees] = useState([]);
   const [salaryConfig, setSalaryConfig] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState(moment().format('YYYY-MM'));
+  const [selectedMonth, setSelectedMonth] = useState(moment().month() + 1); // 1 - 12
+  const [selectedYear, setSelectedYear] = useState(moment().year());
   const [salaryConfigModalVisible, setSalaryConfigModalVisible] = useState(false);
   const [bonusModalVisible, setBonusModalVisible] = useState(false);
   const [deductionModalVisible, setDeductionModalVisible] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-
   const [form] = Form.useForm();
 
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  const years = Array.from({ length: 10 }, (_, i) => moment().year() - 5 + i); // 5 năm trước và sau
+
   useEffect(() => {
+    const monthString = `${selectedYear}-${selectedMonth}`;
     const loadData = async () => {
       try {
-        const [mappedEmployees, dept, posi] = await fetchAllDataForPayroll();
+        const [mappedEmployees, dept, posi] = await fetchAllDataForPayrollManagement(monthString);
         setMappedEmployees(mappedEmployees);
         setDepartments(dept);
         setPositions(posi);
@@ -75,10 +78,7 @@ const PayrollManagement = () => {
     setSalaryConfigModalVisible(true);
 
     try {
-      // Lấy cấu hình lương cho nhân viên khi nhấn vào
       const salaryConfig = await getSalaryConfigByUserId(employee.id);
-
-      // Chỉnh sửa trạng thái để hiển thị dữ liệu cấu hình lương
       form.setFieldsValue({
         basicSalary: salaryConfig.basicSalary || 0,
         overtimeRate: salaryConfig.overtimeRate || 0,
@@ -91,18 +91,9 @@ const PayrollManagement = () => {
     }
   };
 
-  // Cột bảng nhân viên
   const employeeColumns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: 'Họ tên',
-      dataIndex: 'name',
-      key: 'name',
-    },
+    { title: 'ID', dataIndex: 'id', key: 'id' },
+    { title: 'Họ tên', dataIndex: 'name', key: 'name' },
     {
       title: 'Phòng ban',
       dataIndex: 'department',
@@ -179,51 +170,47 @@ const PayrollManagement = () => {
     },
   ];
 
-  // Tính toán lương cho tất cả nhân viên, bỏ qua những nhân viên có lương cơ bản = 0 hoặc gặp lỗi
-const handleCalculatePayroll = async () => {
-  try {
-    setLoading(true); // Hiển thị loading khi tính toán lương
+  const handleCalculatePayroll = async () => {
+    try {
+      setLoading(true);
 
-    // Lặp qua tất cả các nhân viên
-    for (let employee of mappedEmployees) {
-      // Kiểm tra xem nhân viên có lương cơ bản = 0, bỏ qua nếu có
-      if (employee.status === 'ACTIVE' && employee.basicSalary > 0) {
-        const salaryData = {
-          userId: employee.id,
-          month: selectedMonth,  // Lưu ý là giá trị này cần theo định dạng "yyyy-MM"
-        };
+      // Kết hợp tháng và năm thành định dạng YYYY-MM
+      const formattedMonth = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`;
 
-        try {
-          // Gọi API tính lương cho mỗi nhân viên có lương cơ bản > 0
-          const result = await calculateSalary(salaryData.userId, salaryData.month);
-          console.log(`Tính toán lương thành công cho nhân viên ${employee.name}:`, result);
-        } catch (error) {
-          // Nếu xảy ra lỗi với nhân viên này (ví dụ lỗi từ API), thông báo lỗi nhưng tiếp tục tính cho nhân viên khác
-          console.error(`Lỗi khi tính lương cho nhân viên ${employee.name}:`, error);
-          message.error(`Lỗi khi tính lương cho nhân viên ${employee.name}`);
+      for (let employee of mappedEmployees) {
+        if (employee.status === 'ACTIVE' && employee.basicSalary > 0) {
+          const salaryData = {
+            userId: employee.id,
+            month: formattedMonth,
+          };
+
+          try {
+            const result = await calculateSalary(salaryData.userId, salaryData.month);
+            console.log(`Tính toán lương thành công cho nhân viên ${employee.name}:`, result);
+          } catch (error) {
+            console.error(`Lỗi khi tính lương cho nhân viên ${employee.name}:`, error);
+            message.error(`Lỗi khi tính lương cho nhân viên ${employee.name}`);
+          }
+        } else {
+          console.log(`Nhân viên ${employee.name} bị bỏ qua do lương cơ bản = 0.`);
         }
-      } else {
-        // Nếu nhân viên có lương cơ bản = 0, bỏ qua và log lại
-        console.log(`Nhân viên ${employee.name} bị bỏ qua do lương cơ bản = 0.`);
       }
+
+      message.success('Đã tính toán lương cho tất cả nhân viên có lương cơ bản hợp lệ!');
+    } catch (error) {
+      console.error('Lỗi khi tính lương:', error);
+      message.error('Đã xảy ra lỗi khi tính toán lương cho nhân viên.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    message.success('Đã tính toán lương cho tất cả nhân viên có lương cơ bản hợp lệ!');
-  } catch (error) {
-    console.error('Lỗi khi tính lương:', error);
-    message.error('Đã xảy ra lỗi khi tính toán lương cho nhân viên.');
-  } finally {
-    setLoading(false); // Dừng loading sau khi hoàn thành tính toán
-  }
-};
-
-
-  // Mẫu cấu hình lương
   const handleSalaryConfigSubmit = async (values) => {
+    const monthString = `${selectedYear}-${selectedMonth}`;
     try {
       await updateSalaryConfig(selectedEmployee.id, values);
       message.success('Cấu hình lương đã được cập nhật cho ' + selectedEmployee.name);
-      fetchAllDataForPayroll();
+      fetchAllDataForPayrollManagement(monthString);
     } catch (error) {
       console.error('Error saving salary config:', error);
       message.error('Đã xảy ra lỗi khi cập nhật cấu hình lương cho ' + selectedEmployee.name);
@@ -231,13 +218,9 @@ const handleCalculatePayroll = async () => {
     setSalaryConfigModalVisible(false);
   };
 
-  // Mẫu thưởng
   const handleBonusSubmit = async (values) => {
     try {
-      const payload = {
-        ...values,
-        userId: selectedEmployee.id, // Thêm dòng này
-      };
+      const payload = { ...values, userId: selectedEmployee.id };
       await createSalaryBonus(payload);
       fetchAllDataForPayroll();
     } catch (error) {
@@ -247,13 +230,9 @@ const handleCalculatePayroll = async () => {
     setBonusModalVisible(false);
   };
 
-  // Mẫu khấu trừ
   const handleDeductionSubmit = async (values) => {
     try {
-      const payload = {
-        ...values,
-        userId: selectedEmployee.id, // Thêm dòng này
-      };
+      const payload = { ...values, userId: selectedEmployee.id };
       await createSalaryDeduction(payload);
     } catch (error) {
       console.log('Deduction values:', values);
@@ -265,192 +244,194 @@ const handleCalculatePayroll = async () => {
   return (
     <div className="payroll-management p-3">
       <h1>Quản lý lương và phúc lợi</h1>
-      <Tabs
-        defaultActiveKey="1"
-        items={[
-          {
-            label: (
-              <span>
-                <UserOutlined />
-                Nhân viên & Lương
-              </span>
-            ),
-            key: '1',
-            children: (
-              <div>
-                <Card title="Tính lương tháng" style={{ marginBottom: 16 }}>
-                  <Space align="center">
-                    <DatePicker.MonthPicker
-                      value={moment(selectedMonth)}
-                      onChange={(date) => setSelectedMonth(date.format('YYYY-MM'))}
-                      format="MM/YYYY"
-                      placeholder="Chọn tháng"
-                    />
-                    <Button type="primary" icon={<CalculatorOutlined />} onClick={handleCalculatePayroll}>
-                      Tính lương
-                    </Button>
-                  </Space>
-                </Card>
+      <Tabs defaultActiveKey="1">
+        <TabPane
+          tab={
+            <span>
+              <UserOutlined />
+              Nhân viên & Lương
+            </span>
+          }
+          key="1"
+        >
+          <Card title="Tính lương tháng" style={{ marginBottom: 16 }}>
+            <Space align="center">
+              <Select
+                value={selectedMonth}
+                onChange={(value) => setSelectedMonth(value)}
+                placeholder="Chọn tháng"
+                style={{ width: 100 }}
+              >
+                {months.map((month) => (
+                  <Option key={month} value={month}>
+                    Tháng {month}
+                  </Option>
+                ))}
+              </Select>
 
-                <Card title="Danh sách nhân viên">
-                  <Space style={{ marginBottom: 16 }}>
-                    <Input.Search placeholder="Tìm kiếm nhân viên" style={{ width: 300 }} />
-                  </Space>
+              <Select
+                value={selectedYear}
+                onChange={(value) => setSelectedYear(value)}
+                placeholder="Chọn năm"
+                style={{ width: 100 }}
+              >
+                {years.map((year) => (
+                  <Option key={year} value={year}>
+                    {year}
+                  </Option>
+                ))}
+              </Select>
 
-                  <Table
-                    columns={employeeColumns}
-                    dataSource={mappedEmployees}
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{ pageSize: 10 }}
-                  />
-                </Card>
-              </div>
-            ),
-          },
-          {
-            label: (
-              <span>
-                <SettingOutlined />
-                Cấu hình hệ thống
-              </span>
-            ),
-            key: '3',
-            children: (
-              <Card title="Thiết lập cấu hình lương">
-                <Form layout="vertical">
-                  <Form.Item label="Ngày trả lương trong tháng">
-                    <Input type="number" min={1} max={31} defaultValue={25} />
-                  </Form.Item>
+              <Button type="primary" icon={<CalculatorOutlined />} onClick={handleCalculatePayroll}>
+                Tính lương
+              </Button>
+            </Space>
+          </Card>
 
-                  <Form.Item label="Tỷ lệ làm thêm giờ mặc định">
-                    <Input type="number" min={1} step={0.1} defaultValue={1.5} addonAfter="lần mức lương giờ" />
-                  </Form.Item>
+          <Card title="Danh sách nhân viên">
+            <Space style={{ marginBottom: 16 }}>
+              <Input.Search placeholder="Tìm kiếm nhân viên" style={{ width: 300 }} />
+            </Space>
 
-                  <Form.Item label="Tỷ lệ làm thêm giờ ngày nghỉ">
-                    <Input type="number" min={1} step={0.1} defaultValue={2} addonAfter="lần mức lương giờ" />
-                  </Form.Item>
+            <Table
+              columns={employeeColumns}
+              dataSource={mappedEmployees}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 10 }}
+            />
+          </Card>
+        </TabPane>
 
-                  <Form.Item label="Tỷ lệ làm thêm giờ ngày lễ">
-                    <Input type="number" min={1} step={0.1} defaultValue={3} addonAfter="lần mức lương giờ" />
-                  </Form.Item>
+        <TabPane
+          tab={
+            <span>
+              <SettingOutlined />
+              Cấu hình hệ thống
+            </span>
+          }
+          key="3"
+        >
+          <Card title="Thiết lập cấu hình lương">
+            <Form layout="vertical">
+              <Form.Item label="Ngày trả lương trong tháng">
+                <Input type="number" min={1} max={31} defaultValue={25} />
+              </Form.Item>
 
-                  <Divider />
+              <Form.Item label="Tỷ lệ làm thêm giờ mặc định">
+                <Input type="number" min={1} step={0.1} defaultValue={1.5} addonAfter="lần mức lương giờ" />
+              </Form.Item>
 
-                  <Form.Item>
-                    <Button type="primary">Lưu cấu hình</Button>
-                  </Form.Item>
-                </Form>
-              </Card>
-            ),
-          },
-        ]}
-      />
-      {/* Cấu hình lương Modal */}
+              <Form.Item label="Tỷ lệ làm thêm giờ ngày nghỉ">
+                <Input type="number" min={1} step={0.1} defaultValue={2} addonAfter="lần mức lương giờ" />
+              </Form.Item>
+
+              <Form.Item label="Tỷ lệ làm thêm giờ ngày lễ">
+                <Input type="number" min={1} step={0.1} defaultValue={3} addonAfter="lần mức lương giờ" />
+              </Form.Item>
+
+              <Divider />
+
+              <Form.Item>
+                <Button type="primary">Lưu cấu hình</Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </TabPane>
+      </Tabs>
+
+      {/* Modal for Salary Config */}
       <Modal
-        title={`Cấu hình lương - ${selectedEmployee?.name || ''}`}
-        open={salaryConfigModalVisible} // Thay 'visible' bằng 'open'
+        title={`Cấu hình lương cho ${selectedEmployee?.name}`}
+        visible={salaryConfigModalVisible}
         onCancel={() => setSalaryConfigModalVisible(false)}
         footer={null}
       >
-        <Form form={form} layout="vertical" onFinish={handleSalaryConfigSubmit}>
-          <Form.Item name="basicSalary" label="Lương cơ bản" initialValue={selectedEmployee?.basicSalary || 0}>
-            <Input type="number" min={0} addonAfter="VND" />
+        <Form form={form} onFinish={handleSalaryConfigSubmit} layout="vertical">
+          <Form.Item
+            label="Lương cơ bản"
+            name="basicSalary"
+            rules={[{ required: true, message: 'Vui lòng nhập lương cơ bản' }]}
+          >
+            <Input type="number" min={0} step={1000}/>
           </Form.Item>
-
-          <Form.Item name="overtimeRate" label="Tỷ lệ làm thêm giờ" initialValue={0}>
-            <Input type="number" min={1} step={0.1} addonAfter="x" />
+          <Form.Item
+            label="Tỷ lệ làm thêm giờ"
+            name="overtimeRate"
+            rules={[{ required: true, message: 'Vui lòng nhập tỷ lệ làm thêm giờ' }]}
+          >
+            <Input type="number" min={0} step={0.1} />
           </Form.Item>
-
-          <Form.Item name="otherAllowances" label="Phụ cấp khác" initialValue={0}>
-            <Input type="number" min={0} addonAfter="VND" />
+          <Form.Item label="Phụ cấp khác" name="otherAllowances">
+            <Input type="number" />
           </Form.Item>
-
-          <Form.Item name="bonusRate" label="Tỷ lệ thưởng" initialValue={0}>
-            <Input type="number" min={0} step={0.01} addonAfter="%" />
+          <Form.Item label="Tỷ lệ thưởng" name="bonusRate">
+            <Input type="number" min={0} step={0.1} />
           </Form.Item>
-
           <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                Lưu cấu hình
-              </Button>
-              <Button onClick={() => setSalaryConfigModalVisible(false)}>Hủy</Button>
-            </Space>
+            <Button type="primary" htmlType="submit">
+              Lưu cấu hình
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* Bonus Modal */}
+      {/* Modal for Bonus */}
       <Modal
-        title={`Thêm khoản thưởng - ${selectedEmployee?.name || ''}`}
-        open={bonusModalVisible} // Thay 'visible' bằng 'open'
+        title={`Thêm thưởng cho ${selectedEmployee?.name}`}
+        visible={bonusModalVisible}
         onCancel={() => setBonusModalVisible(false)}
         footer={null}
       >
-        <Form form={form} layout="vertical" onFinish={handleBonusSubmit}>
-          <Form.Item name="bonusType" label="Loại thưởng" rules={[{ required: true }]}>
-            <Select>
-              <Option value="PERFORMANCE">Thưởng hiệu suất</Option>
-              <Option value="OVERTIME">Thưởng làm thêm giờ</Option>
-              <Option value="HOLIDAY">Thưởng lễ</Option>
-              <Option value="MONTHLY">Thưởng tháng</Option>
-              <Option value="OTHER">Khác</Option>
-            </Select>
+        <Form onFinish={handleBonusSubmit} layout="vertical">
+          <Form.Item
+            label="Loại thưởng"
+            name="bonusType"
+            rules={[{ required: true, message: 'Vui lòng chọn loại thưởng' }]}
+          >
+            <Input />
           </Form.Item>
-
-          <Form.Item name="amount" label="Số tiền" rules={[{ required: true }]}>
-            <Input type="number" min={0} addonAfter="VND" />
+          <Form.Item
+            label="Số tiền thưởng"
+            name="amount"
+            rules={[{ required: true, message: 'Vui lòng nhập số tiền thưởng' }]}
+          >
+            <Input type="number" min={0} />
           </Form.Item>
-
-          <Form.Item name="bonusDate" label="Ngày thưởng" rules={[{ required: true }]}>
-            <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
-          </Form.Item>
-
           <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                Lưu thưởng
-              </Button>
-              <Button onClick={() => setBonusModalVisible(false)}>Hủy</Button>
-            </Space>
+            <Button type="primary" htmlType="submit">
+              Thêm thưởng
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* Deduction Modal */}
+      {/* Modal for Deduction */}
       <Modal
-        title={`Thêm khoản khấu trừ - ${selectedEmployee?.name || ''}`}
-        open={deductionModalVisible} // Thay 'visible' bằng 'open'
+        title={`Thêm khấu trừ cho ${selectedEmployee?.name}`}
+        visible={deductionModalVisible}
         onCancel={() => setDeductionModalVisible(false)}
         footer={null}
       >
-        <Form form={form} layout="vertical" onFinish={handleDeductionSubmit}>
-          <Form.Item name="deductionType" label="Loại khấu trừ" rules={[{ required: true }]}>
-            <Select>
-              <Option value="TAX">Thuế</Option>
-              <Option value="INSURANCE">Bảo hiểm</Option>
-              <Option value="ABSENCE">Vắng mặt</Option>
-              <Option value="ADVANCE">Tạm ứng</Option>
-              <Option value="OTHER">Khác</Option>
-            </Select>
+        <Form onFinish={handleDeductionSubmit} layout="vertical">
+          <Form.Item
+            label="Loại khấu trừ"
+            name="deductionType"
+            rules={[{ required: true, message: 'Vui lòng chọn loại khấu trừ' }]}
+          >
+            <Input />
           </Form.Item>
-
-          <Form.Item name="amount" label="Số tiền" rules={[{ required: true }]}>
-            <Input type="number" min={0} addonAfter="VND" />
+          <Form.Item
+            label="Số tiền khấu trừ"
+            name="amount"
+            rules={[{ required: true, message: 'Vui lòng nhập số tiền khấu trừ' }]}
+          >
+            <Input type="number" min={0} />
           </Form.Item>
-
-          <Form.Item name="deductionDate" label="Ngày khấu trừ" rules={[{ required: true }]}>
-            <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
-          </Form.Item>
-
           <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                Lưu khấu trừ
-              </Button>
-              <Button onClick={() => setDeductionModalVisible(false)}>Hủy</Button>
-            </Space>
+            <Button type="primary" htmlType="submit">
+              Thêm khấu trừ
+            </Button>
           </Form.Item>
         </Form>
       </Modal>

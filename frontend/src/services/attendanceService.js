@@ -20,7 +20,7 @@ export const getAttendances = async (date) => {
 export const getAttendanceById = async (id) => {
   try {
     const response = await axiosClient.get(`/attendance/${id}`);
-    toast.success(`Lấy thông tin chấm công thành công!`);
+    // toast.success(`Lấy thông tin chấm công thành công!`);
     return response.data;
   } catch (error) {
     toast.error(`Lỗi khi lấy thông tin chấm công`);

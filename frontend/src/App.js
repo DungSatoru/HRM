@@ -1,6 +1,6 @@
 import MainLayout from './layouts/MainLayout/MainLayout';
 import { Route, BrowserRouter as Router, Routes, Outlet } from 'react-router-dom';
-import { privateRoutes, publicRoutes } from './routes';
+import { privateRoutes, publicRoutes } from './routes/routes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Navigate } from 'react-router-dom';
