@@ -15,7 +15,6 @@ import java.time.LocalTime;
 public class AttendanceDTO {
     Long attendanceId;
     Long userId;
-    String fullName;
     LocalDate date;
     LocalTime checkIn;
     LocalTime checkOut;

@@ -8,6 +8,7 @@ import tlu.finalproject.hrmanagement.model.OvertimeRecord;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OvertimeRecordRepository extends JpaRepository<OvertimeRecord, Long> {
@@ -33,4 +34,6 @@ public interface OvertimeRecordRepository extends JpaRepository<OvertimeRecord, 
 
 
     void deleteByUser_UserIdAndOvertimeDate(Long userId, LocalDate date);
+
+    Optional<OvertimeRecord> findByUser_UserIdAndOvertimeDate(Long userId, LocalDate date);
 }

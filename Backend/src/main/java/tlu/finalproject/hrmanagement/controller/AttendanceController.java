@@ -43,7 +43,6 @@ public class AttendanceController {
     // Thêm dữ liệu chấm công mới
     @PostMapping()
     public ResponseEntity<?> createAttendance(@RequestBody AttendanceDTO attendanceDTO) {
-        // Gọi service để thêm mới dữ liệu chấm công
         String message = attendanceService.createAttendance(attendanceDTO);
         return ResponseEntity.ok(message);
     }
@@ -63,7 +62,7 @@ public class AttendanceController {
     @PostMapping("/check")
     public ResponseEntity<?> checkAttendance(@RequestBody AttendanceByFaceDTO attendanceDTO) {
         LocalDateTime eventTime = LocalDateTime.parse(attendanceDTO.getTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        String message = attendanceService.processAttendance(attendanceDTO.getUserId(), eventTime);
+        String message = attendanceService.handleSocketAttendance(attendanceDTO.getUserId(), eventTime);
         return ResponseEntity.ok(message);
     }
 }
