@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getDepartmentById } from '~/services/departmentService';
 import { getEmployeeById } from '~/services/employeeService'; // Dịch vụ lấy thông tin nhân viên theo ID
+import { getPositionById } from '~/services/positionService';
+import { getRoleById } from '~/services/roleService';
 
 const EmployeeDetail = () => {
   const { id } = useParams(); // Lấy ID từ URL
   const navigate = useNavigate();
-  const [employee, setEmployee] = useState(null); // Lưu thông tin nhân viên
+  const [employee, setEmployee] = useState(null);
+  const [departmentName, setDepartmentName] = useState('');
+  const [positionName, setPositionName] = useState('');
+  const [roleName, setRoleName] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,7 +22,13 @@ const EmployeeDetail = () => {
   const fetchEmployeeDetail = async () => {
     try {
       setLoading(true);
-      const data = await getEmployeeById(id); // Gọi API để lấy thông tin nhân viên
+      const data = await getEmployeeById(id);
+      const departmentData = await getDepartmentById(data.departmentId);
+      const positionData = await getPositionById(data.positionId);
+      const roleData = await getRoleById(data.roleId); // Lấy thông tin vai trò
+      setDepartmentName(departmentData.departmentName);
+      setPositionName(positionData.positionName);
+      setRoleName(roleData.roleName);
       setEmployee(data);
       setLoading(false);
     } catch (error) {
@@ -24,10 +36,6 @@ const EmployeeDetail = () => {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return <div className="loading-message">Loading...</div>;
-  }
 
   if (!employee) {
     return <div className="error-message">Không tìm thấy nhân viên</div>;
@@ -104,21 +112,21 @@ const EmployeeDetail = () => {
                       <label style={{ minWidth: '200px' }} className="form-label fw-bold">
                         Vai trò
                       </label>
-                      <span className="profile-value">{employee.role.roleName}</span>
+                      <span className="profile-value">{roleName}</span>
                     </div>
 
                     <div className="profile-item">
                       <label style={{ minWidth: '200px' }} className="form-label fw-bold">
                         Chức vụ
                       </label>
-                      <span className="profile-value">{employee.position.positionName}</span>
+                      <span className="profile-value">{positionName}</span>
                     </div>
 
                     <div className="profile-item">
                       <label style={{ minWidth: '200px' }} className="form-label fw-bold">
                         Phòng ban
                       </label>
-                      <span className="profile-value">{employee.department.departmentName}</span>
+                      <span className="profile-value">{departmentName}</span>
                     </div>
 
                     <div className="profile-item">
@@ -135,7 +143,7 @@ const EmployeeDetail = () => {
         </div>
       </div>
       <button className="btn btn-outline-secondary" onClick={() => navigate('/employees')}>
-        <i class="fa-solid fa-left-long"></i>
+        <i className="fa-solid fa-left-long"></i>
         Quay lại
       </button>
     </div>

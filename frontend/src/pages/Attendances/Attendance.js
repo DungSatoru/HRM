@@ -5,8 +5,10 @@ import Loading from '~/components/Loading/Loading';
 import dayjs from 'dayjs';
 import { CalendarOutlined, PlusOutlined } from '@ant-design/icons';
 import AttendanceForm from '~/components/AttendanceForm/AttendanceForm';
+import { getEmployees } from '~/services/employeeService';
 
 const Attendance = () => {
+  const [employees, setEmployees] = useState([]);
   const [attendances, setAttendances] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [loading, setLoading] = useState(true);
@@ -15,20 +17,28 @@ const Attendance = () => {
   const [formMode, setFormMode] = useState('create');
 
   useEffect(() => {
-    fetchAttendancesByDate(selectedDate.format('YYYY-MM-DD'));
+    const fetchData = async () => {
+      try {
+        const [empData, attData] = await Promise.all([
+          getEmployees(),
+          getAttendances(selectedDate.format('YYYY-MM-DD'))
+        ]);
+        setEmployees(empData);
+        setAttendances(attData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        message.error('Không thể tải dữ liệu');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
   }, [selectedDate]);
 
-  const fetchAttendancesByDate = async (date) => {
-    setLoading(true);
-    try {
-      const data = await getAttendances(date);
-      setAttendances(data || []);
-    } catch (error) {
-      console.error('Error fetching attendances:', error);
-      message.error('Không thể tải dữ liệu chấm công');
-    } finally {
-      setLoading(false);
-    }
+  const getEmployeeName = (userId) => {
+    const employee = employees.find(emp => emp.userId === userId);
+    return employee ? employee.fullName : 'Không tên';
   };
 
   const calculateDuration = (checkIn, checkOut) => {
@@ -73,10 +83,23 @@ const Attendance = () => {
     setEditingId(null);
   };
 
-  const mappedData = attendances?.map((item, index) => ({
+  const fetchAttendancesByDate = async (date) => {
+    setLoading(true);
+    try {
+      const data = await getAttendances(date);
+      setAttendances(data || []);
+    } catch (error) {
+      console.error('Error fetching attendances:', error);
+      message.error('Không thể tải dữ liệu chấm công');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mappedData = attendances.map((item, index) => ({
     key: item.attendanceId,
     stt: index + 1,
-    fullName: item.fullName || 'Không tên',
+    fullName: getEmployeeName(item.userId),
     checkIn: item.checkIn || '-',
     checkOut: item.checkOut || '-',
     duration: item.checkIn && item.checkOut ? calculateDuration(item.checkIn, item.checkOut) : 'Dữ liệu chưa đủ',
@@ -173,7 +196,13 @@ const Attendance = () => {
         {loading ? (
           <Loading />
         ) : (
-          <Table columns={columns} dataSource={mappedData} rowKey="key" pagination={{ pageSize: 10 }} />
+          <Table 
+            columns={columns} 
+            dataSource={mappedData} 
+            rowKey="key" 
+            pagination={{ pageSize: 10 }} 
+            locale={{ emptyText: 'Không có dữ liệu chấm công' }}
+          />
         )}
       </Card>
 

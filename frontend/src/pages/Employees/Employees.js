@@ -82,7 +82,7 @@ const Employees = () => {
       dataIndex: 'fullName',
       key: 'fullName',
       render: (text, record) => (
-        <Button type="link" onClick={() => navigate(`/employees/${record.userId}/edit`)}>
+        <Button type="link" onClick={() => navigate(`/employees/${record.userId}`)}>
           {text}
         </Button>
       ),
