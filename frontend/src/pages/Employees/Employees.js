@@ -4,7 +4,6 @@ import { deleteEmployee } from '~/services/employeeService';
 import { fetchEmpDepPos } from '~/utils/fetchData';
 import { Table, Button, Modal, Input, Tag, Space, message } from 'antd';
 import Loading from '~/components/Loading/Loading';
-import './Employees.css';
 import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const Employees = () => {
