@@ -21,27 +21,27 @@ public class PositionController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllDepartments() {
+    public ResponseEntity<?> getAllPositions() {
         return ResponseEntity.ok(positionService.getAllPosition());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getPositionById(@PathVariable Long id) {
         return ResponseEntity.ok(positionService.getPositionById(id));
     }
 
     @PostMapping
-    public ResponseEntity<?> createDepartment(@RequestBody PositionDTO userDTO) {
+    public ResponseEntity<?> createPosition(@RequestBody PositionDTO userDTO) {
         return new ResponseEntity<>(positionService.createPosition(userDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDepartment(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
+    public ResponseEntity<?> updatePosition(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
         return ResponseEntity.ok(positionService.updatePosition(id, positionDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDepartment(@PathVariable Long id) {
+    public ResponseEntity<?> deletePosition(@PathVariable Long id) {
         return ResponseEntity.ok(positionService.deletePosition(id));
     }
 }
