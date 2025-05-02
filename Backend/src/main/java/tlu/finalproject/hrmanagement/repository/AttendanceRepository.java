@@ -29,7 +29,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
                     a.attendanceId, a.user.userId,  a.date, a.checkIn, a.checkOut
                 ) 
                 FROM Attendance a
-                WHERE a.user = :userId 
+                WHERE a.user.userId = :userId 
                 AND a.date BETWEEN :start AND :end
             """)
     List<AttendanceDTO> findAttendancesByUserAndDateRange(@Param("userId") Long userId, @Param("start") LocalDate start, @Param("end") LocalDate end);

@@ -3,8 +3,10 @@ package tlu.finalproject.hrmanagement.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
 import tlu.finalproject.hrmanagement.dto.PositionDTO;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
+import tlu.finalproject.hrmanagement.model.Department;
 import tlu.finalproject.hrmanagement.model.Position;
 import tlu.finalproject.hrmanagement.repository.PositionRepository;
 import tlu.finalproject.hrmanagement.service.PositionService;
@@ -28,7 +30,13 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public PositionDTO getPositionById(Long id) {
-        return null;
+        try {
+            Position position = positionRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vị trí với ID: " + id));
+            return modelMapper.map(position, PositionDTO.class);
+        } catch (Exception ex) {
+            throw new ResourceNotFoundException("Không tìm thấy vị trí với ID: " + id);
+        }
     }
 
     @Override
