@@ -7,7 +7,6 @@ export const getAttendances = async (date) => {
     console.log(localStorage.getItem('token'));
     
     const response = await axiosClient.get(`/attendance?date=${date}`);
-    toast.success("Lấy danh sách chấm công theo ngày thành công!");
     return response.data;
   } catch (error) {
     toast.error("Đã xảy ra lỗi khi lấy danh sách chấm công!");
@@ -38,7 +37,6 @@ export const getUserAttendanceByRange = async (userId, startDate, endDate) => {
         end: endDate,
       },
     });
-    toast.success("Lấy danh sách chấm công theo khoảng thời gian thành công!");
     return response.data;
   } catch (error) {
     toast.error("Đã xảy ra lỗi khi lấy chấm công theo khoảng thời gian!");

@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Table, Input, Card, DatePicker, Space, Badge, Button, Popconfirm, message } from 'antd';
+import { Table, Card, DatePicker, Space, Badge, Button, Popconfirm, message } from 'antd';
 import { getAttendances, deleteAttendance } from '~/services/attendanceService';
 import Loading from '~/components/Loading/Loading';
-import EditAttendanceForm from './EditAttendanceForm';
 import dayjs from 'dayjs';
-import { CalendarOutlined } from '@ant-design/icons';
+import { CalendarOutlined, PlusOutlined } from '@ant-design/icons';
+import AttendanceForm from '~/components/AttendanceForm/AttendanceForm';
 
 const Attendance = () => {
   const [attendances, setAttendances] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
+  const [formVisible, setFormVisible] = useState(false);
+  const [formMode, setFormMode] = useState('create');
 
   useEffect(() => {
     fetchAttendancesByDate(selectedDate.format('YYYY-MM-DD'));
@@ -46,7 +47,8 @@ const Attendance = () => {
 
   const handleEdit = (id) => {
     setEditingId(id);
-    setShowEditForm(true);
+    setFormMode('edit');
+    setFormVisible(true);
   };
 
   const handleDelete = async (id) => {
@@ -60,8 +62,14 @@ const Attendance = () => {
     }
   };
 
-  const closeEditForm = () => {
-    setShowEditForm(false);
+  const handleCreate = () => {
+    setEditingId(null);
+    setFormMode('create');
+    setFormVisible(true);
+  };
+
+  const closeForm = () => {
+    setFormVisible(false);
     setEditingId(null);
   };
 
@@ -150,11 +158,14 @@ const Attendance = () => {
         <Space direction="horizontal" size="middle">
           <DatePicker
             value={selectedDate}
-            format="YYYY-MM-DD"
+            format="DD/MM/YYYY"
             onChange={(date) => setSelectedDate(date)}
             suffixIcon={<CalendarOutlined />}
           />
           <Badge count={`${attendances.length} nhân viên`} style={{ backgroundColor: '#1890ff' }} />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            Tạo mới chấm công
+          </Button>
         </Space>
       </Card>
 
@@ -162,19 +173,16 @@ const Attendance = () => {
         {loading ? (
           <Loading />
         ) : (
-          <Table
-            columns={columns}
-            dataSource={mappedData}
-            rowKey="key"
-            pagination={{ pageSize: 10 }}
-          />
+          <Table columns={columns} dataSource={mappedData} rowKey="key" pagination={{ pageSize: 10 }} />
         )}
       </Card>
 
-      <EditAttendanceForm
-        visible={showEditForm}
-        onClose={closeEditForm}
+      <AttendanceForm
+        visible={formVisible}
+        onClose={closeForm}
+        onSuccess={() => fetchAttendancesByDate(selectedDate.format('YYYY-MM-DD'))}
         attendanceId={editingId}
+        mode={formMode}
       />
     </div>
   );
