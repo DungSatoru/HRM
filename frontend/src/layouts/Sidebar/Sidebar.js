@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import './Sidebar2.css';
+import './Sidebar.css';
 
 const Sidebar = () => {
   // Lấy thông tin người dùng từ localStorage
@@ -51,32 +51,15 @@ const Sidebar = () => {
           {/* Tổng quan */}
           <li>
             <NavLink to="/dashboard">
-              <i className="fas fa-tachometer-alt"></i> Tổng quan
+              <i className="fa-solid fas fa-tachometer-alt"></i> Tổng quan
             </NavLink>
           </li>
 
           {/* Quản lý nhân viên */}
           <li>
-            <NavLink to="#collapseNhanVien" className="nav-item" onClick={() => handleToggle('collapseNhanVien')}>
-              <div className="d-flex justify-content-between align-items-center">
-                <span>
-                  <i className="fa-solid fa-users"></i> Nhân viên
-                </span>
-                <span className="dropdown-icon">
-                  <i className={`fa-solid ${openSections.collapseNhanVien ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                </span>
-              </div>
+            <NavLink to="/employees">
+              <i className="fa-solid fa-users"></i> Nhân viên
             </NavLink>
-            <div className={`collapse ${openSections.collapseNhanVien ? 'show' : ''}`} id="collapseNhanVien">
-              <ul className="submenu">
-                <li>
-                  <NavLink to="/employees">Danh sách nhân viên</NavLink>
-                </li>
-                <li>
-                  <NavLink to="/employees/add">Quản lý nhân viên</NavLink>
-                </li>
-              </ul>
-            </div>
           </li>
 
           {/* Quản lý phòng ban và chức vụ */}

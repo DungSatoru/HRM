@@ -64,9 +64,10 @@ const EditAttendanceForm = ({ visible, onClose, attendanceId , onSuccess}) => {
     try {
       await updateAttendance(attendanceId, form);
       toast.success('Cập nhật chấm công thành công!');
-      onSuccess();  // Gọi onSuccess để làm mới dữ liệu
+      onSuccess(); 
       onClose();
     } catch (error) {
+      console.error('Lỗi khi cập nhật chấm công:', error);
       toast.error('Đã có lỗi xảy ra khi cập nhật');
     }
   };
