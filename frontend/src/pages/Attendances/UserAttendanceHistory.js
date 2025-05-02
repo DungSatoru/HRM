@@ -179,6 +179,10 @@ const UserAttendanceHistory = () => {
                 value={month}
                 onChange={(value) => {
                   setMonth(value);
+                  console.log(value);
+                  
+                  console.log('Selected month:', value.format('YYYY-MM-DD'));
+                  
                   if (selectedUser) fetchAttendance(selectedUser.userId);
                 }}
               />
