@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
-import tlu.finalproject.hrmanagement.dto.EmployeeByDepartmentDTO;
 import tlu.finalproject.hrmanagement.service.DepartmentService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api/departments") // http://localhost:8080/api/departments

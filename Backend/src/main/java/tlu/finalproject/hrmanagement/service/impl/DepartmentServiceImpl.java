@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
-import tlu.finalproject.hrmanagement.dto.EmployeeByDepartmentDTO;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.exception.BadRequestException;  // Import thêm
 import tlu.finalproject.hrmanagement.model.Department;
@@ -13,6 +12,7 @@ import tlu.finalproject.hrmanagement.repository.UserRepository;  // Nếu bạn 
 import tlu.finalproject.hrmanagement.service.DepartmentService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +31,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<EmployeeByDepartmentDTO> getDepartmentById(Long departmentId) {
+    public DepartmentDTO getDepartmentById(Long departmentId) {
         try {
-            return departmentRepository.getEmployeesByDepartmentId(departmentId);
+            Department department = departmentRepository.findById(departmentId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + departmentId));
+            DepartmentDTO dto = DepartmentDTO.builder()
+                    .departmentId(department.getDepartmentId())
+                    .departmentName(department.getDepartmentName())
+                    .build();
+            return dto;
         } catch (Exception ex) {
             throw new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + departmentId);
         }
