@@ -3,7 +3,6 @@ package tlu.finalproject.hrmanagement.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import tlu.finalproject.hrmanagement.dto.PositionDTO;
 import tlu.finalproject.hrmanagement.dto.RoleDTO;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.Role;
@@ -39,9 +38,9 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public String createRole(PositionDTO positionDTO) {
+    public String createRole(RoleDTO RoleDTO) {
         try {
-            Role role = modelMapper.map(positionDTO, Role.class);
+            Role role = modelMapper.map(RoleDTO, Role.class);
             roleRepository.save(role);
             return "Tạo vai trò thành công!";
         } catch (Exception ex) {
@@ -50,11 +49,11 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public String updateRole(Long id, PositionDTO positionDTO) {
+    public String updateRole(Long id, RoleDTO RoleDTO) {
         try {
             Role role = roleRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò với ID: " + id));
-            modelMapper.map(positionDTO, role);
+            modelMapper.map(RoleDTO, role);
             roleRepository.save(role);
             return "Cập nhật vai trò thành công!";
         } catch (Exception ex) {
