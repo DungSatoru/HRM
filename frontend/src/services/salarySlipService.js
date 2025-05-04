@@ -23,6 +23,29 @@ export const getSalarySlipsByMonth = async (month) => {
     }
 }
 
+export const getSalarySlipByEmployeeIdAndMonth = async (userId, month) => {
+    try {
+        // Gửi yêu cầu với query params (userId và month)
+        const response = await axiosClient.get(`/salaries/employee/${userId}`, {
+            params: { month }  // Tháng cần lấy phiếu lương (yyyy-MM)
+        });
+
+        if (response.status === 200) {
+            return response.data;  // Trả về phiếu lương của nhân viên
+        } else {
+            throw new Error(response.data.message || 'Không thể lấy phiếu lương của nhân viên');
+        }
+    } catch (error) {
+        // Xử lý lỗi từ backend hoặc lỗi mạng
+        const errorMessage = error.response ? error.response.data.message : error.message;
+        toast.error(errorMessage || 'Đã xảy ra lỗi khi lấy phiếu lương của nhân viên.');
+        console.error('Lỗi khi lấy phiếu lương của nhân viên:', errorMessage);
+        throw error;  // Ném lại lỗi để frontend có thể xử lý nếu cần
+    }
+}
+
+
+
 // Tính toán lương
 export const calculateSalary = async (userId, month) => {
     try {

@@ -6,7 +6,7 @@ import { getSalarySlipsByMonth } from '~/services/salarySlipService';
 
 import moment from 'moment';
 
-export const fetchAllDataForPayroll = async (month) => {
+export const fetchAllDataForSalary = async (month) => {
   try {
     const [employeesData, departmentsData, positionsData, salarySlipData] = await Promise.all([
       getEmployees(),
@@ -53,7 +53,7 @@ export const fetchAllDataForPayroll = async (month) => {
 };
 
 
-export const fetchAllDataForPayrollManagement = async (month) => {
+export const fetchAllDataForSalaryManagement = async (month) => {
   try {
     const [employeesData, departmentsData, positionsData, salaryConfigData] = await Promise.all([
       getEmployees(),

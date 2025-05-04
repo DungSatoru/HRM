@@ -29,7 +29,7 @@ import {
 } from '@ant-design/icons';
 import moment from 'moment';
 import { getSalaryConfigByUserId, getSalaryConfigList, updateSalaryConfig } from '~/services/salaryConfigService';
-import { fetchAllDataForPayroll, fetchAllDataForPayrollManagement } from '~/utils/fetchData';
+import { fetchAllDataForSalary, fetchAllDataForSalaryManagement } from '~/utils/fetchData';
 import { createSalaryBonus } from '~/services/salaryBonusService';
 import { createSalaryDeduction } from '~/services/deductionService';
 import { calculateSalary } from '~/services/salarySlipService';
@@ -37,7 +37,7 @@ import { calculateSalary } from '~/services/salarySlipService';
 const { TabPane } = Tabs;
 const { Option } = Select;
 
-const PayrollManagement = () => {
+const SalaryManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
@@ -59,12 +59,11 @@ const PayrollManagement = () => {
     const monthString = `${selectedYear}-${selectedMonth}`;
     const loadData = async () => {
       try {
-        const [mappedEmployees, dept, posi] = await fetchAllDataForPayrollManagement(monthString);
+        const [mappedEmployees, dept, posi] = await fetchAllDataForSalaryManagement(monthString);
         setMappedEmployees(mappedEmployees);
         setDepartments(dept);
         setPositions(posi);
       } catch (error) {
-        console.error('Lỗi khi tải dữ liệu:', error);
       } finally {
         setLoading(false);
       }
@@ -79,14 +78,15 @@ const PayrollManagement = () => {
 
     try {
       const salaryConfig = await getSalaryConfigByUserId(employee.id);
+
       form.setFieldsValue({
         basicSalary: salaryConfig.basicSalary || 0,
+        insuranceBaseSalary: salaryConfig.insuranceBaseSalary || 'Đóng toàn bộ các khoản',
         overtimeRate: salaryConfig.overtimeRate || 0,
         otherAllowances: salaryConfig.otherAllowances || 0,
         bonusRate: salaryConfig.bonusRate || 0,
       });
     } catch (error) {
-      console.error('Không thể lấy cấu hình lương cho nhân viên:', error);
       message.error('Không thể lấy cấu hình lương cho nhân viên');
     }
   };
@@ -170,7 +170,7 @@ const PayrollManagement = () => {
     },
   ];
 
-  const handleCalculatePayroll = async () => {
+  const handleCalculateSalary = async () => {
     try {
       setLoading(true);
 
@@ -186,19 +186,14 @@ const PayrollManagement = () => {
 
           try {
             const result = await calculateSalary(salaryData.userId, salaryData.month);
-            console.log(`Tính toán lương thành công cho nhân viên ${employee.name}:`, result);
           } catch (error) {
-            console.error(`Lỗi khi tính lương cho nhân viên ${employee.name}:`, error);
             message.error(`Lỗi khi tính lương cho nhân viên ${employee.name}`);
           }
-        } else {
-          console.log(`Nhân viên ${employee.name} bị bỏ qua do lương cơ bản = 0.`);
         }
       }
 
       message.success('Đã tính toán lương cho tất cả nhân viên có lương cơ bản hợp lệ!');
     } catch (error) {
-      console.error('Lỗi khi tính lương:', error);
       message.error('Đã xảy ra lỗi khi tính toán lương cho nhân viên.');
     } finally {
       setLoading(false);
@@ -210,9 +205,8 @@ const PayrollManagement = () => {
     try {
       await updateSalaryConfig(selectedEmployee.id, values);
       message.success('Cấu hình lương đã được cập nhật cho ' + selectedEmployee.name);
-      fetchAllDataForPayrollManagement(monthString);
+      fetchAllDataForSalaryManagement(monthString);
     } catch (error) {
-      console.error('Error saving salary config:', error);
       message.error('Đã xảy ra lỗi khi cập nhật cấu hình lương cho ' + selectedEmployee.name);
     }
     setSalaryConfigModalVisible(false);
@@ -220,11 +214,11 @@ const PayrollManagement = () => {
 
   const handleBonusSubmit = async (values) => {
     try {
+      const monthString = `${selectedYear}-${selectedMonth}`;
       const payload = { ...values, userId: selectedEmployee.id };
       await createSalaryBonus(payload);
-      fetchAllDataForPayroll();
+      fetchAllDataForSalaryManagement(monthString);
     } catch (error) {
-      console.error('Error creating salary bonus:', error);
       message.error('Đã xảy ra lỗi khi thêm thưởng cho ' + selectedEmployee.name);
     }
     setBonusModalVisible(false);
@@ -235,14 +229,13 @@ const PayrollManagement = () => {
       const payload = { ...values, userId: selectedEmployee.id };
       await createSalaryDeduction(payload);
     } catch (error) {
-      console.log('Deduction values:', values);
       message.success('Đã thêm khoản khấu trừ cho ' + selectedEmployee.name);
     }
     setDeductionModalVisible(false);
   };
 
   return (
-    <div className="payroll-management p-3">
+    <div className="Salary-management p-3">
       <h1>Quản lý lương và phúc lợi</h1>
       <Tabs defaultActiveKey="1">
         <TabPane
@@ -282,7 +275,7 @@ const PayrollManagement = () => {
                 ))}
               </Select>
 
-              <Button type="primary" icon={<CalculatorOutlined />} onClick={handleCalculatePayroll}>
+              <Button type="primary" icon={<CalculatorOutlined />} onClick={handleCalculateSalary}>
                 Tính lương
               </Button>
             </Space>
@@ -343,7 +336,7 @@ const PayrollManagement = () => {
       {/* Modal for Salary Config */}
       <Modal
         title={`Cấu hình lương cho ${selectedEmployee?.name}`}
-        visible={salaryConfigModalVisible}
+        open={salaryConfigModalVisible}
         onCancel={() => setSalaryConfigModalVisible(false)}
         footer={null}
       >
@@ -353,7 +346,13 @@ const PayrollManagement = () => {
             name="basicSalary"
             rules={[{ required: true, message: 'Vui lòng nhập lương cơ bản' }]}
           >
-            <Input type="number" min={0} step={1000}/>
+            <Input type="number" min={0} step={1000} />
+          </Form.Item>
+          <Form.Item
+            label="Mức đóng bảo hiểm (Đóng bảo hiểm xã hội, y tế, thất nghiệp) *Nếu đóng full thì bỏ trống"
+            name="insuranceBaseSalary"
+          >
+            <Input type="text" min={0} step={50000} />
           </Form.Item>
           <Form.Item
             label="Tỷ lệ làm thêm giờ"
@@ -379,7 +378,7 @@ const PayrollManagement = () => {
       {/* Modal for Bonus */}
       <Modal
         title={`Thêm thưởng cho ${selectedEmployee?.name}`}
-        visible={bonusModalVisible}
+        open={bonusModalVisible}
         onCancel={() => setBonusModalVisible(false)}
         footer={null}
       >
@@ -390,6 +389,13 @@ const PayrollManagement = () => {
             rules={[{ required: true, message: 'Vui lòng chọn loại thưởng' }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item
+            label="Ngày thưởng"
+            name="bonusDate"
+            rules={[{ required: true, message: 'Vui lòng chọn ngày khấu trừ' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
             label="Số tiền thưởng"
@@ -409,7 +415,7 @@ const PayrollManagement = () => {
       {/* Modal for Deduction */}
       <Modal
         title={`Thêm khấu trừ cho ${selectedEmployee?.name}`}
-        visible={deductionModalVisible}
+        open={deductionModalVisible}
         onCancel={() => setDeductionModalVisible(false)}
         footer={null}
       >
@@ -420,6 +426,13 @@ const PayrollManagement = () => {
             rules={[{ required: true, message: 'Vui lòng chọn loại khấu trừ' }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item
+            label="Ngày khấu trừ"
+            name="deductionDate"
+            rules={[{ required: true, message: 'Vui lòng chọn ngày khấu trừ' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
             label="Số tiền khấu trừ"
@@ -439,4 +452,4 @@ const PayrollManagement = () => {
   );
 };
 
-export default PayrollManagement;
+export default SalaryManagement;

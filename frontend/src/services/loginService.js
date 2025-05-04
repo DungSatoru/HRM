@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { getPositions } from './positionService';
+import { getPositionById } from './positionService';
+import { getRoleById } from './roleService';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const API_URL = `${apiUrl}/auth/login`;
@@ -23,22 +24,15 @@ const loginService = {
       if (response.data.token) {
         // Lưu thông tin cơ bản trước
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userId', response.data.user.userId || '');
         localStorage.setItem('fullName', response.data.user.fullName || '');
 
-        // Lấy và lưu thông tin position nếu có
-        if (response.data.user.positionId) {
-          try {
-            const positions = await getPositions();
-            const position = positions.find(pos => pos.positionId === response.data.user.positionId);
-            if (position) {
-              localStorage.setItem('positionId', position.positionId);
-              localStorage.setItem('positionName', position.positionName || '');
-            }
-          } catch (error) {
-            console.error('Error fetching positions:', error);
-            // Không làm gì cả, vẫn cho đăng nhập dù không lấy được position
-          }
-        }
+        const position = await getPositionById(response.data.user.positionId);
+        localStorage.setItem('positionName', position.positionName || '');
+
+        const role = await getRoleById(response.data.user.roleId);
+
+        localStorage.setItem('roleName', role.roleName || '');
 
         toast.success('Đăng nhập thành công!');
         return response.data;
@@ -67,14 +61,6 @@ const loginService = {
     localStorage.clear();
     toast.info('Đã đăng xuất!');
   },
-
-  // Thêm hàm helper để lấy thông tin position
-  getPosition: () => {
-    return {
-      positionId: localStorage.getItem('positionId'),
-      positionName: localStorage.getItem('positionName')
-    };
-  }
 };
 
 export default loginService;

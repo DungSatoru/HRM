@@ -2,11 +2,11 @@ import { Table, Button, Select, Card, Space } from 'antd';
 import { FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useState } from 'react';
-import { fetchAllDataForPayroll } from '~/utils/fetchData';
+import { fetchAllDataForSalary } from '~/utils/fetchData';
 
 const { Option } = Select;
 
-function Payroll() {
+function Salary() {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
@@ -27,7 +27,7 @@ function Payroll() {
     const monthString = `${selectedYear}-${selectedMonth}`;
     setLoading(true);
     try {
-      const [employees, dept, pos] = await fetchAllDataForPayroll(monthString);
+      const [employees, dept, pos] = await fetchAllDataForSalary(monthString);
       setMappedEmployees(employees);
       setDepartments(dept);
       setPositions(pos);
@@ -138,7 +138,7 @@ function Payroll() {
   ];
 
   return (
-    <div className="payroll p-3">
+    <div className="Salary p-3">
       <Card title="Danh sách phiếu lương">
         <Space style={{ marginBottom: 16 }}>
           <Select value={selectedMonth} onChange={handleMonthChange} style={{ width: 120 }}>
@@ -180,4 +180,4 @@ function Payroll() {
   );
 }
 
-export default Payroll;
+export default Salary;
