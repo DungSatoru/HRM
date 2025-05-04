@@ -13,7 +13,6 @@ function RequireAuth() {
   console.log('Token:', token);  // Debugging token
 
   if (!token) {
-    console.log('Chuyển hướng về trang đăng nhập');
     return <Navigate to="/login" replace />;
   }
   return <Outlet />;
