@@ -8,5 +8,5 @@ public interface SalaryDeductionService {
     List<SalaryDeductionDTO> getAllByUserId(Long userId);
     SalaryDeductionDTO create(SalaryDeductionDTO dto);
     SalaryDeductionDTO update(Long id, SalaryDeductionDTO dto);
-    String delete(Long id);
+    boolean delete(Long id);
 }

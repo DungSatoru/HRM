@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String createUser(EmployeeDTO employeeDTO) {
+    public EmployeeDTO createUser(EmployeeDTO employeeDTO) {
         User user = modelMapper.map(employeeDTO, User.class);
 
         if (userRepository.existsByEmail(employeeDTO.getEmail())) {
@@ -81,27 +81,24 @@ public class UserServiceImpl implements UserService {
         user.setStatus(Optional.ofNullable(user.getStatus()).orElse(Status.ACTIVE));
         user.setCreatedAt(Optional.ofNullable(user.getCreatedAt()).orElse(new Date()));
 
-        User usersaved = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        // Sử dụng Builder Lombok để tạo mới cấu hình lương
         SalaryConfigurationDTO salaryConfigurationDTO = SalaryConfigurationDTO.builder()
-                .userId(usersaved.getUserId())
+                .userId(savedUser.getUserId())
                 .basicSalary(0.0)
                 .bonusRate(0.0)
                 .overtimeRate(0.0)
                 .otherAllowances(0.0)
                 .build();
 
-        // Gọi service để tạo cấu hình lương
         salaryConfigurationService.createSalaryConfiguration(salaryConfigurationDTO);
 
-        return "Thêm nhân viên thành công";
+        return modelMapper.map(savedUser, EmployeeDTO.class);
     }
-
 
     @Override
     @Transactional
-    public String updateUser(Long id, EmployeeDTO employeeDTO) {
+    public EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + id));
 
@@ -114,37 +111,29 @@ public class UserServiceImpl implements UserService {
         if (employeeDTO.getHireDate() != null) existingUser.setHireDate(employeeDTO.getHireDate());
 
         if (employeeDTO.getDepartmentId() != null) {
-            Long deptId = employeeDTO.getDepartmentId();
-            if (deptId != null) {
-                Department department = departmentRepository.findById(deptId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + deptId));
-                existingUser.setDepartment(department);
-            } else {
-                throw new BadRequestException("Dữ liệu phòng ban không hợp lệ.");
-            }
+            Department department = departmentRepository.findById(employeeDTO.getDepartmentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + employeeDTO.getDepartmentId()));
+            existingUser.setDepartment(department);
         }
 
         if (employeeDTO.getPositionId() != null) {
-            Long posId = employeeDTO.getPositionId();
-            if (posId != null) {
-                Position position = positionRepository.findById(posId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chức vụ với ID: " + posId));
-                existingUser.setPosition(position);
-            } else {
-                throw new BadRequestException("Dữ liệu chức vụ không hợp lệ.");
-            }
+            Position position = positionRepository.findById(employeeDTO.getPositionId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chức vụ với ID: " + employeeDTO.getPositionId()));
+            existingUser.setPosition(position);
         }
 
-        existingUser = userRepository.save(existingUser);
-        return "Cập nhật nhân viên thnh công";
+        User saved = userRepository.save(existingUser);
+        return modelMapper.map(saved, EmployeeDTO.class);
     }
-
 
     @Override
-    public String deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + id));
-        userRepository.delete(user);
-        return "Xóa nhân viên thành công";
+    public boolean deleteUser(Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        userRepository.delete(userOpt.get());
+        return true;
     }
+
 }

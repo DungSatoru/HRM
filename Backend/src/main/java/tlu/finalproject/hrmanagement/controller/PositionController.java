@@ -1,12 +1,10 @@
 package tlu.finalproject.hrmanagement.controller;
 
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
 import tlu.finalproject.hrmanagement.dto.PositionDTO;
-import tlu.finalproject.hrmanagement.service.DepartmentService;
+import tlu.finalproject.hrmanagement.dto.common.ApiResponse;
+import tlu.finalproject.hrmanagement.dto.common.ResponseUtil;
 import tlu.finalproject.hrmanagement.service.PositionService;
 
 import java.util.List;
@@ -21,27 +19,41 @@ public class PositionController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllPositions() {
-        return ResponseEntity.ok(positionService.getAllPosition());
+    public ResponseEntity<ApiResponse<List<PositionDTO>>> getAllPositions() {
+        List<PositionDTO> positions = positionService.getAllPosition();
+        return ResponseUtil.success(positions, "Lấy danh sách chức vụ thành công");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPositionById(@PathVariable Long id) {
-        return ResponseEntity.ok(positionService.getPositionById(id));
+    public ResponseEntity<ApiResponse<PositionDTO>> getPositionById(@PathVariable Long id) {
+        PositionDTO position = positionService.getPositionById(id);
+        if (position == null) {
+            return ResponseUtil.notFound("Không tìm thấy chức vụ với ID " + id);
+        }
+        return ResponseUtil.success(position, "Lấy thông tin chức vụ thành công");
     }
 
     @PostMapping
-    public ResponseEntity<?> createPosition(@RequestBody PositionDTO userDTO) {
-        return new ResponseEntity<>(positionService.createPosition(userDTO), HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<PositionDTO>> createPosition(@RequestBody PositionDTO positionDTO) {
+        PositionDTO createdPosition = positionService.createPosition(positionDTO);
+        return ResponseUtil.created(createdPosition, "Tạo chức vụ mới thành công");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePosition(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
-        return ResponseEntity.ok(positionService.updatePosition(id, positionDTO));
+    public ResponseEntity<ApiResponse<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
+        PositionDTO updatedPosition = positionService.updatePosition(id, positionDTO);
+        if (updatedPosition == null) {
+            return ResponseUtil.notFound("Không tìm thấy chức vụ với ID " + id);
+        }
+        return ResponseUtil.success(updatedPosition, "Cập nhật chức vụ thành công");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePosition(@PathVariable Long id) {
-        return ResponseEntity.ok(positionService.deletePosition(id));
+    public ResponseEntity<ApiResponse<Void>> deletePosition(@PathVariable Long id) {
+        boolean deleted = positionService.deletePosition(id);
+        if (!deleted) {
+            return ResponseUtil.notFound("Không tìm thấy chức vụ với ID " + id);
+        }
+        return ResponseUtil.success(null, "Xóa chức vụ thành công");
     }
 }

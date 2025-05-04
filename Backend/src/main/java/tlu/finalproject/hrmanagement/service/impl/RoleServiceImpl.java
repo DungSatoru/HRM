@@ -38,36 +38,34 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public String createRole(RoleDTO RoleDTO) {
+    public RoleDTO createRole(RoleDTO RoleDTO) {
         try {
             Role role = modelMapper.map(RoleDTO, Role.class);
-            roleRepository.save(role);
-            return "Tạo vai trò thành công!";
+            return modelMapper.map(roleRepository.save(role), RoleDTO.class);
         } catch (Exception ex) {
             throw new ResourceNotFoundException("Tạo vai trò thất bại!");
         }
     }
 
     @Override
-    public String updateRole(Long id, RoleDTO RoleDTO) {
+    public RoleDTO updateRole(Long id, RoleDTO RoleDTO) {
         try {
             Role role = roleRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò với ID: " + id));
             modelMapper.map(RoleDTO, role);
-            roleRepository.save(role);
-            return "Cập nhật vai trò thành công!";
+            return modelMapper.map(roleRepository.save(role), RoleDTO.class);
         } catch (Exception ex) {
             throw new ResourceNotFoundException("Cập nhật vai trò thất bại!");
         }
     }
 
     @Override
-    public String deleteRole(Long id) {
+    public boolean deleteRole(Long id) {
         try {
             Role role = roleRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò với ID: " + id));
             roleRepository.delete(role);
-            return "Xóa vai trò thành công!";
+            return true;
         } catch (Exception ex) {
             throw new ResourceNotFoundException("Xóa vai trò thất bại!");
         }

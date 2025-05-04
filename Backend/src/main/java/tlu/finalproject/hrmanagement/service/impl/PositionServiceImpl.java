@@ -40,26 +40,26 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public String createPosition(PositionDTO positionDTO) {
+    public PositionDTO createPosition(PositionDTO positionDTO) {
         Position position = modelMapper.map(positionDTO, Position.class);
         positionRepository.save(position);
-        return "Tạo mới vị trí " + position.getPositionName() + " thành công!";
+        return modelMapper.map(positionRepository.save(position), PositionDTO.class);
     }
 
     @Override
-    public String updatePosition(Long id, PositionDTO positionDTO) {
+    public PositionDTO updatePosition(Long id, PositionDTO positionDTO) {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vị trí với ID: " + id));
         position.setPositionName(positionDTO.getPositionName());
         positionRepository.save(position);
-        return "Cập nhật vị trí " + position.getPositionName() + " thành công!";
+        return modelMapper.map(positionRepository.save(position), PositionDTO.class);
     }
 
     @Override
-    public String deletePosition(Long id) {
+    public boolean deletePosition(Long id) {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vị trí với ID: " + id));
         positionRepository.deleteById(id);
-        return "Đã xóa vị trí thành công";
+        return true;
     }
 }

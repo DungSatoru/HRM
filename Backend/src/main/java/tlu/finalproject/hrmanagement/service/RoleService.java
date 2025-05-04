@@ -10,9 +10,9 @@ public interface RoleService {
 
     RoleDTO getRoleById(Long id);
 
-    String createRole(RoleDTO RoleDTO);
+    RoleDTO createRole(RoleDTO RoleDTO);
 
-    String updateRole(Long id, RoleDTO RoleDTO);
+    RoleDTO updateRole(Long id, RoleDTO RoleDTO);
 
-    String deleteRole(Long id);
+    boolean deleteRole(Long id);
 }

@@ -8,5 +8,5 @@ public interface SalaryBonusService {
     List<SalaryBonusDTO> getAllByUserId(Long userId);
     SalaryBonusDTO create(SalaryBonusDTO dto);
     SalaryBonusDTO update(Long id, SalaryBonusDTO dto);
-    String delete(Long id);
+    boolean delete(Long id);
 }

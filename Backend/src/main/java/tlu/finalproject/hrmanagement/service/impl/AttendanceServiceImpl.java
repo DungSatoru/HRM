@@ -52,44 +52,40 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public String createAttendance(AttendanceDTO attendanceDTO) {
+    public AttendanceDTO createAttendance(AttendanceDTO attendanceDTO) {
         Attendance attendance = modelMapper.map(attendanceDTO, Attendance.class);
-        attendanceRepository.save(attendance);
+        Attendance saved = attendanceRepository.save(attendance);
 
         processOvertimeIfNeeded(attendanceDTO.getUserId(), attendance.getDate(),
                 attendance.getCheckOut());
 
-        return "Tạo mới chấm công thành công";
+        return modelMapper.map(saved, AttendanceDTO.class);
     }
 
     @Transactional
     @Override
-    public String updateAttendance(Long id, AttendanceDTO attendanceDTO) {
-        try {
-            Attendance attendance = findAttendanceById(id);
+    public AttendanceDTO updateAttendance(Long id, AttendanceDTO attendanceDTO) {
+        Attendance attendance = findAttendanceById(id);
 
-            // Cập nhật thông tin chấm công
-            updateAttendanceFields(attendance, attendanceDTO);
-            attendanceRepository.save(attendance);
+        // Cập nhật thông tin chấm công
+        updateAttendanceFields(attendance, attendanceDTO);
+        Attendance saved = attendanceRepository.save(attendance);
 
-            // Xử lý OT nếu có checkOut sau giờ tiêu chuẩn
-            if (isOvertimeCheckout(attendanceDTO.getCheckOut())) {
-                updateOrCreateOvertimeRecord(attendance.getUser().getUserId(),
-                        attendance.getDate(), STANDARD_END_TIME, attendanceDTO.getCheckOut());
-            }
-
-            return "Cập nhật chấm công và xử lý OT thành công với ID: " + id;
-        } catch (Exception e) {
-            return "Đã xảy ra lỗi trong quá trình cập nhật: " + e.toString();
+        // Xử lý OT nếu có checkOut sau giờ tiêu chuẩn
+        if (isOvertimeCheckout(attendanceDTO.getCheckOut())) {
+            updateOrCreateOvertimeRecord(attendance.getUser().getUserId(),
+                    attendance.getDate(), STANDARD_END_TIME, attendanceDTO.getCheckOut());
         }
+
+        return modelMapper.map(saved, AttendanceDTO.class);
     }
 
     @Override
-    public String deleteAttendance(Long id) {
+    public boolean deleteAttendance(Long id) {
         Attendance attendance = findAttendanceById(id);
         deleteRelatedOvertimeRecords(attendance);
         attendanceRepository.delete(attendance);
-        return "Xóa chấm công thành công với ID: " + id;
+        return true;
     }
 
     @Override

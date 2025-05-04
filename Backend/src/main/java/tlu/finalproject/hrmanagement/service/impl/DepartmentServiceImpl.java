@@ -46,25 +46,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public String createDepartment(DepartmentDTO departmentDTO) {
+    public DepartmentDTO createDepartment(DepartmentDTO departmentDTO) {
         try {
             // Chuyển đổi DTO sang Entity
             Department department = modelMapper.map(departmentDTO, Department.class);
-            departmentRepository.save(department);
-            return "Thêm phòng ban thành công";
+            return modelMapper.map( departmentRepository.save(department), DepartmentDTO.class);
         } catch (Exception e) {
             throw new BadRequestException("Không thể tạo phòng ban");
         }
     }
 
     @Override
-    public String updateDepartment(Long id, DepartmentDTO departmentDTO) {
+    public DepartmentDTO updateDepartment(Long id, DepartmentDTO departmentDTO) {
         try {
             Department department = departmentRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + id));
             department.setDepartmentName(departmentDTO.getDepartmentName());
-            departmentRepository.save(department);
-            return "Cập nhật phòng ban thành công!";
+            return modelMapper.map( departmentRepository.save(department), DepartmentDTO.class);
+
         } catch (ResourceNotFoundException e) {
             throw e;  // Ném lại lỗi nếu phòng ban không tồn tại
         } catch (Exception e) {
@@ -73,17 +72,22 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public String deleteDepartment(Long id) {
+    public boolean deleteDepartment(Long id) {
         try {
             // Kiểm tra có nhân viên trong phòng ban không
             long userCount = userRepository.countByDepartment_DepartmentId(id);
             if (userCount > 0) {
                 throw new IllegalStateException("Không thể xóa phòng ban vì vẫn còn nhân viên thuộc về nó.");
             }
+
+            // Kiểm tra xem phòng ban có tồn tại không
             departmentRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + id));
+
+            // Xóa phòng ban
             departmentRepository.deleteById(id);
-            return "Xóa phòng ban thành công!";
+            return true;  // Trả về true nếu xóa thành công
+
         } catch (IllegalStateException e) {
             throw new BadRequestException(e.getMessage());  // Bắt lỗi khi không thể xóa phòng ban
         } catch (ResourceNotFoundException e) {
@@ -92,4 +96,5 @@ public class DepartmentServiceImpl implements DepartmentService {
             throw new RuntimeException("Không thể xóa phòng ban", e);
         }
     }
+
 }

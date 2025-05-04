@@ -51,10 +51,10 @@ public class SalaryBonusServiceImpl implements SalaryBonusService {
     }
 
     @Override
-    public String delete(Long id) {
+    public boolean delete(Long id) {
         SalaryBonus existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản thưởng có ID: " + id));
         repository.delete(existing);
-        return "Xoá khoản thưởng thành công.";
+        return true;
     }
 }
