@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.CorsFilter;
@@ -24,7 +26,6 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomAuthenticationEntryPoint customAuthEntryPoint;
-
 
     private final String[] PUBLIC_ENDPOINT = {
             "/api/auth/login",  // Chỉ login là không cần token
@@ -49,9 +50,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // Disable CSRF
                 .addFilterBefore(corsFilter, CorsFilter.class)  // Thêm CORS filter
                 .authorizeRequests(auth -> auth
-                                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
-                                .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
-//                        .anyRequest().permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
+                        .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN", "HR", "MANAGER") // Phân quyền cho chấm công
+
+                        .requestMatchers("/api/departments/**").hasRole("ADMIN") // Phân quyền cho quản lý roles, departments và positions
+
+                        .requestMatchers(HttpMethod.GET, "/api/positions/**", "/api/roles/**").hasAnyRole("EMPLOYEE", "ADMIN", "MANAGER", "ACCOUNTANT", "HR")
+                        .requestMatchers("/api/positions/**", "/api/roles/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/salary-bonuses/**", "/api/salary-config/**").hasAnyRole("ADMIN", "HR", "MANAGER") // Phân quyền cho lương và thưởng
+                        .requestMatchers(HttpMethod.GET, "/api/salaries/employee/**").hasAnyRole("EMPLOYEE", "ADMIN", "MANAGER", "ACCOUNTANT", "HR")
+                        .requestMatchers("/api/salaries/**").hasAnyRole("ADMIN", "ACCOUNTANT", "HR") .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "HR", "MANAGER") // Quản lý người dùng
+
+                        .requestMatchers("/api/video/upload").hasRole("ADMIN") // Phân quyền cho video upload
+
+                        .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtTokenProvider.jwtDecoder()))  // Sử dụng JwtDecoder để giải mã token
@@ -66,5 +79,16 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers(new AntPathRequestMatcher("/ws/**"));
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthorityPrefix(""); // KHÔNG thêm "ROLE_", vì đã có sẵn trong DB/token
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("roles"); // Đọc từ claim "roles"
+
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
     }
 }

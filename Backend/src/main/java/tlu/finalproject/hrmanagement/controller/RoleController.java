@@ -5,8 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tlu.finalproject.hrmanagement.dto.PositionDTO;
-import tlu.finalproject.hrmanagement.service.PositionService;
+import tlu.finalproject.hrmanagement.dto.RoleDTO;
 import tlu.finalproject.hrmanagement.service.RoleService;
 
 @RestController
@@ -16,27 +15,27 @@ public class RoleController {
     private final RoleService roleService;
 
     @GetMapping
-    public ResponseEntity<?> getAllPositions() {
+    public ResponseEntity<?> getAllRoles() {
         return ResponseEntity.ok(roleService.getAllRole());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPositionById(@PathVariable Long id) {
+    public ResponseEntity<?> getRoleById(@PathVariable Long id) {
         return ResponseEntity.ok(roleService.getRoleById(id));
     }
 
     @PostMapping
-    public ResponseEntity<?> createPosition(@RequestBody PositionDTO userDTO) {
-        return new ResponseEntity<>(roleService.createRole(userDTO), HttpStatus.CREATED);
+    public ResponseEntity<?> createRole(@RequestBody RoleDTO roleDTO) {
+        return new ResponseEntity<>(roleService.createRole(roleDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePosition(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
-        return ResponseEntity.ok(roleService.updateRole(id, positionDTO));
+    public ResponseEntity<?> updateRole(@PathVariable Long id, @RequestBody RoleDTO RoleDTO) {
+        return ResponseEntity.ok(roleService.updateRole(id, RoleDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePosition(@PathVariable Long id) {
+    public ResponseEntity<?> deleteRole(@PathVariable Long id) {
         return ResponseEntity.ok(roleService.deleteRole(id));
     }
 }
