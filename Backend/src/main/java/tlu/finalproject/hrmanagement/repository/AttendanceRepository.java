@@ -35,4 +35,35 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<AttendanceDTO> findAttendancesByUserAndDateRange(@Param("userId") Long userId, @Param("start") LocalDate start, @Param("end") LocalDate end);
 
 
+    /**
+     * Tìm tất cả các bản ghi chấm công của nhân viên trong một tháng cụ thể
+     * @param userId ID của nhân viên
+     * @param monthStr Chuỗi tháng theo định dạng "yyyy-MM"
+     * @return Danh sách các bản ghi chấm công
+     */
+    @Query("""
+            SELECT a FROM Attendance a 
+            WHERE a.user.userId = :userId 
+            AND SUBSTRING(CAST(a.date AS string), 1, 7) = :monthStr
+        """)
+    List<Attendance> findByUser_UserIdAndMonthString(@Param("userId") Long userId, @Param("monthStr") String monthStr);
+
+    /**
+     * Phương thức thay thế cho findByUser_UserIdAndMonth
+     * Tìm tất cả các bản ghi chấm công của nhân viên trong một tháng cụ thể
+     * @param userId ID của nhân viên
+     * @param yearMonth Năm và tháng, ví dụ: 2025-05
+     * @return Danh sách các bản ghi chấm công
+     */
+    @Query("""
+            SELECT a FROM Attendance a
+            WHERE a.user.userId = :userId
+            AND YEAR(a.date) = :year AND MONTH(a.date) = :month
+        """)
+    List<Attendance> findByUserIdAndYearAndMonth(
+            @Param("userId") Long userId,
+            @Param("year") int year,
+            @Param("month") int month);
+
+    List<Attendance> findByUserUserIdAndDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 }
