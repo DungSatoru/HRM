@@ -10,7 +10,7 @@ export const getSalarySlipsByMonth = async (month) => {
         });
 
         if (response.status === 200) {
-            return response.data;  // Trả về danh sách phiếu lương
+            return response.data.data;  // Trả về danh sách phiếu lương
         } else {
             throw new Error(response.data.message || 'Không thể lấy danh sách phiếu lương');
         }
@@ -31,7 +31,7 @@ export const getSalarySlipByEmployeeIdAndMonth = async (userId, month) => {
         });
 
         if (response.status === 200) {
-            return response.data;  // Trả về phiếu lương của nhân viên
+            return response.data.data;  // Trả về phiếu lương của nhân viên
         } else {
             throw new Error(response.data.message || 'Không thể lấy phiếu lương của nhân viên');
         }
@@ -59,7 +59,7 @@ export const calculateSalary = async (userId, month) => {
 
         if (response.status === 200) {
             toast.success('Tính toán lương thành công!');
-            return response.data;  // Trả về dữ liệu thành công từ backend
+            return response.data.data;  // Trả về dữ liệu thành công từ backend
         } else {
             throw new Error(response.data.message || 'Không thể tính toán lương');
         }

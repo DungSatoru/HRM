@@ -8,7 +8,7 @@ export const getSalaryConfigList = async () => {
     if (response.status !== 200) {
       throw new Error('Không thể lấy danh sách cấu hình lương');
     }
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy danh sách cấu hình lương.');
     console.error('Lỗi khi lấy danh sách cấu hình lương:', error);
@@ -23,7 +23,7 @@ export const getSalaryConfigByUserId = async (userId) => {
     if (response.status !== 200) {
       throw new Error('Không thể lấy cấu hình lương');
     }
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy cấu hình lương.');
     console.error('Lỗi khi lấy cấu hình lương:', error);
@@ -39,7 +39,7 @@ export const createSalaryConfig = async (salaryConfigData) => {
       throw new Error('Không thể tạo cấu hình lương mới');
     }
     toast.success('Tạo cấu hình lương thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi tạo cấu hình lương.');
     console.error('Lỗi khi tạo cấu hình lương:', error);
@@ -56,7 +56,7 @@ export const updateSalaryConfig = async (id, updatedData) => {
       throw new Error('Không thể cập nhật cấu hình lương');
     }
     toast.success('Cập nhật cấu hình lương thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi cập nhật cấu hình lương.');
     console.error(`Lỗi khi cập nhật cấu hình lương ID: ${id}`, error);
@@ -72,7 +72,7 @@ export const deleteSalaryConfigByUserId = async (id) => {
       throw new Error('Không thể xóa cấu hình lương');
     }
     toast.success('Xóa cấu hình lương thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi xóa cấu hình lương.');
     console.error(`Lỗi khi xóa cấu hình lương ID: ${id}`, error);

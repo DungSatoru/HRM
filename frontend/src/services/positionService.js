@@ -8,7 +8,7 @@ export const getPositions = async () => {
     if (response.status !== 200) {
       throw new Error('Không thể lấy danh sách vị trí');
     }
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy danh sách vị trí.');
     console.error('Lỗi khi lấy danh sách vị trí:', error);
@@ -23,7 +23,7 @@ export const getPositionById = async (id) => {
       throw new Error('Không thể lấy vị trí theo ID');
     }
     toast.success('Lấy thông tin vị trí thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy vị trí.');
     console.error('Lỗi khi lấy vị trí theo ID:', error);
@@ -38,7 +38,7 @@ export const addPosition = async (positionData) => {
       throw new Error('Không thể thêm vị trí mới');
     }
     toast.success('Thêm vị trí thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi thêm vị trí.');
     console.error('Lỗi khi thêm vị trí:', error);
@@ -53,7 +53,7 @@ export const updatePosition = async (id, updatedData) => {
       throw new Error('Không thể cập nhật vị trí');
     }
     toast.success('Cập nhật vị trí thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi cập nhật vị trí.');
     console.error(`Lỗi khi cập nhật vị trí ID: ${id}`, error);

@@ -7,7 +7,7 @@ export const getRoles = async () => {
     if (response.status !== 200) {
       throw new Error('Không thể lấy danh sách vai trò');
     }
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy danh sách vai trò.');
     console.error('Lỗi khi lấy danh sách vai trò:', error);
@@ -22,7 +22,7 @@ export const getRoleById = async (id) => {
       throw new Error('Không thể lấy vai trò theo ID');
     }
     toast.success('Lấy thông tin vai trò thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy vai trò.');
     console.error('Lỗi khi lấy vai trò theo ID:', error);
@@ -37,7 +37,7 @@ export const addRole = async (roleData) => {
       throw new Error('Không thể thêm vai trò mới');
     }
     toast.success('Thêm vai trò thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi thêm vai trò.');
     console.error('Lỗi khi thêm vai trò:', error);
@@ -52,7 +52,7 @@ export const updateRole = async (id, updatedData) => {
       throw new Error('Không thể cập nhật vai trò');
     }
     toast.success('Cập nhật vai trò thành công!');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi cập nhật vai trò.');
     console.error(`Lỗi khi cập nhật vai trò ID: ${id}`, error);
