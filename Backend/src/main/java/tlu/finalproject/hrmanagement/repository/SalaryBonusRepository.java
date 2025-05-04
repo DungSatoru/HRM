@@ -12,4 +12,6 @@ public interface SalaryBonusRepository extends JpaRepository<SalaryBonus, Long> 
     List<SalaryBonus> findByUserUserId(Long userId);
 
     List<SalaryBonus> findByUser_UserIdAndBonusDateBetween(Long userId, LocalDate withDayOfMonth, LocalDate withDayOfMonth1);
+
+    List<SalaryBonus> findByUserUserIdAndBonusDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 }

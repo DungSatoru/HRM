@@ -3,6 +3,7 @@ package tlu.finalproject.hrmanagement.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tlu.finalproject.hrmanagement.dto.SalarySlipDetailDTO;
 import tlu.finalproject.hrmanagement.service.SalaryCalculationService;
 import tlu.finalproject.hrmanagement.service.SalarySlipService;
 
@@ -19,6 +20,14 @@ public class SalarySlipController {
     @GetMapping()
     public ResponseEntity<?> getSalarySlipsByMonth(@RequestParam String month) {
         return ResponseEntity.ok(salarySlipService.getAllSalarySlipsByMonth(month));
+    }
+
+    @GetMapping("/employee/{userId}")
+    public ResponseEntity<SalarySlipDetailDTO> getSalarySlipDetail(
+            @PathVariable Long userId,
+            @RequestParam String month) {
+        SalarySlipDetailDTO dto = salarySlipService.getSalarySlipDetail(userId, month);
+        return ResponseEntity.ok(dto);
     }
 
     /**

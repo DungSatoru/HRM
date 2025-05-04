@@ -17,4 +17,5 @@ public class SalaryConfigurationDTO {
     Double overtimeRate;
     Double bonusRate;
     Double otherAllowances;
+    Double insuranceBaseSalary;
 }
