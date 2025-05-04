@@ -11,9 +11,9 @@ public interface UserService {
 
     List<EmployeeDTO> getUsersByDepartmentId(Long id);
 
-    String createUser(EmployeeDTO employeeDTO);
+    EmployeeDTO createUser(EmployeeDTO employeeDTO);
 
-    String updateUser(Long id, EmployeeDTO employeeDTO);
+    EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO);
 
-    String deleteUser(Long id);
+    boolean deleteUser(Long id);
 }

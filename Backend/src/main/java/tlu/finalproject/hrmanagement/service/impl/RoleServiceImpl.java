@@ -3,7 +3,6 @@ package tlu.finalproject.hrmanagement.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import tlu.finalproject.hrmanagement.dto.PositionDTO;
 import tlu.finalproject.hrmanagement.dto.RoleDTO;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.Role;
@@ -39,36 +38,34 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public String createRole(PositionDTO positionDTO) {
+    public RoleDTO createRole(RoleDTO RoleDTO) {
         try {
-            Role role = modelMapper.map(positionDTO, Role.class);
-            roleRepository.save(role);
-            return "Tạo vai trò thành công!";
+            Role role = modelMapper.map(RoleDTO, Role.class);
+            return modelMapper.map(roleRepository.save(role), RoleDTO.class);
         } catch (Exception ex) {
             throw new ResourceNotFoundException("Tạo vai trò thất bại!");
         }
     }
 
     @Override
-    public String updateRole(Long id, PositionDTO positionDTO) {
+    public RoleDTO updateRole(Long id, RoleDTO RoleDTO) {
         try {
             Role role = roleRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò với ID: " + id));
-            modelMapper.map(positionDTO, role);
-            roleRepository.save(role);
-            return "Cập nhật vai trò thành công!";
+            modelMapper.map(RoleDTO, role);
+            return modelMapper.map(roleRepository.save(role), RoleDTO.class);
         } catch (Exception ex) {
             throw new ResourceNotFoundException("Cập nhật vai trò thất bại!");
         }
     }
 
     @Override
-    public String deleteRole(Long id) {
+    public boolean deleteRole(Long id) {
         try {
             Role role = roleRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò với ID: " + id));
             roleRepository.delete(role);
-            return "Xóa vai trò thành công!";
+            return true;
         } catch (Exception ex) {
             throw new ResourceNotFoundException("Xóa vai trò thất bại!");
         }

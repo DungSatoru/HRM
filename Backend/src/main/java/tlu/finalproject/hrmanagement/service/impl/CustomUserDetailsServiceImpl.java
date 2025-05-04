@@ -22,7 +22,8 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .authorities(user.getRole().getRoleName()) // phân quyền từ bảng Role
+                .authorities(user.getRole().getRoleName()) // ĐÃ CÓ "ROLE_" SẴN
+
                 .build();
     }
 }

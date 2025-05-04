@@ -12,4 +12,7 @@ public interface SalarySlipRepository extends JpaRepository<SalarySlip, Long> {
     List<SalarySlip> findByMonth(String monthStr);
 
     Optional<SalarySlip> findByUser_UserIdAndMonth(Long userId, String monthStr);
+
+    Optional<SalarySlip> findByUserUserIdAndMonth(Long userId, String month);
+
 }

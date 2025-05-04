@@ -2,20 +2,12 @@ package tlu.finalproject.hrmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tlu.finalproject.hrmanagement.dto.OvertimeRecordDTO;
 import tlu.finalproject.hrmanagement.exception.ResourceAlreadyExistsException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
-import tlu.finalproject.hrmanagement.model.OvertimeRecord;
-import tlu.finalproject.hrmanagement.model.SalaryBonus;
-import tlu.finalproject.hrmanagement.model.SalaryConfiguration;
-import tlu.finalproject.hrmanagement.model.SalaryDeduction;
-import tlu.finalproject.hrmanagement.model.SalarySlip;
-import tlu.finalproject.hrmanagement.model.User;
-import tlu.finalproject.hrmanagement.repository.OvertimeRecordRepository;
-import tlu.finalproject.hrmanagement.repository.SalaryBonusRepository;
-import tlu.finalproject.hrmanagement.repository.SalaryConfigurationRepository;
-import tlu.finalproject.hrmanagement.repository.SalaryDeductionRepository;
-import tlu.finalproject.hrmanagement.repository.SalarySlipRepository;
-import tlu.finalproject.hrmanagement.repository.UserRepository;
+import tlu.finalproject.hrmanagement.model.*;
+import tlu.finalproject.hrmanagement.projection.OvertimeRecordProjection;
+import tlu.finalproject.hrmanagement.repository.*;
 import tlu.finalproject.hrmanagement.service.SalaryCalculationService;
 
 import java.time.LocalDate;
@@ -27,97 +19,141 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class SalaryCalculationServiceImpl implements SalaryCalculationService {
+    private static final int STANDARD_WORKING_DAYS = 22;
+    private static final int WORKING_HOURS_PER_DAY = 8;
+    private static final double BHXH_RATE = 0.08;
+    private static final double BHYT_RATE = 0.015;
+    private static final double BHTN_RATE = 0.01;
+    private static final double PERSONAL_DEDUCTION = 11000000.0;
+    private static final double DEFAULT_OVERTIME_RATE = 1.5;
+
     private final SalaryDeductionRepository deductionRepository;
     private final UserRepository userRepository;
     private final SalaryConfigurationRepository salaryConfigurationRepository;
     private final SalaryBonusRepository salaryBonusRepository;
     private final SalarySlipRepository salarySlipRepository;
     private final OvertimeRecordRepository overtimeRecordRepository;
+    private final AttendanceRepository attendanceRepository;
 
     @Override
     public void calculateAndSaveSalarySlip(Long userId, LocalDate month) {
-        // Kiểm tra xem đã có phiếu lương cho tháng này chưa
-        String monthStr = month.toString().substring(0, 7); // Lấy định dạng yyyy-MM
-        Optional<SalarySlip> existingSlip = salarySlipRepository.findByUser_UserIdAndMonth(userId, monthStr);
+        String monthStr = formatMonthString(month);
+        validateSalarySlipNotExists(userId, monthStr);
 
-        if (existingSlip.isPresent()) {
-            throw new ResourceAlreadyExistsException("Phiếu lương cho nhân viên ID: " + userId + " tháng " + monthStr + " đã tồn tại!");
+        User user = findUserById(userId);
+        // Nếu trạng thái là INACTIVE thì không tính lương
+        if (user.getStatus() == Status.INACTIVE) {
+            return; // Dừng luôn, không tính lương nữa
         }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
-
-        SalaryConfiguration config = salaryConfigurationRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cấu hình lương cho nhân viên ID: " + userId));
+        SalaryConfiguration config = findSalaryConfigurationByUserId(userId);
 
         double basicSalary = config.getBasicSalary();
-        double base = config.getInsuranceBaseSalary() != null ? config.getInsuranceBaseSalary() : basicSalary;
+        double dailySalary = calculateDailySalary(basicSalary);
 
-        // Lấy phụ cấp khác từ cấu hình lương
-        double otherAllowances = config.getOtherAllowances() != null ? config.getOtherAllowances() : 0;
+        // Lấy số ngày làm việc thực tế
+        YearMonth yearMonth = YearMonth.from(month);
+        List<Attendance> attendances = getAttendanceRecords(userId, yearMonth);
+        int workingDays = countWorkingDays(attendances);
 
-        // Tính bảo hiểm
-        double bhxh = base * 0.08;
-        double bhyt = base * 0.015;
-        double bhtn = base * 0.01;
+        // Tính lương cơ bản thực tế dựa trên số ngày làm việc
+        double actualBasicSalary = dailySalary * workingDays;
 
-        double totalInsurance = bhxh + bhyt + bhtn;
+        // Tính các khoản bảo hiểm và khấu trừ
+        double insuranceBaseSalary = getInsuranceBaseSalary(config, basicSalary);
+        double otherAllowances = getOtherAllowances(config);
 
-        // Giảm trừ cá nhân cho thuế TNCN
-        double personalDeduction = 11000000;
-        double dependentDeduction = 0;
-
-        // Tính thu nhập chịu thuế (không bao gồm phụ cấp để đơn giản hóa)
-        double taxableIncome = basicSalary - totalInsurance - personalDeduction - dependentDeduction;
-        taxableIncome = Math.max(taxableIncome, 0);
+        // Tính và lưu các khoản khấu trừ
+        List<SalaryDeduction> deductions = calculateAndSaveInsuranceDeductions(user, insuranceBaseSalary, month);
+        double totalInsurance = calculateTotalInsurance(deductions);
 
         // Tính thuế TNCN
+        double taxableIncome = calculateTaxableIncome(actualBasicSalary, totalInsurance, PERSONAL_DEDUCTION);
         double personalIncomeTax = calculatePersonalIncomeTax(taxableIncome);
+        deductions.add(createAndSaveDeduction(user, "Thuế TNCN", personalIncomeTax, month));
 
-        // Lưu các khoản khấu trừ bảo hiểm và thuế
-        List<SalaryDeduction> newDeductions = new ArrayList<>();
-        newDeductions.add(createDeduction(user, "BHXH", bhxh, month));
-        newDeductions.add(createDeduction(user, "BHYT", bhyt, month));
-        newDeductions.add(createDeduction(user, "BHTN", bhtn, month));
-        newDeductions.add(createDeduction(user, "Thuế TNCN", personalIncomeTax, month));
-        deductionRepository.saveAll(newDeductions);
-
-        // Lấy tất cả các khoản thưởng trong tháng
-        List<SalaryBonus> bonuses = salaryBonusRepository.findByUser_UserIdAndBonusDateBetween(
-                userId,
-                month.withDayOfMonth(1),
-                month.withDayOfMonth(month.lengthOfMonth())
-        );
-        double totalBonus = bonuses.stream().mapToDouble(SalaryBonus::getAmount).sum();
-
-        // Tính overtime salary
+        // Tính tổng khấu trừ và thưởng
+        double totalBonus = calculateTotalBonus(userId, month);
         double overtimeSalary = calculateOvertimeSalary(userId, month, config);
+        double totalDeductions = calculateTotalDeductions(userId, month);
 
-        // LẤY TẤT CẢ CÁC KHOẢN KHẤU TRỪ của nhân viên trong tháng
-        List<SalaryDeduction> allDeductions = deductionRepository.findByUser_UserIdAndDeductionDateBetween(
-                userId,
-                month.withDayOfMonth(1),
-                month.withDayOfMonth(month.lengthOfMonth())
-        );
-        double totalDeductions = allDeductions.stream().mapToDouble(SalaryDeduction::getAmount).sum();
+        // Tính lương tổng
+        double totalSalary = calculateTotalSalary(actualBasicSalary, totalBonus, overtimeSalary, otherAllowances, totalDeductions);
 
-        // Gọi hàm tính lương tổng (thêm phụ cấp khác vào công thức)
-        double totalSalary = calculateTotalSalary(basicSalary, totalBonus, overtimeSalary, otherAllowances, totalDeductions);
+        // Lưu phiếu lương
+        saveSalarySlip(user, month, basicSalary, actualBasicSalary, otherAllowances, totalBonus,
+                totalDeductions, overtimeSalary, totalSalary, monthStr);
+    }
 
-        // Lưu Salary Slip
-        SalarySlip salarySlip = SalarySlip.builder()
-                .user(user)
-                .paymentDate(month.withDayOfMonth(month.lengthOfMonth()))
-                .basicSalary(basicSalary)
-                .otherAllowances(otherAllowances)
-                .bonus(totalBonus)
-                .deductions(totalDeductions)
-                .overTimePay(overtimeSalary)
-                .totalSalary(totalSalary)
-                .month(month.toString().substring(0, 7))
-                .build();
+    private String formatMonthString(LocalDate month) {
+        return month.toString().substring(0, 7); // Format yyyy-MM
+    }
 
-        salarySlipRepository.save(salarySlip);
+    private void validateSalarySlipNotExists(Long userId, String monthStr) {
+        Optional<SalarySlip> existingSlip = salarySlipRepository.findByUser_UserIdAndMonth(userId, monthStr);
+        if (existingSlip.isPresent()) {
+            throw new ResourceAlreadyExistsException(
+                    "Phiếu lương cho nhân viên ID: " + userId + " tháng " + monthStr + " đã tồn tại!");
+        }
+    }
+
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+    }
+
+    private SalaryConfiguration findSalaryConfigurationByUserId(Long userId) {
+        return salaryConfigurationRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cấu hình lương cho nhân viên ID: " + userId));
+    }
+
+    private double calculateDailySalary(double basicSalary) {
+        return basicSalary / STANDARD_WORKING_DAYS;
+    }
+
+    private List<Attendance> getAttendanceRecords(Long userId, YearMonth yearMonth) {
+        return attendanceRepository.findByUserIdAndYearAndMonth(userId, yearMonth.getYear(), yearMonth.getMonthValue());
+    }
+
+    private int countWorkingDays(List<Attendance> attendances) {
+        return (int) attendances.stream()
+                .filter(att -> att.getCheckIn() != null && att.getCheckOut() != null)
+                .count();
+    }
+
+    private double getInsuranceBaseSalary(SalaryConfiguration config, double basicSalary) {
+        return config.getInsuranceBaseSalary() != null ? config.getInsuranceBaseSalary() : basicSalary;
+    }
+
+    private double getOtherAllowances(SalaryConfiguration config) {
+        return config.getOtherAllowances() != null ? config.getOtherAllowances() : 0;
+    }
+
+    private List<SalaryDeduction> calculateAndSaveInsuranceDeductions(User user, double insuranceBaseSalary, LocalDate month) {
+        double bhxh = insuranceBaseSalary * BHXH_RATE;
+        double bhyt = insuranceBaseSalary * BHYT_RATE;
+        double bhtn = insuranceBaseSalary * BHTN_RATE;
+
+        List<SalaryDeduction> deductions = new ArrayList<>();
+        deductions.add(createDeduction(user, "BHXH", bhxh, month));
+        deductions.add(createDeduction(user, "BHYT", bhyt, month));
+        deductions.add(createDeduction(user, "BHTN", bhtn, month));
+        deductionRepository.saveAll(deductions);
+
+        return deductions;
+    }
+
+    private double calculateTotalInsurance(List<SalaryDeduction> insuranceDeductions) {
+        return insuranceDeductions.stream().mapToDouble(SalaryDeduction::getAmount).sum();
+    }
+
+    private double calculateTaxableIncome(double actualBasicSalary, double totalInsurance, double personalDeduction) {
+        double taxableIncome = actualBasicSalary - totalInsurance - personalDeduction;
+        return Math.max(taxableIncome, 0);
+    }
+
+    private SalaryDeduction createAndSaveDeduction(User user, String type, double amount, LocalDate month) {
+        SalaryDeduction deduction = createDeduction(user, type, amount, month);
+        return deductionRepository.save(deduction);
     }
 
     private SalaryDeduction createDeduction(User user, String type, double amount, LocalDate month) {
@@ -127,6 +163,48 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
                 .amount(amount)
                 .deductionDate(month.withDayOfMonth(1))
                 .build();
+    }
+
+    private double calculateTotalBonus(Long userId, LocalDate month) {
+        List<SalaryBonus> bonuses = salaryBonusRepository.findByUser_UserIdAndBonusDateBetween(
+                userId,
+                month.withDayOfMonth(1),
+                month.withDayOfMonth(month.lengthOfMonth())
+        );
+        return bonuses.stream().mapToDouble(SalaryBonus::getAmount).sum();
+    }
+
+    private double calculateTotalDeductions(Long userId, LocalDate month) {
+        List<SalaryDeduction> allDeductions = deductionRepository.findByUser_UserIdAndDeductionDateBetween(
+                userId,
+                month.withDayOfMonth(1),
+                month.withDayOfMonth(month.lengthOfMonth())
+        );
+        return allDeductions.stream().mapToDouble(SalaryDeduction::getAmount).sum();
+    }
+
+    private double calculateTotalSalary(double basicSalary, double bonus, double overtimeSalary,
+                                        double otherAllowances, double totalDeductions) {
+        return basicSalary + bonus + overtimeSalary + otherAllowances - totalDeductions;
+    }
+
+    private void saveSalarySlip(User user, LocalDate month, double basicSalary, double actualBasicSalary,
+                                double otherAllowances, double totalBonus, double totalDeductions,
+                                double overtimeSalary, double totalSalary, String monthStr) {
+        SalarySlip salarySlip = SalarySlip.builder()
+                .user(user)
+                .paymentDate(month.withDayOfMonth(month.lengthOfMonth()))
+                .basicSalary(basicSalary)
+                .actualBasicSalary(actualBasicSalary)
+                .otherAllowances(otherAllowances)
+                .bonus(totalBonus)
+                .deductions(totalDeductions)
+                .overTimePay(overtimeSalary)
+                .totalSalary(totalSalary)
+                .month(monthStr)
+                .build();
+
+        salarySlipRepository.save(salarySlip);
     }
 
     private double calculatePersonalIncomeTax(double income) {
@@ -140,45 +218,68 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         return 18150000 + (income - 80000000) * 0.35;
     }
 
-    private double calculateTotalSalary(double basicSalary, double bonus, double overtimeSalary, double otherAllowances, double totalDeductions) {
-        return basicSalary + bonus + overtimeSalary + otherAllowances - totalDeductions;
-    }
-
     private double calculateOvertimeSalary(Long userId, LocalDate month, SalaryConfiguration config) {
-        // Lấy năm và tháng
         YearMonth yearMonth = YearMonth.from(month);
         String monthYearString = yearMonth.toString();
 
-        // Tìm tất cả bản ghi làm thêm giờ cho nhân viên trong tháng này
-        List<OvertimeRecord> overtimeRecords = overtimeRecordRepository.findByUser_UserIdAndMonth(userId, monthYearString);
-
-        // Nếu đã có sẵn trường overtime_pay trong bảng
+        List<OvertimeRecordProjection> overtimeRecords = overtimeRecordRepository.findByUserIdAndMonth(userId, monthYearString);
         double totalOvertimePay = 0;
 
-        for (OvertimeRecord record : overtimeRecords) {
-            if (record.getOvertimePay() != null) {
-                // Nếu đã có giá trị lưu sẵn, sử dụng giá trị đó
-                totalOvertimePay += record.getOvertimePay();
+        for (OvertimeRecordProjection projection : overtimeRecords) {
+            OvertimeRecordDTO recordDTO = mapProjectionToDTO(projection);
+
+            if (recordDTO.getOvertimePay() != null) {
+                totalOvertimePay += recordDTO.getOvertimePay();
             } else {
-                // Nếu chưa có, tính toán dựa trên số giờ và tỷ lệ làm thêm
-                double hourlyRate = calculateHourlyRate(config.getBasicSalary());
-                double overtimeRate = config.getOvertimeRate() != null ? config.getOvertimeRate() : 1.5;
-
-                double overtimePay = record.getOvertimeHour() * hourlyRate * overtimeRate;
-
-                // Cập nhật giá trị overtime_pay trong record
-                record.setOvertimePay(overtimePay);
-                overtimeRecordRepository.save(record);
-
-                totalOvertimePay += overtimePay;
+                double pay = calculateAndSaveOvertimePay(userId, config, recordDTO);
+                totalOvertimePay += pay;
             }
         }
 
         return totalOvertimePay;
     }
 
+    private OvertimeRecordDTO mapProjectionToDTO(OvertimeRecordProjection projection) {
+        return OvertimeRecordDTO.builder()
+                .overtimeId(projection.getOvertimeId())
+                .userId(projection.getUserId())
+                .overtimeStart(projection.getOvertimeStart())
+                .overtimeEnd(projection.getOvertimeEnd())
+                .overtimeHour(projection.getOvertimeHour())
+                .overtimePay(projection.getOvertimePay())
+                .overtimeDate(projection.getOvertimeDate())
+                .month(projection.getMonth())
+                .build();
+    }
+
+    private double calculateAndSaveOvertimePay(Long userId, SalaryConfiguration config, OvertimeRecordDTO recordDTO) {
+        double hourlyRate = calculateHourlyRate(config.getBasicSalary());
+        double overtimeRate = config.getOvertimeRate() != null ? config.getOvertimeRate() : DEFAULT_OVERTIME_RATE;
+        double calculatedPay = recordDTO.getOvertimeHour() * hourlyRate * overtimeRate;
+
+        // Lưu vào database
+        saveOvertimeRecord(userId, recordDTO, calculatedPay);
+
+        return calculatedPay;
+    }
+
+    private void saveOvertimeRecord(Long userId, OvertimeRecordDTO recordDTO, double calculatedPay) {
+        User user = User.builder().userId(userId).build();
+
+        OvertimeRecord overtimeRecord = OvertimeRecord.builder()
+                .overtimeId(recordDTO.getOvertimeId())
+                .user(user)
+                .overtimeStart(recordDTO.getOvertimeStart())
+                .overtimeEnd(recordDTO.getOvertimeEnd())
+                .overtimeHour(recordDTO.getOvertimeHour())
+                .overtimePay(calculatedPay)
+                .overtimeDate(recordDTO.getOvertimeDate())
+                .build();
+
+        overtimeRecordRepository.save(overtimeRecord);
+    }
+
     private double calculateHourlyRate(double basicSalary) {
-        // Giả sử 22 ngày làm việc trong tháng, mỗi ngày 8 giờ
-        return basicSalary / (22 * 8);
+        return basicSalary / (STANDARD_WORKING_DAYS * WORKING_HOURS_PER_DAY);
     }
 }

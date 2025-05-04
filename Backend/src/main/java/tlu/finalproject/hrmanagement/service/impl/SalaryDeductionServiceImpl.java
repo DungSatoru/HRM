@@ -52,10 +52,10 @@ public class SalaryDeductionServiceImpl implements SalaryDeductionService {
     }
 
     @Override
-    public String delete(Long id) {
+    public boolean delete(Long id) {
         SalaryDeduction existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản khấu trừ có ID: " + id));
         repository.delete(existing);
-        return "Xoá khoản khấu trừ thành công.";
+        return true;
     }
 }

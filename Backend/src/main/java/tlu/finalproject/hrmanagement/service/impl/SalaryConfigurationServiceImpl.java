@@ -37,7 +37,7 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
     }
 
     @Override
-    public String createSalaryConfiguration(SalaryConfigurationDTO dto) {
+    public SalaryConfigurationDTO createSalaryConfiguration(SalaryConfigurationDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại với ID: " + dto.getUserId()));
 
@@ -50,7 +50,7 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
     }
 
     @Override
-    public String updateSalaryConfiguration(Long userId, SalaryConfigurationDTO dto) {
+    public SalaryConfigurationDTO updateSalaryConfiguration(Long userId, SalaryConfigurationDTO dto) {
         SalaryConfiguration salaryConfiguration = salaryConfigurationRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cấu hình lương không tồn tại cho người dùng với ID: " + userId));
 
@@ -65,7 +65,7 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
     }
 
     @Override
-    public String deleteByUserId(Long userId) {
+    public boolean deleteByUserId(Long userId) {
         SalaryConfiguration salaryConfiguration = salaryConfigurationRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cấu hình lương không tồn tại cho người dùng với ID: " + userId));
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtTokenProvider {
@@ -24,7 +25,7 @@ public class JwtTokenProvider {
     // Phương thức tạo token
     public String generateToken(String username, String role) {
         Claims claims = Jwts.claims().setSubject(username);
-        claims.put("role", role); // thêm role vào claims
+        claims.put("roles", List.of(role));
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validityInMilliseconds);

@@ -7,9 +7,9 @@ import java.util.List;
 public interface SalaryConfigurationService {
     List<SalaryConfigurationDTO> getAllSalaryConfig();
     SalaryConfigurationDTO getByUserId(Long userId);
-    String createSalaryConfiguration(SalaryConfigurationDTO dto);
-    String updateSalaryConfiguration(Long userId, SalaryConfigurationDTO dto);
-    String deleteByUserId(Long userId);
+    SalaryConfigurationDTO createSalaryConfiguration(SalaryConfigurationDTO dto);
+    SalaryConfigurationDTO updateSalaryConfiguration(Long userId, SalaryConfigurationDTO dto);
+    boolean deleteByUserId(Long userId);
 }
 
 

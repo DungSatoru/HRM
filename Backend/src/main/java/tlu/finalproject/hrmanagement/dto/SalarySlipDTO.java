@@ -15,6 +15,7 @@ public class SalarySlipDTO {
     Long salarySlipId;
     Long userId;
     Double basicSalary;
+    Double actualBasicSalary;
     Double otherAllowances;
     Double overTimePay;
     Double bonus;

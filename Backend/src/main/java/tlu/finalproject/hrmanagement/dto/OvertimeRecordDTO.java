@@ -12,12 +12,13 @@ import java.time.LocalTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OvertimeDTO {
+public class OvertimeRecordDTO {
     Long overtimeId;
     Long userId;
     LocalTime overtimeStart;
     LocalTime overtimeEnd;
-    Double overtimeHours;
+    Double overtimeHour;
     Double overtimePay;
     LocalDate overtimeDate;
+    String month;
 }

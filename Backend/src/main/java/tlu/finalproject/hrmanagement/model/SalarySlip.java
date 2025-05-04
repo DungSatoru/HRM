@@ -25,8 +25,13 @@ public class SalarySlip {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
+    // Lương cơ bản theo hợp đồng
     @Column(name = "basic_salary")
     Double basicSalary;
+
+    // Lương cơ bản thực tế (dựa trên số ngày làm việc)
+    @Column(name = "actual_basic_salary")
+    Double actualBasicSalary;
 
     @Column(name = "other_allowances")
     Double otherAllowances;

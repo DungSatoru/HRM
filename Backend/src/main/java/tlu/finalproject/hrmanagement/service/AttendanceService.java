@@ -21,9 +21,9 @@ public interface AttendanceService {
 
     AttendanceDTO getAttendanceById(Long id);
 
-    String updateAttendance(Long id, AttendanceDTO attendanceDTO);
+    AttendanceDTO updateAttendance(Long id, AttendanceDTO attendanceDTO);
 
-    String createAttendance(AttendanceDTO attendanceDTO);
+    AttendanceDTO createAttendance(AttendanceDTO attendanceDTO);
 
-    String deleteAttendance(Long id);
+    boolean deleteAttendance(Long id);
 }

@@ -1,6 +1,6 @@
 package tlu.finalproject.hrmanagement.service;
 
-import tlu.finalproject.hrmanagement.dto.PositionDTO;
+import tlu.finalproject.hrmanagement.dto.RoleDTO;
 import tlu.finalproject.hrmanagement.dto.RoleDTO;
 
 import java.util.List;
@@ -10,9 +10,9 @@ public interface RoleService {
 
     RoleDTO getRoleById(Long id);
 
-    String createRole(PositionDTO positionDTO);
+    RoleDTO createRole(RoleDTO RoleDTO);
 
-    String updateRole(Long id, PositionDTO positionDTO);
+    RoleDTO updateRole(Long id, RoleDTO RoleDTO);
 
-    String deleteRole(Long id);
+    boolean deleteRole(Long id);
 }

@@ -9,9 +9,9 @@ public interface DepartmentService {
 
     DepartmentDTO getDepartmentById(Long id);
 
-    String createDepartment(DepartmentDTO departmentDTO);
+    DepartmentDTO createDepartment(DepartmentDTO departmentDTO);
 
-    String updateDepartment(Long id, DepartmentDTO departmentDTO);
+    DepartmentDTO updateDepartment(Long id, DepartmentDTO departmentDTO);
 
-    String deleteDepartment(Long id);
+    boolean deleteDepartment(Long id);
 }
