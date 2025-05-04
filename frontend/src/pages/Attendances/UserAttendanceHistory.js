@@ -180,8 +180,9 @@ const UserAttendanceHistory = () => {
   ];
 
   return (
-    <div className="page-container">
-      <Title level={3}>Lịch sử chấm công nhân viên</Title>
+    <div className="page-container user-attendances-container">
+      <h2 className="page-title">Lịch sử chấm công nhân viên</h2>
+      <Title level={3}></Title>
 
       <Row gutter={16} style={{ overflow: 'hidden' }}>
         {/* Danh sách nhân viên */}

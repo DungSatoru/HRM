@@ -59,19 +59,15 @@ const Dashboard = () => {
         }, {});
 
         setDepartmentDistributionData(
-          Object.entries(departmentCounts).map(([id, count]) => ({ departmentId: id, count }))
+          Object.entries(departmentCounts).map(([id, count]) => ({ departmentId: id, count })),
         );
 
-        setStatusDistributionData(
-          Object.entries(statusCounts).map(([status, count]) => ({ status, count }))
-        );
+        setStatusDistributionData(Object.entries(statusCounts).map(([status, count]) => ({ status, count })));
 
-        setHireDateDistributionData(
-          Object.entries(hireDateCounts).map(([hireDate, count]) => ({ hireDate, count }))
-        );
+        setHireDateDistributionData(Object.entries(hireDateCounts).map(([hireDate, count]) => ({ hireDate, count })));
 
         setPositionDistributionData(
-          Object.entries(positionCounts).map(([positionId, count]) => ({ positionId, count }))
+          Object.entries(positionCounts).map(([positionId, count]) => ({ positionId, count })),
         );
       })
       .catch(console.error);
@@ -80,13 +76,9 @@ const Dashboard = () => {
     getPositions().then(setPositionData).catch(console.error);
   }, []);
 
-  const departmentMap = Object.fromEntries(
-    departmentData.map((dep) => [dep.departmentId, dep.departmentName])
-  );
+  const departmentMap = Object.fromEntries(departmentData.map((dep) => [dep.departmentId, dep.departmentName]));
 
-  const positionMap = Object.fromEntries(
-    positionData.map((pos) => [pos.positionId, pos.positionName])
-  );
+  const positionMap = Object.fromEntries(positionData.map((pos) => [pos.positionId, pos.positionName]));
 
   const departmentWithNames = departmentDistributionData.map((d) => ({
     ...d,
@@ -99,20 +91,13 @@ const Dashboard = () => {
   }));
 
   return (
-    <div className="dashboard-container space-y-8">
+    <div className="page-container dashboard-container">
+      <h2 className="page-title">Tổng quan</h2>
       <section className="chart-container">
         <h2 className="chart-title">Phân bố nhân viên theo phòng ban</h2>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
-            <Pie
-              data={departmentWithNames}
-              dataKey="count"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              label
-            >
+            <Pie data={departmentWithNames} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
               {departmentWithNames.map((entry, index) => (
                 <Cell key={index} fill={COLORS[index % COLORS.length]} />
               ))}

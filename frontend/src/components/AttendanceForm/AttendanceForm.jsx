@@ -25,8 +25,9 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
       try {
         if (mode === 'edit' && attendanceId) {
           const data = await getAttendanceById(attendanceId);
+          console.log('Dữ liệu lấy được: ', data); // Debug log
           form.setFieldsValue({
-            date: moment(data.date),
+            date: data.date ? moment(data.date) : null,
             checkIn: data.checkIn ? moment(data.checkIn, 'HH:mm') : null,
             checkOut: data.checkOut ? moment(data.checkOut, 'HH:mm') : null,
             note: data.note || '',
@@ -96,7 +97,7 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
   return (
     <Modal
       title={mode === 'create' ? 'Tạo mới chấm công' : 'Chỉnh sửa chấm công'}
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       footer={null}
       width={800}
