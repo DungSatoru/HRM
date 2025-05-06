@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -62,4 +63,27 @@ public class User {
     @Column(nullable = false, updatable = false, name = "created_at")
     private Date createdAt = new Date();
 
+    @Column(name = "gender", nullable = true)
+    Boolean gender;
+
+    @Column(name = "date_of_birth", nullable = true)
+    Date dateOfBirth;
+
+    @Column(name = "address", length = 255)
+    String address;
+
+    @Column(name = "profile_image_url", length = 255)
+    String profileImageUrl;
+
+    @Column(name = "emergency_contact_name", length = 100)
+    String emergencyContactName;
+
+    @Column(name = "emergency_contact_phone", length = 15)
+    String emergencyContactPhone;
+
+    @Column(name = "contract_type", length = 50)
+    String contractType;
+
+    @Column(name = "education_level", length = 100)
+    String educationLevel;
 }

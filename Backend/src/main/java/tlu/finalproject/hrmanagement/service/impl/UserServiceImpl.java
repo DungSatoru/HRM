@@ -28,8 +28,7 @@ public class UserServiceImpl implements UserService {
     private final PositionRepository positionRepository;
     private final ModelMapper modelMapper;
     private final SalaryConfigurationService salaryConfigurationService;
-    private final SalaryConfigurationRepository salaryConfigurationRepository;
-    private final OvertimeRecordRepository overtimeRecordRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -99,16 +98,22 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO) {
+        // Lấy user hiện tại
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + id));
 
-        if (employeeDTO.getUsername() != null) existingUser.setUsername(employeeDTO.getUsername());
-        if (employeeDTO.getEmail() != null) existingUser.setEmail(employeeDTO.getEmail());
-        if (employeeDTO.getPhone() != null) existingUser.setPhone(employeeDTO.getPhone());
-        if (employeeDTO.getFullName() != null) existingUser.setFullName(employeeDTO.getFullName());
-        if (employeeDTO.getIdentity() != null) existingUser.setIdentity(employeeDTO.getIdentity());
-        if (employeeDTO.getStatus() != null) existingUser.setStatus(employeeDTO.getStatus());
-        if (employeeDTO.getHireDate() != null) existingUser.setHireDate(employeeDTO.getHireDate());
+        // Ánh xạ các trường từ EmployeeDTO vào User thủ công
+        existingUser.setUsername(employeeDTO.getUsername());
+        existingUser.setFullName(employeeDTO.getFullName());
+        existingUser.setIdentity(employeeDTO.getIdentity());
+        existingUser.setEmail(employeeDTO.getEmail());
+        existingUser.setPhone(employeeDTO.getPhone());
+
+        if (employeeDTO.getRoleId() != null) {
+            Role role = roleRepository.findById(employeeDTO.getRoleId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò với ID: " + employeeDTO.getRoleId()));
+            existingUser.setRole(role);
+        }
 
         if (employeeDTO.getDepartmentId() != null) {
             Department department = departmentRepository.findById(employeeDTO.getDepartmentId())
@@ -122,9 +127,25 @@ public class UserServiceImpl implements UserService {
             existingUser.setPosition(position);
         }
 
+        // Ánh xạ các trường khác
+        existingUser.setStatus(employeeDTO.getStatus());
+        existingUser.setHireDate(employeeDTO.getHireDate());
+        existingUser.setGender(employeeDTO.getGender());
+        existingUser.setDateOfBirth(employeeDTO.getDateOfBirth());
+        existingUser.setAddress(employeeDTO.getAddress());
+        existingUser.setProfileImageUrl(employeeDTO.getProfileImageUrl());
+        existingUser.setEmergencyContactName(employeeDTO.getEmergencyContactName());
+        existingUser.setEmergencyContactPhone(employeeDTO.getEmergencyContactPhone());
+        existingUser.setContractType(employeeDTO.getContractType());
+        existingUser.setEducationLevel(employeeDTO.getEducationLevel());
+
+        // Cập nhật đối tượng User
         User saved = userRepository.save(existingUser);
+
+        // Trả về DTO
         return modelMapper.map(saved, EmployeeDTO.class);
     }
+
 
     @Override
     public boolean deleteUser(Long id) {
