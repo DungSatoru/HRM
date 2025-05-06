@@ -44,9 +44,9 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
         SalaryConfiguration salaryConfiguration = modelMapper.map(dto, SalaryConfiguration.class);
         salaryConfiguration.setUser(user);
 
-        salaryConfigurationRepository.save(salaryConfiguration);
+        SalaryConfiguration saved = salaryConfigurationRepository.save(salaryConfiguration);
 
-        return "Cấu hình lương đã được tạo mới hoặc cập nhật thành công!";
+        return modelMapper.map(saved, SalaryConfigurationDTO.class);
     }
 
     @Override
@@ -59,9 +59,9 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
         salaryConfiguration.setOtherAllowances(dto.getOtherAllowances());
         salaryConfiguration.setOvertimeRate(dto.getOvertimeRate());
 
-        salaryConfigurationRepository.save(salaryConfiguration);
+        SalaryConfiguration saved = salaryConfigurationRepository.save(salaryConfiguration);
 
-        return "Cấu hình lương của người dùng đã được cập nhật thành công!";
+        return modelMapper.map(saved, SalaryConfigurationDTO.class);
     }
 
     @Override
@@ -71,6 +71,6 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
 
         salaryConfigurationRepository.delete(salaryConfiguration);
 
-        return "Cấu hình lương của người dùng đã được xóa thành công!";
+        return true;
     }
 }

@@ -21,6 +21,7 @@ public class SalarySlipServiceImpl implements SalarySlipService {
     private final SalaryBonusRepository salaryBonusRepository;
     private final SalaryDeductionRepository salaryDeductionRepository;
     private final AttendanceRepository attendanceRepository;
+    private final OvertimeRecordRepository overtimeRecordRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -46,6 +47,13 @@ public class SalarySlipServiceImpl implements SalarySlipService {
         List<SalaryDeduction> deductions = salaryDeductionRepository.findByUserUserIdAndDeductionDateBetween(userId, startDate, endDate);
         List<Attendance> attendances = attendanceRepository.findByUserUserIdAndDateBetween(userId, startDate, endDate);
 
+        Object[] result1 = attendanceRepository.countAttendancesByUserAndDateRange(userId, startDate, endDate);
+        Integer totalWorkingDays =  ((Long) result1[1]).intValue();
+
+        Object[] result2 = overtimeRecordRepository.getTotalOvertimeByUserIdNative(userId);
+        Double totalOTHours = (Double) result2[1];  // Tổng giờ làm thêm
+
+
         // Map DTO
         EmployeeDTO employeeDTO = modelMapper.map(salarySlip.getUser(), EmployeeDTO.class);
         SalarySlipDTO slipDTO = modelMapper.map(salarySlip, SalarySlipDTO.class);
@@ -53,8 +61,6 @@ public class SalarySlipServiceImpl implements SalarySlipService {
                 .map(b -> modelMapper.map(b, SalaryBonusDTO.class)).toList();
         List<SalaryDeductionDTO> deductionDTOs = deductions.stream()
                 .map(d -> modelMapper.map(d, SalaryDeductionDTO.class)).toList();
-        List<AttendanceDTO> attendanceDTOs = attendances.stream()
-                .map(a -> modelMapper.map(a, AttendanceDTO.class)).toList();
 
 
         return SalarySlipDetailDTO.builder()
@@ -62,7 +68,8 @@ public class SalarySlipServiceImpl implements SalarySlipService {
                 .salarySlip(slipDTO)
                 .bonusDetails(bonusDTOs)
                 .deductionDetails(deductionDTOs)
-                .attendanceSummary(attendanceDTOs)
+                .attendanceSummary(totalWorkingDays)
+                .totalOvertimeHour(totalOTHours)
                 .build();
     }
 }

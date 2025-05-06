@@ -66,4 +66,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
             @Param("month") int month);
 
     List<Attendance> findByUserUserIdAndDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
+    @Query("SELECT a.user.userId, COUNT(a.date) FROM Attendance a WHERE a.user.userId = :userId AND a.date BETWEEN :startDate AND :endDate GROUP BY a.user.userId")
+    Object[] countAttendancesByUserAndDateRange(@Param("userId") Long userId,
+                                                @Param("startDate") LocalDate startDate,
+                                                @Param("endDate") LocalDate endDate);
 }
