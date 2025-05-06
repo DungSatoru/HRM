@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .addFilterBefore(corsFilter, CorsFilter.class)  // Thêm CORS filter
                 .authorizeRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
+                        .requestMatchers(HttpMethod.GET, "uploads/**").permitAll()
                         .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN", "HR", "MANAGER") // Phân quyền cho chấm công
 
                         .requestMatchers("/api/departments/**").hasRole("ADMIN") // Phân quyền cho quản lý roles, departments và positions
