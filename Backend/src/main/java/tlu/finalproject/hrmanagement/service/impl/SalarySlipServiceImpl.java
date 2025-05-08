@@ -48,10 +48,26 @@ public class SalarySlipServiceImpl implements SalarySlipService {
         List<Attendance> attendances = attendanceRepository.findByUserUserIdAndDateBetween(userId, startDate, endDate);
 
         Object[] result1 = attendanceRepository.countAttendancesByUserAndDateRange(userId, startDate, endDate);
-        Integer totalWorkingDays =  ((Long) result1[1]).intValue();
+        Integer totalWorkingDays =  attendances.size();
+
+
+        if (result1 != null && result1.length > 0 && result1[0] instanceof Object[]) {
+            Object[] innerArray = (Object[]) result1[0];
+            if (innerArray.length > 1) {
+                 totalWorkingDays = ((Long) innerArray[1]).intValue();
+            }
+        }
 
         Object[] result2 = overtimeRecordRepository.getTotalOvertimeByUserIdNative(userId);
-        Double totalOTHours = (Double) result2[1];  // Tổng giờ làm thêm
+        Double totalOTHours = 0.0;
+
+        if (result2 != null && result2.length > 0 && result2[0] instanceof Object[]) {
+            Object[] innerArray = (Object[]) result2[0];
+            if (innerArray.length > 1) {
+                totalOTHours = (Double) innerArray[1];
+            }
+        }
+
 
 
         // Map DTO
