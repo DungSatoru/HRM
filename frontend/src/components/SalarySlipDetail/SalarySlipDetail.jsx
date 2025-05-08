@@ -3,7 +3,7 @@ import { Card, Descriptions, Table, Divider } from 'antd';
 
 const SalarySlipDetail = ({ data }) => {
   if (!data) return <div>Không có dữ liệu</div>;
-  const { employee, salarySlip, bonusDetails, deductionDetails, attendanceSummary } = data;
+  const { employee, salarySlip, bonusDetails, deductionDetails, attendanceSummary, totalOvertimeHour } = data;
 
   const bonusColumns = [
     { title: 'Loại thưởng', dataIndex: 'bonusType', key: 'bonusType' },
@@ -15,12 +15,6 @@ const SalarySlipDetail = ({ data }) => {
     { title: 'Loại khấu trừ', dataIndex: 'deductionType', key: 'deductionType' },
     { title: 'Số tiền', dataIndex: 'amount', key: 'amount', render: (val) => `${val.toLocaleString()}₫` },
     { title: 'Ngày khấu trừ', dataIndex: 'deductionDate', key: 'deductionDate' },
-  ];
-
-  const attendanceColumns = [
-    { title: 'Ngày', dataIndex: 'date', key: 'date' },
-    { title: 'Giờ vào', dataIndex: 'checkIn', key: 'checkIn' },
-    { title: 'Giờ ra', dataIndex: 'checkOut', key: 'checkOut' },
   ];
 
   return (
@@ -37,13 +31,15 @@ const SalarySlipDetail = ({ data }) => {
       <Card title="Chi tiết bảng lương">
         <Descriptions column={2}>
           <Descriptions.Item label="Lương cơ bản">{salarySlip.basicSalary.toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Lương thực nhận">{salarySlip.totalSalary.toLocaleString()}₫</Descriptions.Item>
+          <Descriptions.Item label="Lương thực nhận">{Math.round(salarySlip.totalSalary).toLocaleString()}₫</Descriptions.Item>
           <Descriptions.Item label="Phụ cấp">{salarySlip.otherAllowances.toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Lương làm thêm">{salarySlip.overTimePay.toLocaleString()}₫</Descriptions.Item>
+          <Descriptions.Item label="Lương làm thêm">{Math.round(salarySlip.overTimePay).toLocaleString()}₫</Descriptions.Item>
           <Descriptions.Item label="Tổng thưởng">{salarySlip.bonus.toLocaleString()}₫</Descriptions.Item>
           <Descriptions.Item label="Tổng khấu trừ">{salarySlip.deductions.toLocaleString()}₫</Descriptions.Item>
           <Descriptions.Item label="Tháng">{salarySlip.month}</Descriptions.Item>
           <Descriptions.Item label="Ngày thanh toán">{salarySlip.paymentDate}</Descriptions.Item>
+          <Descriptions.Item label="Tổng số ngày công">{attendanceSummary}</Descriptions.Item>
+          <Descriptions.Item label="Số giờ tăng ca">{Math.round(totalOvertimeHour)} giờ</Descriptions.Item>
         </Descriptions>
       </Card>
 
@@ -55,10 +51,6 @@ const SalarySlipDetail = ({ data }) => {
 
       <Card title="Chi tiết khấu trừ">
         <Table columns={deductionColumns} dataSource={deductionDetails} pagination={false} rowKey="deductionId" />
-      </Card>
-
-      <Card title="Tóm tắt chấm công">
-        <Table columns={attendanceColumns} dataSource={attendanceSummary} pagination={false} rowKey="attendanceId" />
       </Card>
     </div>
   );

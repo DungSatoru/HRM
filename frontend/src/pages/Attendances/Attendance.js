@@ -21,7 +21,7 @@ const Attendance = () => {
       try {
         const [empData, attData] = await Promise.all([
           getEmployees(),
-          getAttendances(selectedDate.format('YYYY-MM-DD'))
+          getAttendances(selectedDate.format('YYYY-MM-DD')),
         ]);
         setEmployees(empData);
         setAttendances(attData || []);
@@ -32,12 +32,12 @@ const Attendance = () => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, [selectedDate]);
 
   const getEmployeeName = (userId) => {
-    const employee = employees.find(emp => emp.userId === userId);
+    const employee = employees.find((emp) => emp.userId === userId);
     return employee ? employee.fullName : 'Không tên';
   };
 
@@ -96,14 +96,14 @@ const Attendance = () => {
     }
   };
 
-  const mappedData = attendances.map((item, index) => ({
-    key: item.attendanceId,
+  const mappedData = (Array.isArray(attendances) ? attendances : []).map((item, index) => ({
+    key: item.attendanceId || 'Không có ID',
     stt: index + 1,
-    fullName: getEmployeeName(item.userId),
-    checkIn: item.checkIn || '-',
-    checkOut: item.checkOut || '-',
+    fullName: item.userId ? getEmployeeName(item.userId) : 'Tên không có',
+    checkIn: item.checkIn ? item.checkIn : '-',
+    checkOut: item.checkOut ? item.checkOut : '-',
     duration: item.checkIn && item.checkOut ? calculateDuration(item.checkIn, item.checkOut) : 'Dữ liệu chưa đủ',
-    status: item.checkOut ? 'Đã chấm công' : 'Chưa checkout',
+    status: item.checkOut ? 'Đã chấm công' : item.checkIn ? 'Chưa checkout' : 'Chưa chấm công',
   }));
 
   const columns = [
@@ -196,11 +196,11 @@ const Attendance = () => {
         {loading ? (
           <Loading />
         ) : (
-          <Table 
-            columns={columns} 
-            dataSource={mappedData} 
-            rowKey="key" 
-            pagination={{ pageSize: 10 }} 
+          <Table
+            columns={columns}
+            dataSource={mappedData}
+            rowKey="key"
+            pagination={{ pageSize: 10 }}
             locale={{ emptyText: 'Không có dữ liệu chấm công' }}
           />
         )}
