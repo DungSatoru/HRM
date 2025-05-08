@@ -70,4 +70,29 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     Object[] countAttendancesByUserAndDateRange(@Param("userId") Long userId,
                                                 @Param("startDate") LocalDate startDate,
                                                 @Param("endDate") LocalDate endDate);
+
+
+
+    @Query(value = """
+        SELECT 
+            u.user_id,
+            u.full_name,
+            a.date,
+            a.check_in,
+            TIMESTAMPDIFF(
+                MINUTE,
+                STR_TO_DATE(CONCAT(a.date, ' 08:00:00'), '%Y-%m-%d %H:%i:%s'),
+                a.check_in
+            ) AS minutes_late
+        FROM 
+            attendances a
+        JOIN 
+            users u ON a.user_id = u.user_id
+        WHERE 
+            a.check_in IS NOT NULL
+            AND TIME(a.check_in) > '08:00:00'
+            AND a.date BETWEEN :start AND :end
+    """, nativeQuery = true)
+    List<Object[]> findRawLateAttendances(LocalDate start, LocalDate end);
+
 }

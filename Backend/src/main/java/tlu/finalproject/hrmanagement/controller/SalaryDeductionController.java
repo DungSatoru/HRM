@@ -1,13 +1,16 @@
 package tlu.finalproject.hrmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tlu.finalproject.hrmanagement.dto.LateDeductionDTO;
 import tlu.finalproject.hrmanagement.dto.SalaryDeductionDTO;
 import tlu.finalproject.hrmanagement.dto.common.ApiResponse;
 import tlu.finalproject.hrmanagement.dto.common.ResponseUtil;
 import tlu.finalproject.hrmanagement.service.SalaryDeductionService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -42,5 +45,12 @@ public class SalaryDeductionController {
             ResponseUtil.notFound("Không tìm thấy khấu trừ với ID " + id);
         }
         return ResponseUtil.success(null, "Xóa khoản giảm trừ thành công");
+    }
+
+    @GetMapping("/late")
+    public ResponseEntity<ApiResponse<List<LateDeductionDTO>>> getLateDeductions(
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        return ResponseUtil.success(service.getLateDeductions(start, end), "Lấy danh sách đi muộn thành công");
     }
 }
