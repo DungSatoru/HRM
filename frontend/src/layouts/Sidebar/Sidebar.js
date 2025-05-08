@@ -179,69 +179,6 @@ const Sidebar = () => {
               </ul>
             </div>
           </li>
-
-          {/* Tuyển dụng - HR và Admin */}
-          {(isHR || isAdmin) && (
-            <li>
-              <NavLink to="#collapseTuyenDung" className="nav-item" onClick={() => handleToggle('collapseTuyenDung')}>
-                <div className="d-flex justify-content-between align-items-center">
-                  <span>
-                    <i className="fa-solid fa-user-plus"></i> Tuyển dụng
-                  </span>
-                  <span className="dropdown-icon">
-                    <i
-                      className={`fa-solid ${openSections.collapseTuyenDung ? 'fa-chevron-up' : 'fa-chevron-down'}`}
-                    ></i>
-                  </span>
-                </div>
-              </NavLink>
-              <div className={`collapse ${openSections.collapseTuyenDung ? 'show' : ''}`} id="collapseTuyenDung">
-                <ul className="submenu">
-                  <li>
-                    <NavLink to="/recruitment">Quản lý ứng viên</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/create-job-post">Đăng tin tuyển dụng</NavLink>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          )}
-
-          {/* Báo cáo - Admin, HR, Manager */}
-          {(isAdmin || isHR || isManager || isAccountant) && (
-            <li>
-              <NavLink to="#collapseBaoCao" className="nav-item" onClick={() => handleToggle('collapseBaoCao')}>
-                <div className="d-flex justify-content-between align-items-center">
-                  <span>
-                    <i className="fa-solid fa-chart-line"></i> Báo cáo
-                  </span>
-                  <span className="dropdown-icon">
-                    <i className={`fa-solid ${openSections.collapseBaoCao ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                  </span>
-                </div>
-              </NavLink>
-              <div className={`collapse ${openSections.collapseBaoCao ? 'show' : ''}`} id="collapseBaoCao">
-                <ul className="submenu">
-                  {(isHR || isAdmin) && (
-                    <li>
-                      <NavLink to="/reports">Báo cáo nhân sự</NavLink>
-                    </li>
-                  )}
-                  {(isAccountant || isAdmin) && (
-                    <li>
-                      <NavLink to="/salary-reports">Báo cáo lương</NavLink>
-                    </li>
-                  )}
-                  {isHR && (
-                    <li>
-                      <NavLink to="/recruitment-reports">Báo cáo tuyển dụng</NavLink>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </li>
-          )}
         </ul>
       </div>
 
@@ -264,13 +201,7 @@ const Sidebar = () => {
               <div className={`collapse ${openSections.collapseUser ? 'show' : ''}`} id="collapseUser">
                 <ul className="submenu">
                   <li>
-                    <NavLink to="/user-list">Danh sách người dùng</NavLink>
-                  </li>
-                  <li>
                     <NavLink to="/user-permissions">Phân quyền người dùng</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/system-settings">Cấu hình hệ thống</NavLink>
                   </li>
                 </ul>
               </div>
@@ -296,9 +227,7 @@ const Sidebar = () => {
             </NavLink>
             <div className={`collapse ${openSections.collapseSetting ? 'show' : ''}`} id="collapseSetting">
               <ul className="submenu">
-                <li>
-                  <NavLink to="/settings/account">Tài khoản của tôi</NavLink>
-                </li>
+                
                 {(isHR || isAdmin) && (
                   <li>
                     <NavLink to="/settings/security">Cấu hình bảo mật</NavLink>
