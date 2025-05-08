@@ -4,8 +4,12 @@ import { Form, Input, Select, Button, DatePicker, message, Card, Spin } from 'an
 import { addEmployee, updateEmployee, getEmployeeById } from '~/services/employeeService';
 import { getDepartments } from '~/services/departmentService';
 import { getPositions } from '~/services/positionService';
+import { Upload } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+
 import moment from 'moment';
 import './EmployeeForm.css';
+import { getRoleById } from '~/services/roleService';
 
 const { Option } = Select;
 
@@ -16,6 +20,9 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:8080';
 
   useEffect(() => {
     fetchData();
@@ -28,24 +35,33 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
       setDepartments(depData || []);
       setPositions(posData || []);
 
-      // Nếu đang chỉnh sửa, tải thông tin nhân viên
       if (isEdit && employeeId) {
         const employeeData = await getEmployeeById(employeeId);
         if (employeeData) {
-          // Format ngày tháng để phù hợp với DatePicker
-          const hireDate = employeeData.hireDate ? moment(employeeData.hireDate.split('T')[0]) : null;
-          
+          const role = await getRoleById(employeeData.roleId);
+          if (employeeData.profileImageUrl) {
+            setImageUrl(`${SERVER_URL}${employeeData.profileImageUrl}`);
+          }
+
           form.setFieldsValue({
             username: employeeData.username,
             fullName: employeeData.fullName,
             identity: employeeData.identity,
             email: employeeData.email,
             phone: employeeData.phone,
-            roleName: 'Nhân viên',
+            roleName: role.roleName,
             positionId: employeeData.positionId,
             departmentId: employeeData.departmentId,
             status: employeeData.status,
-            hireDate: hireDate,
+            hireDate: employeeData.hireDate ? moment(employeeData.hireDate.split('T')[0]) : null,
+            gender: employeeData.gender,
+            dateOfBirth: employeeData.dateOfBirth ? moment(employeeData.dateOfBirth) : null,
+            address: employeeData.address,
+            profileImageUrl: employeeData.profileImageUrl,
+            emergencyContactName: employeeData.emergencyContactName,
+            emergencyContactPhone: employeeData.emergencyContactPhone,
+            contractType: employeeData.contractType,
+            educationLevel: employeeData.educationLevel,
           });
         } else {
           message.error('Không tìm thấy thông tin nhân viên');
@@ -70,23 +86,31 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
       email: values.email,
       phone: values.phone,
       fullName: values.fullName,
-      roleId: 5,
+      roleId: values.roleId,
       departmentId: selectedDepartment?.departmentId,
       positionId: selectedPosition?.positionId,
       status: values.status,
       hireDate: values.hireDate.format('YYYY-MM-DD'),
+      gender: values.gender,
+      dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : null,
+      address: values.address,
+      profileImageUrl: values.profileImageUrl,
+      emergencyContactName: values.emergencyContactName,
+      emergencyContactPhone: values.emergencyContactPhone,
+      contractType: values.contractType,
+      educationLevel: values.educationLevel,
     };
 
     setSubmitting(true);
     try {
       if (isEdit) {
-        await updateEmployee(employeeId, data);
+        await updateEmployee(employeeId, data, imageFile);
         message.success('Cập nhật thông tin nhân viên thành công!');
       } else {
-        await addEmployee(data);
+        await addEmployee(data, imageFile);
         message.success('Thêm nhân viên thành công!');
       }
-      navigate('/employees');
+      // navigate('/employees');
     } catch (error) {
       console.error(`Lỗi khi ${isEdit ? 'cập nhật' : 'thêm'} nhân viên:`, error);
       message.error(`${isEdit ? 'Cập nhật' : 'Thêm'} nhân viên thất bại!`);
@@ -95,10 +119,17 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
     }
   };
 
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
   return (
     <div className="page-container employees-container">
       <h2 className="page-title">{isEdit ? 'Chỉnh Sửa Thông Tin Nhân Viên' : 'Thêm Nhân Viên'}</h2>
-
       <Card>
         {loading ? (
           <div className="loading-container">
@@ -109,17 +140,46 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
             form={form}
             layout="vertical"
             onFinish={handleSubmit}
-            initialValues={{
-              roleName: 'Nhân viên',
-              status: 'ACTIVE',
-            }}
+            // initialValues={{
+            //   roleName: 'Nhân viên',
+            //   status: 'ACTIVE',
+            // }}
           >
+            {/* Ảnh đại diện */}
+            <div className="row">
+              <div className="col-md-6">
+                <Form.Item label="Ảnh đại diện">
+                  <Upload
+                    name="avatar"
+                    listType="picture-card"
+                    className="avatar-uploader"
+                    showUploadList={false}
+                    beforeUpload={async (file) => {
+                      const base64 = await getBase64(file);
+                      setImageUrl(base64);
+                      setImageFile(file);
+                      return false; // Không upload ngay
+                    }}
+                  >
+                    {imageUrl ? (
+                      <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
+                    ) : (
+                      <div>
+                        <PlusOutlined />
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                      </div>
+                    )}
+                  </Upload>
+                </Form.Item>
+              </div>
+            </div>
+
+            {/* Thông tin cá nhân */}
             <div className="form-section">
               <h6 className="section-title">
                 <i className="fas fa-id-card section-icon"></i>Thông tin cá nhân
               </h6>
               <div className="row">
-                {/* Tên tài khoản */}
                 <div className="col-md-4">
                   <Form.Item
                     label="Tên tài khoản"
@@ -129,8 +189,6 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                     <Input placeholder="Tên tài khoản" />
                   </Form.Item>
                 </div>
-
-                {/* Họ và tên */}
                 <div className="col-md-4">
                   <Form.Item
                     label="Họ và Tên"
@@ -140,8 +198,6 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                     <Input placeholder="Họ và Tên" />
                   </Form.Item>
                 </div>
-
-                {/* Căn cước công dân */}
                 <div className="col-md-4">
                   <Form.Item
                     label="Căn cước công dân"
@@ -154,12 +210,12 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
               </div>
             </div>
 
+            {/* Thông tin liên hệ */}
             <div className="form-section">
               <h6 className="section-title">
                 <i className="fas fa-address-book section-icon"></i>Thông tin liên hệ
               </h6>
               <div className="row">
-                {/* Email */}
                 <div className="col-md-6">
                   <Form.Item
                     label="Email"
@@ -169,8 +225,6 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                     <Input placeholder="Email" />
                   </Form.Item>
                 </div>
-
-                {/* Số điện thoại */}
                 <div className="col-md-6">
                   <Form.Item
                     label="Số điện thoại"
@@ -183,19 +237,17 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
               </div>
             </div>
 
+            {/* Thông tin công việc */}
             <div className="form-section">
               <h6 className="section-title">
                 <i className="fas fa-briefcase section-icon"></i>Thông tin công việc
               </h6>
               <div className="row">
-                {/* Vai trò */}
                 <div className="col-md-4">
                   <Form.Item label="Vai trò" name="roleName">
                     <Input value="Nhân viên" disabled />
                   </Form.Item>
                 </div>
-
-                {/* Chức vụ */}
                 <div className="col-md-4">
                   <Form.Item
                     label="Chức vụ"
@@ -211,8 +263,6 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                     </Select>
                   </Form.Item>
                 </div>
-
-                {/* Phòng ban */}
                 <div className="col-md-4">
                   <Form.Item
                     label="Phòng ban"
@@ -228,8 +278,6 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                     </Select>
                   </Form.Item>
                 </div>
-
-                {/* Trạng thái */}
                 <div className="col-md-6">
                   <Form.Item
                     label="Trạng thái"
@@ -243,8 +291,6 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                     </Select>
                   </Form.Item>
                 </div>
-
-                {/* Ngày vào làm */}
                 <div className="col-md-6">
                   <Form.Item
                     label="Ngày vào làm"
@@ -257,14 +303,56 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
               </div>
             </div>
 
-            {/* Button actions */}
+            {/* Thông tin bổ sung */}
+            <div className="form-section">
+              <h6 className="section-title">
+                <i className="fas fa-user section-icon"></i>Thông tin bổ sung
+              </h6>
+              <div className="row">
+                <div className="col-md-4">
+                  <Form.Item label="Ngày sinh" name="dateOfBirth">
+                    <DatePicker style={{ width: '100%' }} />
+                  </Form.Item>
+                </div>
+                <div className="col-md-4">
+                  <Form.Item label="Giới tính" name="gender">
+                    <Select placeholder="Chọn giới tính">
+                      <Option value={true}>Nam</Option>
+                      <Option value={false}>Nữ</Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="col-md-4">
+                  <Form.Item label="Địa chỉ" name="address">
+                    <Input placeholder="Địa chỉ" />
+                  </Form.Item>
+                </div>
+                <div className="col-md-6">
+                  <Form.Item label="Người liên hệ khẩn" name="emergencyContactName">
+                    <Input placeholder="Tên người liên hệ" />
+                  </Form.Item>
+                </div>
+                <div className="col-md-6">
+                  <Form.Item label="SĐT người liên hệ" name="emergencyContactPhone">
+                    <Input placeholder="Số điện thoại" />
+                  </Form.Item>
+                </div>
+                <div className="col-md-6">
+                  <Form.Item label="Loại hợp đồng" name="contractType">
+                    <Input placeholder="Loại hợp đồng" />
+                  </Form.Item>
+                </div>
+                <div className="col-md-6">
+                  <Form.Item label="Trình độ học vấn" name="educationLevel">
+                    <Input placeholder="Trình độ học vấn" />
+                  </Form.Item>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
             <div className="form-actions">
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                loading={submitting}
-                className="submit-button"
-              >
+              <Button type="primary" htmlType="submit" loading={submitting} className="submit-button">
                 {isEdit ? 'Lưu thay đổi' : 'Lưu'}
               </Button>
               <Button onClick={() => navigate('/employees')} disabled={submitting}>

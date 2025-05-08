@@ -15,7 +15,6 @@ export const getDepartments = async () => {
 export const getDepartmentById = async (id) => {
   try {
     const response = await axiosClient.get(`/departments/${id}`);
-    toast.success(`Lấy thông tin phòng ban với ID: ${id} thành công!`);
     return response.data.data;
   } catch (error) {
     toast.error(`Lỗi khi lấy thông tin phòng ban với ID: ${id}`);

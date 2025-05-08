@@ -1,5 +1,6 @@
 import axiosClient from './axiosClient';
-import { toast } from 'react-toastify'; // Thêm toast
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export const getEmployees = async () => {
   try {
@@ -15,7 +16,6 @@ export const getEmployees = async () => {
 export const getEmployeeById = async (id) => {
   try {
     const response = await axiosClient.get(`/users/${id}`);
-    toast.success(`Lấy thông tin nhân viên ${id} thành công!`);
     return response.data.data;
   } catch (error) {
     toast.error(`Lỗi khi lấy thông tin nhân viên với ID: ${id}`);
@@ -24,9 +24,21 @@ export const getEmployeeById = async (id) => {
   }
 };
 
-export const addEmployee = async (employeeData) => {
+export const addEmployee = async (employeeData, avatarFile) => {
   try {
-    const response = await axiosClient.post('/users', employeeData);
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(employeeData)); // 👈 phần JSON
+
+    if (avatarFile) {
+      formData.append('image', avatarFile); // 👈 phần file
+    }
+
+    const response = await axiosClient.post('/users', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
     toast.success('Thêm nhân viên thành công!');
     return response.data.data;
   } catch (error) {
@@ -36,10 +48,22 @@ export const addEmployee = async (employeeData) => {
   }
 };
 
-export const updateEmployee = async (id, updatedData) => {
+export const updateEmployee = async (id, updatedData, avatarFile) => {
   try {
-    const response = await axiosClient.put(`/users/${id}`, updatedData);
-    toast.success(`Cập nhật thông tin nhân viên ${id} thành công!`);
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(updatedData)); // 👈 phần JSON - đã sửa từ employeeData sang updatedData
+
+    if (avatarFile) {
+      formData.append('image', avatarFile); // 👈 phần file
+    }
+    
+    const response = await axiosClient.put(`/users/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    toast.success(`Cập nhật thông tin nhân viên thành công!`);
     return response.data.data;
   } catch (error) {
     toast.error(`Đã xảy ra lỗi khi cập nhật nhân viên với ID: ${id}`);
