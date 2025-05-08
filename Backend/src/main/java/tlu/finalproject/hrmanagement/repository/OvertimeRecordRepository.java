@@ -37,4 +37,9 @@ public interface OvertimeRecordRepository extends JpaRepository<OvertimeRecord, 
     void deleteByUser_UserIdAndOvertimeDate(Long userId, LocalDate date);
 
     Optional<OvertimeRecord> findByUser_UserIdAndOvertimeDate(Long userId, LocalDate date);
+
+    List<OvertimeRecord> findByUser_UserIdAndOvertimeDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
+    @Query(value = "SELECT user_id, SUM(overtime_hour) FROM overtime_records " +
+            "WHERE user_id = :userId GROUP BY user_id", nativeQuery = true)
+    Object[] getTotalOvertimeByUserIdNative(@Param("userId") Long userId);
 }
