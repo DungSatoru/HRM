@@ -21,7 +21,6 @@ export const getRoleById = async (id) => {
     if (response.status !== 200) {
       throw new Error('Không thể lấy vai trò theo ID');
     }
-    toast.success('Lấy thông tin vai trò thành công!');
     return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy vai trò.');

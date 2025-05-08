@@ -22,7 +22,6 @@ export const getPositionById = async (id) => {
     if (response.status !== 200) {
       throw new Error('Không thể lấy vị trí theo ID');
     }
-    toast.success('Lấy thông tin vị trí thành công!');
     return response.data.data;
   } catch (error) {
     toast.error(error.message || 'Đã xảy ra lỗi khi lấy vị trí.');
