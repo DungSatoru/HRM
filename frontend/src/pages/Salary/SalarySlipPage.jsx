@@ -16,15 +16,28 @@ const SalarySlipPage = () => {
   const [selectedMonth, setSelectedMonth] = useState(dayjs()); // mặc định là tháng hiện tại
 
   const fetchData = async (month) => {
-    setLoading(true);
-    setError(null);
-    const formattedMonth = month.format('YYYY-MM');
-    const response = await getSalarySlipByEmployeeIdAndMonth(userId, formattedMonth);
-    console.log(response);
+    setLoading(true);  // Đặt trạng thái loading thành true khi bắt đầu lấy dữ liệu
+    setError(null);    // Xóa lỗi cũ nếu có
 
-    setData(response);
-    setLoading(false);
-  };
+    const formattedMonth = month.format('YYYY-MM');  // Định dạng lại tháng thành 'YYYY-MM'
+    
+    try {
+        // Gọi API để lấy dữ liệu phiếu lương
+        const response = await getSalarySlipByEmployeeIdAndMonth(userId, formattedMonth);
+        console.log(response);  // Log dữ liệu để kiểm tra
+        
+        // Cập nhật dữ liệu vào state
+        setData(response);
+    } catch (error) {
+        // Xử lý lỗi khi API trả về lỗi
+        console.error("Lỗi khi lấy dữ liệu phiếu lương:", error);
+        setError(error.message || 'Không thể lấy dữ liệu phiếu lương.');
+    } finally {
+        // Đảm bảo rằng loading luôn được tắt, bất kể có lỗi hay không
+        setLoading(false);
+    }
+};
+
 
   useEffect(() => {
     fetchData(selectedMonth);
