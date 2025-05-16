@@ -6,7 +6,6 @@ export const getDepartments = async () => {
     const response = await axiosClient.get('/departments');
     return response.data.data;
   } catch (error) {
-    toast.error('Đã xảy ra lỗi khi lấy danh sách phòng ban!');
     console.error('Lỗi khi lấy danh sách phòng ban:', error);
     throw error;
   }
@@ -17,7 +16,6 @@ export const getDepartmentById = async (id) => {
     const response = await axiosClient.get(`/departments/${id}`);
     return response.data.data;
   } catch (error) {
-    toast.error(`Lỗi khi lấy thông tin phòng ban với ID: ${id}`);
     console.error(`Lỗi khi lấy thông tin phòng ban với ID: ${id}`, error);
     throw error;
   }

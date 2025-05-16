@@ -45,6 +45,22 @@ export const getUserAttendanceByRange = async (userId, startDate, endDate) => {
   }
 };
 
+export const getUserAttendanceByMonthForAll = async (userId, monthYear) => {
+  try {
+    const response = await axiosClient.get(`/attendance/monthly`, {
+      params: {
+       userId,
+       monthYear
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    toast.error("Đã xảy ra lỗi khi lấy chấm công theo tháng!");
+    console.error('Lỗi khi lấy chấm công theo tháng:', error);
+    throw error;
+  }
+}
+
 // Cập nhật thông tin chấm công
 export const updateAttendance = async (id, data) => {
   try {

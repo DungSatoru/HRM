@@ -164,7 +164,7 @@ const Departments = () => {
 
       <Modal
         title={modalAction === 'Delete' ? 'Xóa phòng ban' : modalAction === 'Edit' ? 'Sửa phòng ban' : 'Thêm phòng ban'}
-        visible={isModalOpen}
+        open={isModalOpen}
         onCancel={closeModal}
         onOk={modalAction === 'Delete' ? handleDelete : handleSubmit}
         okText={modalAction === 'Delete' ? 'Xóa' : 'Lưu'}

@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Spin, Alert, DatePicker, Typography, Space } from 'antd';
+import { Spin, Alert, DatePicker, Space } from 'antd';
 import dayjs from 'dayjs';
 import SalarySlipDetail from '~/components/SalarySlipDetail/SalarySlipDetail';
 import { getSalarySlipByEmployeeIdAndMonth } from '~/services/salarySlipService';
 
-const { Title } = Typography;
 
 const SalarySlipPage = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const userId = 1;
+  const userId = localStorage.getItem('userId'); 
   const [selectedMonth, setSelectedMonth] = useState(dayjs()); // mặc định là tháng hiện tại
 
   const fetchData = async (month) => {
@@ -65,7 +63,7 @@ const SalarySlipPage = () => {
         {loading ? (
           <Spin tip="Đang tải bảng lương..." />
         ) : error ? (
-          <Alert type="error" message={error} showIcon />
+          <Alert type="info" message={"Không có phiếu lương cho tháng này"} showIcon />
         ) : data ? (
           <SalarySlipDetail data={data} />
         ) : (

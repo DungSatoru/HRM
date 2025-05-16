@@ -169,7 +169,7 @@ const Positions = () => {
 
       <Modal
         title={modalAction === 'Delete' ? 'Xóa chức vụ' : modalAction === 'Edit' ? 'Sửa chức vụ' : 'Thêm chức vụ'}
-        visible={isModalOpen}
+        open={isModalOpen}
         onCancel={closeModal}
         onOk={modalAction === 'Delete' ? handleDelete : handleSubmit}
         okText={modalAction === 'Delete' ? 'Xóa' : 'Lưu'}

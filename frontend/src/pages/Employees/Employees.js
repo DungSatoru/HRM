@@ -161,7 +161,7 @@ const Employees = () => {
             style={{ width: 300 }}
           />
           <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/employees/add')}>
-            Thêm mới
+            Thêm nhân viên mới
           </Button>
         </div>
       </div>
@@ -184,7 +184,7 @@ const Employees = () => {
       {/* Modal xác nhận xóa */}
       <Modal
         title="Xác nhận xóa"
-        visible={isModalOpen}
+        open={isModalOpen}
         onOk={handleDelete}
         onCancel={closeModal}
         okText="Xóa"
