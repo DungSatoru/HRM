@@ -1,37 +1,3 @@
-# import face_recognition
-# import os
-# import time
-
-# def encode_images(directory_path, encoding_file, ID):
-#     if not os.path.exists(directory_path):
-#         print(f"Lỗi: Thư mục '{directory_path}' không tồn tại!")
-#         return
-
-#     if not os.path.isfile(encoding_file):
-#         with open(encoding_file, 'w') as file:
-#             file.write('')
-
-#     with open(encoding_file, 'a') as encoding_file:
-#         for filename in os.listdir(directory_path):
-#             image_path = os.path.join(directory_path, filename)
-
-#             if not os.path.isfile(image_path):
-#                 continue  # Bỏ qua nếu không phải file ảnh
-
-#             try:
-#                 image = face_recognition.load_image_file(image_path)
-#                 encodings = face_recognition.face_encodings(image)
-
-#                 if len(encodings) > 0:
-#                     encoding_file.write(f"{ID}: {list(encodings[0])}\n")
-#                     print(f"Mã hóa thành công {filename}")
-#                 else:
-#                     print(f"Không tìm thấy khuôn mặt trong {filename}, bỏ qua.")
-#             except Exception as e:
-#                 print(f"Lỗi xử lý {filename}: {e}")
-
-
-
 import face_recognition
 import sys
 import os

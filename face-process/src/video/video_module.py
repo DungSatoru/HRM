@@ -204,7 +204,7 @@ class VideoProcessor:
             processed_frame = self._process_frame(frame)
             
             # Hiển thị khung hình
-            cv2.imshow('Nhận diện trực tiếp', processed_frame)
+            cv2.imshow('Realtime recognition', processed_frame)
             
             # Kiểm tra xem người dùng có nhấn phím thoát hay không
             if cv2.waitKey(1) & 0xFF == ord('q'):

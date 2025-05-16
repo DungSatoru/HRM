@@ -2,6 +2,7 @@
 import os, sys
 import time
 import cv2
+import argparse
 from src.face_recognition.face_recognizer import FaceRecognizer
 from src.attendance.attendance_tracker import AttendanceTracker
 from src.video.video_module import VideoProcessor
@@ -10,9 +11,17 @@ from src.utils.utils import create_directory
 # Thêm thư mục gốc của project vào sys.path
 
 def main():
+    parser = argparse.ArgumentParser(description="Face Recognition Attendance System")
+    parser.add_argument('--ip', required=True, help="Camera IP address (e.g., 192.168.0.108)")
+    parser.add_argument('--user', required=True, help="Camera username")
+    parser.add_argument('--password', required=True, help="Camera password")
+    args = parser.parse_args()
+    
     # Configuration parameters
+    rtsp_url = f"rtsp://{args.user}:{args.password}@{args.ip}:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
+
+    # rtsp_url = "rtsp://admin:L23F65D3@192.168.0.108:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
     encoding_file = r"data\encodings.txt"
-    rtsp_url = "rtsp://admin:L23F65D3@192.168.0.108:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
     yolo_model_path = r"data\yolov8n-face.pt"
     checkin_folder = r"src\attendance\checkin"
     frame_resize_width = 640

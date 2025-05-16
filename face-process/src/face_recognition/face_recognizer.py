@@ -29,7 +29,8 @@ class FaceRecognizer:
             list: List of tuples (name, face_location)
         """
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        face_locations = self.face_detector.detect_faces(frame)
+        # face_locations = self.face_detector.detect_faces(frame)
+        face_locations = face_recognition.face_locations(frame)
         
         if not face_locations:
             return []
@@ -38,7 +39,7 @@ class FaceRecognizer:
         recognized_faces = []
         
         for face_location, face_encoding in zip(face_locations, face_encodings):
-            matches = face_recognition.compare_faces(self.encodings, face_encoding)
+            matches = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.45)
             name = "Unknown"
             
             if True in matches:
