@@ -30,9 +30,9 @@ public class AttendanceWebSocketHandler extends TextWebSocketHandler {
         LocalDateTime attendanceTime = LocalDateTime.parse(attendanceByFaceDTO.getTime(), formatter);
 
         // Gọi service để lưu vào database
-        attendanceService.handleSocketAttendance(attendanceByFaceDTO.getUserId(), attendanceTime);
+        String result = attendanceService.handleSocketAttendance(attendanceByFaceDTO.getUserId(), attendanceTime);
 
-        session.sendMessage(new TextMessage("Attendance received"));
+        session.sendMessage(new TextMessage(result));
     }
 }
 

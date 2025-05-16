@@ -28,6 +28,7 @@ public class AttendanceController {
         return ResponseUtil.success(attendanceList, "Lấy danh sách chấm công thành công");
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AttendanceDTO>> getAttendanceById(@PathVariable Long id) {
         AttendanceDTO attendance = attendanceService.getAttendanceById(id);
@@ -75,6 +76,8 @@ public class AttendanceController {
         return ResponseUtil.success(updatedAttendance, "Cập nhật dữ liệu chấm công thành công");
     }
 
+
+    // TEST CHẤM CÔNG THỦ CÔNG VỚI DỮ LIỆU GỬI VÀO ĐỂ CHECK XEM LÀ CHECKIN HAY SẼ CHECKOUT
     @PostMapping("/check")
     public ResponseEntity<ApiResponse<String>> checkAttendance(@RequestBody AttendanceByFaceDTO attendanceDTO) {
         LocalDateTime eventTime = LocalDateTime.parse(attendanceDTO.getTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

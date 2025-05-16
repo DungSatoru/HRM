@@ -3,6 +3,7 @@ package tlu.finalproject.hrmanagement.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.OvertimeRecordDTO;
+import tlu.finalproject.hrmanagement.dto.SalarySlipDTO;
 import tlu.finalproject.hrmanagement.exception.ResourceAlreadyExistsException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.*;
@@ -15,6 +16,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +40,18 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
     @Override
     public void calculateAndSaveSalarySlip(Long userId, LocalDate month) {
         String monthStr = formatMonthString(month);
-        validateSalarySlipNotExists(userId, monthStr);
+//        validateSalarySlipNotExists(userId, monthStr);
+
+        // Tìm phiếu lương đã tồn tại
+        Optional<SalarySlip> existingSlip = salarySlipRepository.findByUser_UserIdAndMonth(userId, monthStr);
+
+        // Xóa các khấu trừ liên quan
+        if (existingSlip.isPresent()) {
+           deleteStandardDeductions(userId, month);
+
+            // Xóa phiếu lương
+            salarySlipRepository.delete(existingSlip.get());
+        }
 
         User user = findUserById(userId);
         // Nếu trạng thái là INACTIVE thì không tính lương
@@ -82,6 +95,27 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         // Lưu phiếu lương
         saveSalarySlip(user, month, basicSalary, actualBasicSalary, otherAllowances, totalBonus,
                 totalDeductions, overtimeSalary, totalSalary, monthStr);
+    }
+
+    private void deleteStandardDeductions(Long userId, LocalDate month) {
+        List<String> standardDeductionTypes = List.of("BHXH", "BHYT", "BHTN", "Thuế TNCN");
+
+        // Tìm các khấu trừ trong tháng của nhân viên
+        List<SalaryDeduction> deductions = deductionRepository.findByUser_UserIdAndDeductionDateBetween(
+                userId,
+                month.withDayOfMonth(1),
+                month.withDayOfMonth(month.lengthOfMonth())
+        );
+
+        // Lọc ra các khấu trừ chuẩn cần xóa
+        List<SalaryDeduction> deductionsToDelete = deductions.stream()
+                .filter(deduction -> standardDeductionTypes.contains(deduction.getDeductionType()))
+                .collect(Collectors.toList());
+
+        // Xóa các khấu trừ
+        if (!deductionsToDelete.isEmpty()) {
+            deductionRepository.deleteAll(deductionsToDelete);
+        }
     }
 
     private String formatMonthString(LocalDate month) {

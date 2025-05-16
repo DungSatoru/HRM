@@ -8,9 +8,9 @@ import tlu.finalproject.hrmanagement.service.VideoService;
 import java.io.*;
 import java.util.concurrent.TimeUnit;
 
-
 @Service
 public class VideoServiceImpl implements VideoService {
+
     @Value("${face.recognition.script}")
     private String encoderFilePath;
 
@@ -19,22 +19,23 @@ public class VideoServiceImpl implements VideoService {
 
     @Value("${face.recognition.model}")
     private String encodingsPath;
-    private static final String UPLOAD_DIR = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\uploads\\VideoFaceTraining";
+
+    @Value("${face.recognition.video}")
+    private String uploadDirPath;
 
     @Override
     public String saveVideo(MultipartFile file) {
         try {
-            File uploadDir = new File(UPLOAD_DIR);
+            File uploadDir = new File(uploadDirPath).getAbsoluteFile();
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
 
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            String filePath = UPLOAD_DIR + File.separator + fileName;
-            File videoFile = new File(filePath);
+            File videoFile = new File(uploadDir, fileName);
             file.transferTo(videoFile);
 
-            return filePath;
+            return videoFile.getAbsolutePath();
         } catch (IOException e) {
             throw new RuntimeException("Failed to save video file!", e);
         }
@@ -42,17 +43,21 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public String processVideo(String filePath) {
-        String extractFramesFilePath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\python\\extract_frames.py";
         try {
-            ProcessBuilder pb = new ProcessBuilder("python", extractFramesFilePath, filePath);
+            ProcessBuilder pb = new ProcessBuilder(
+                    "python",
+                    new File(extractFramesFilePath).getAbsolutePath(),
+                    new File(filePath).getAbsolutePath()
+            );
+
+            pb.redirectErrorStream(true);
             Process process = pb.start();
 
-            boolean finished = process.waitFor(10, TimeUnit.SECONDS); // Chờ tối đa 10 giây
+            boolean finished = process.waitFor(30, TimeUnit.SECONDS);
             if (!finished) {
-                System.err.println("Python script timeout!");
-                process.destroy(); // Hủy tiến trình nếu quá lâu
+                process.destroy();
+                return "Timeout while extracting frames.";
             }
-
 
             return "Extract Successfully";
         } catch (Exception e) {
@@ -61,52 +66,56 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public String trainFaceEmployee(String filePath, String Id) {
-//        String mainFilePath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\python\\FaceRecognition.py";
-//        String extractFramesFilePath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\uploads\\ImageExtractFromVideo";
-//        String encodingsPath = "D:\\Documents\\THUYLOIUNIVERSITY\\Semester8\\GraduationProject\\HRM\\Backend\\src\\main\\resources\\FaceEncoding\\encodings.txt";
-
+    public String trainFaceEmployee(String filePath, String userId) {
+        clearDirectory(new File(extractFramesFilePath).getAbsoluteFile());
         try {
-            // Tạo command dưới dạng List<String> để tránh lỗi dấu cách
             ProcessBuilder pb = new ProcessBuilder(
                     "python",
-                    encoderFilePath,
-                    filePath,
-                    extractFramesFilePath,
-                    encodingsPath,
-                    Id
+                    new File(encoderFilePath).getAbsolutePath(),
+                    new File(filePath).getAbsolutePath(),
+                    new File(extractFramesFilePath).getAbsolutePath(),
+                    new File(encodingsPath).getAbsolutePath(),
+                    userId
             );
 
             pb.redirectErrorStream(true);
-
-
-            // Tạo chuỗi command để trả về
-            String commandString = String.join(" ", pb.command());
-
-            // Chạy tiến trình
             Process process = pb.start();
-            boolean finished = process.waitFor(180, TimeUnit.SECONDS);
 
+            boolean finished = process.waitFor(180, TimeUnit.SECONDS);
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            StringBuilder result = new StringBuilder();
             String line;
-            String result = "";
             while ((line = reader.readLine()) != null) {
-               result += (line + "/n");
+                result.append(line).append("\n");
             }
 
             if (!finished) {
-                System.err.println("Python script timeout!");
                 process.destroy();
-                return "Timeout while processing face training. Command: " + result;
+                return "Timeout while processing face training. Output:\n" + result;
             }
 
-            return "Train Successfully. Command: " + result;
+
+
+            return "Train Successfully. Output:\n" + result;
         } catch (Exception e) {
-            throw new RuntimeException("Error processing video with Python script. Command: " +
+            throw new RuntimeException("Error processing video with Python script.\nCommand: " +
                     String.format("python %s %s %s %s %s",
-                            encoderFilePath, filePath, extractFramesFilePath, encodingsPath, Id), e);
+                            encoderFilePath, filePath, extractFramesFilePath, encodingsPath, userId), e);
         }
     }
 
+    private void clearDirectory(File directory) {
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (!file.delete()) {
+                        System.err.println("Failed to delete file: " + file.getAbsolutePath());
+                    }
+                }
+            }
+        }
+    }
 
 }

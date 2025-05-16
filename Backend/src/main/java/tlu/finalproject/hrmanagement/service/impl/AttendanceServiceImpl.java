@@ -17,10 +17,10 @@ import tlu.finalproject.hrmanagement.repository.SalaryConfigurationRepository;
 import tlu.finalproject.hrmanagement.repository.UserRepository;
 import tlu.finalproject.hrmanagement.service.AttendanceService;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,10 +107,23 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (todayRecords.isEmpty()) {
             return createNewCheckIn(user, date, eventTime);
         } else {
-            Attendance lastRecord = todayRecords.get(todayRecords.size() - 1);
+//            Attendance lastRecord = todayRecords.get(todayRecords.size() - 1);
+//
+//            if (lastRecord.getCheckOut() == null) {
+//                return recordCheckOut(lastRecord, eventTime, userId, date);
+//            } else {
+//                return createNewCheckIn(user, date, eventTime);
+//            }
 
-            if (lastRecord.getCheckOut() == null) {
-                return recordCheckOut(lastRecord, eventTime, userId, date);
+            Attendance lastUnfinished = null;
+            for (Attendance record : todayRecords) {
+                if (record.getCheckOut() == null) {
+                    return recordCheckOut(record, eventTime, userId, date);
+                }
+            }
+
+            if (lastUnfinished.getCheckOut() == null) {
+                return recordCheckOut(lastUnfinished, eventTime, userId, date);
             } else {
                 return createNewCheckIn(user, date, eventTime);
             }
