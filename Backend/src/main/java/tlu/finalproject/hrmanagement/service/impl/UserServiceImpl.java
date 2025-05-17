@@ -58,9 +58,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public EmployeeDTO createUser(EmployeeDTO employeeDTO) {
         User user = modelMapper.map(employeeDTO, User.class);
+        if (userRepository.existsByIdentity(employeeDTO.getIdentity())) {
+            throw new ConflictException("CCCD đã tồn tại.");
+        }
+        if (userRepository.existsByPhone(employeeDTO.getPhone())) {
+            throw new ConflictException("Số điện thoại đã tồn tại.");
+        }
 
         if (userRepository.existsByEmail(employeeDTO.getEmail())) {
-            throw new ConflictException("Email đã tồn tại trong hệ thống.");
+            throw new ConflictException("Email đã tồn tại.");
         }
 
         if (userRepository.existsByUsername(employeeDTO.getUsername())) {
@@ -145,16 +151,4 @@ public class UserServiceImpl implements UserService {
         // Trả về DTO
         return modelMapper.map(saved, EmployeeDTO.class);
     }
-
-
-    @Override
-    public boolean deleteUser(Long id) {
-        Optional<User> userOpt = userRepository.findById(id);
-        if (userOpt.isEmpty()) {
-            return false;
-        }
-        userRepository.delete(userOpt.get());
-        return true;
-    }
-
 }

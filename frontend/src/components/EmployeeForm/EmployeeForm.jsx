@@ -110,7 +110,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
         await addEmployee(data, imageFile);
         message.success('Thêm nhân viên thành công!');
       }
-      // navigate('/employees');
+      navigate('/employees');
     } catch (error) {
       console.error(`Lỗi khi ${isEdit ? 'cập nhật' : 'thêm'} nhân viên:`, error);
       message.error(`${isEdit ? 'Cập nhật' : 'Thêm'} nhân viên thất bại!`);

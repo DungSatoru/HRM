@@ -79,13 +79,4 @@ public class UserController {
         }
         return ResponseUtil.success(updatedUser, "Cập nhật người dùng thành công");
     }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUser(id);
-        if (!deleted) {
-            return ResponseUtil.notFound("Không tìm thấy người dùng với ID " + id);
-        }
-        return ResponseUtil.success(null, "Xóa người dùng thành công");
-    }
 }

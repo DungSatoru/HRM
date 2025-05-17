@@ -15,8 +15,6 @@ const Employees = () => {
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [employeeIdToDelete, setEmployeeIdToDelete] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,30 +43,6 @@ const Employees = () => {
     setFilteredEmployees(filtered);
   };
 
-  const openModal = (id) => {
-    setEmployeeIdToDelete(id);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEmployeeIdToDelete(null);
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteEmployee(employeeIdToDelete);
-      message.success('Xóa nhân viên thành công!');
-      const { mappedEmployees } = await fetchEmpDepPos();
-      setEmployees(mappedEmployees);
-      setFilteredEmployees(mappedEmployees);
-    } catch (error) {
-      console.error('Lỗi khi xóa nhân viên:', error);
-      message.error('Xóa nhân viên thất bại!');
-    } finally {
-      closeModal();
-    }
-  };
 
   const columns = [
     {
@@ -134,14 +108,6 @@ const Employees = () => {
           >
             Sửa
           </Button>
-          <Button
-            type="default"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => openModal(record.userId)}
-          >
-            Xóa
-          </Button>
         </Space>
       ),
     },
@@ -180,18 +146,6 @@ const Employees = () => {
           )}
         </div>
       </div>
-
-      {/* Modal xác nhận xóa */}
-      <Modal
-        title="Xác nhận xóa"
-        open={isModalOpen}
-        onOk={handleDelete}
-        onCancel={closeModal}
-        okText="Xóa"
-        cancelText="Hủy"
-      >
-        Bạn có chắc chắn muốn xóa nhân viên này?
-      </Modal>
     </div>
   );
 };

@@ -27,16 +27,16 @@ public class User {
     @Column(name = "password", nullable = false)
     String password;
 
-    @Column(name = "identity", nullable = false, length = 12)
+    @Column(name = "identity", nullable = false, unique = true, length = 12)
     String identity;
 
-    @Column(name = "email", unique = true, length = 100)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     String email;
 
-    @Column(name = "phone", unique = true, length = 15)
+    @Column(name = "phone", nullable = false, unique = true, length = 15)
     String phone;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "full_name", nullable = false, length = 100)
     String fullName;
 
     @ManyToOne(fetch = FetchType.LAZY)

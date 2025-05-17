@@ -27,10 +27,10 @@ export const getEmployeeById = async (id) => {
 export const addEmployee = async (employeeData, avatarFile) => {
   try {
     const formData = new FormData();
-    formData.append('data', JSON.stringify(employeeData)); // 👈 phần JSON
+    formData.append('data', JSON.stringify(employeeData));
 
     if (avatarFile) {
-      formData.append('image', avatarFile); // 👈 phần file
+      formData.append('image', avatarFile);
     }
 
     const response = await axiosClient.post('/users', formData, {
@@ -42,7 +42,13 @@ export const addEmployee = async (employeeData, avatarFile) => {
     toast.success('Thêm nhân viên thành công!');
     return response.data.data;
   } catch (error) {
-    toast.error('Đã xảy ra lỗi khi thêm nhân viên!');
+    let errorMessage = 'Đã xảy ra lỗi khi thêm nhân viên!';
+
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage = error.response.data.message;
+    }
+
+    toast.error(errorMessage);
     console.error('Lỗi khi thêm nhân viên:', error);
     throw error;
   }

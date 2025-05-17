@@ -14,6 +14,4 @@ public interface UserService {
     EmployeeDTO createUser(EmployeeDTO employeeDTO);
 
     EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO);
-
-    boolean deleteUser(Long id);
 }
