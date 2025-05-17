@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
+import tlu.finalproject.hrmanagement.exception.ConflictException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.exception.BadRequestException;  // Import thêm
 import tlu.finalproject.hrmanagement.model.Department;
@@ -47,28 +48,26 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public DepartmentDTO createDepartment(DepartmentDTO departmentDTO) {
-        try {
-            // Chuyển đổi DTO sang Entity
-            Department department = modelMapper.map(departmentDTO, Department.class);
-            return modelMapper.map( departmentRepository.save(department), DepartmentDTO.class);
-        } catch (Exception e) {
-            throw new BadRequestException("Không thể tạo phòng ban");
+        if (departmentRepository.existsByDepartmentNameIgnoreCase(departmentDTO.getDepartmentName().trim())) {
+            throw new ConflictException("Phòng ban đã tồn tại.");
         }
+
+        // Chuyển đổi DTO sang Entity
+        Department department = modelMapper.map(departmentDTO, Department.class);
+        return modelMapper.map(departmentRepository.save(department), DepartmentDTO.class);
     }
 
     @Override
     public DepartmentDTO updateDepartment(Long id, DepartmentDTO departmentDTO) {
-        try {
-            Department department = departmentRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + id));
-            department.setDepartmentName(departmentDTO.getDepartmentName());
-            return modelMapper.map( departmentRepository.save(department), DepartmentDTO.class);
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + id));
 
-        } catch (ResourceNotFoundException e) {
-            throw e;  // Ném lại lỗi nếu phòng ban không tồn tại
-        } catch (Exception e) {
-            throw new BadRequestException("Không thể cập nhật phòng ban");
+        if (departmentRepository.existsByDepartmentNameIgnoreCase(departmentDTO.getDepartmentName().trim())) {
+            throw new ConflictException("Phòng ban đã tồn tại.");
         }
+
+        department.setDepartmentName(departmentDTO.getDepartmentName());
+        return modelMapper.map(departmentRepository.save(department), DepartmentDTO.class);
     }
 
     @Override
@@ -77,19 +76,19 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Kiểm tra có nhân viên trong phòng ban không
             long userCount = userRepository.countByDepartment_DepartmentId(id);
             if (userCount > 0) {
-                throw new IllegalStateException("Không thể xóa phòng ban vì vẫn còn nhân viên thuộc về nó.");
+                throw new IllegalStateException("Phòng ban đã có nhân viên nên không thể xóa");
             }
 
             // Kiểm tra xem phòng ban có tồn tại không
             departmentRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng ban với ID: " + id));
+                    .orElseThrow(() -> new ResourceNotFoundException("Phng ban không tồn tại"));
 
             // Xóa phòng ban
             departmentRepository.deleteById(id);
-            return true;  // Trả về true nếu xóa thành công
+            return true;
 
         } catch (IllegalStateException e) {
-            throw new BadRequestException(e.getMessage());  // Bắt lỗi khi không thể xóa phòng ban
+            throw new BadRequestException(e.getMessage());
         } catch (ResourceNotFoundException e) {
             throw e;  // Ném lại lỗi nếu phòng ban không tồn tại
         } catch (Exception e) {

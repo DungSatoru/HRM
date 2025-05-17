@@ -36,7 +36,7 @@ public class PositionController {
     @PostMapping
     public ResponseEntity<ApiResponse<PositionDTO>> createPosition(@RequestBody PositionDTO positionDTO) {
         PositionDTO createdPosition = positionService.createPosition(positionDTO);
-        return ResponseUtil.created(createdPosition, "Tạo chức vụ mới thành công");
+        return ResponseUtil.created(createdPosition, "Thêm chức vụ mới thành công");
     }
 
     @PutMapping("/{id}")

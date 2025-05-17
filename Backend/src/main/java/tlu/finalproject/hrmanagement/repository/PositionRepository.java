@@ -6,4 +6,5 @@ import tlu.finalproject.hrmanagement.model.Position;
 
 @Repository
 public interface PositionRepository extends JpaRepository<Position, Long> {
+    boolean existsByPositionNameIgnoreCase(String positionName);
 }

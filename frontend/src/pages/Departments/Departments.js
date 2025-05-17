@@ -57,10 +57,8 @@ const Departments = () => {
       const values = await form.validateFields();
       if (modalAction === 'Add') {
         await addDepartment({ departmentName: values.departmentName });
-        message.success('Thêm phòng ban thành công!');
       } else if (modalAction === 'Edit') {
         await updateDepartment(selectedDepartment.departmentId, { departmentName: values.departmentName });
-        message.success('Cập nhật phòng ban thành công!');
       }
       fetchDepartments();
       closeModal();
@@ -73,12 +71,10 @@ const Departments = () => {
   const handleDelete = async () => {
     try {
       await deleteDepartment(selectedDepartment.departmentId);
-      message.success('Xóa phòng ban thành công!');
       fetchDepartments();
       closeModal();
     } catch (error) {
       console.error('Lỗi khi xóa phòng ban:', error);
-      message.error('Không thể xóa phòng ban');
     }
   };
 

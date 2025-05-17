@@ -37,7 +37,7 @@ const EmployeeDetail = () => {
   };
 
   if (loading) return <div>Đang tải dữ liệu...</div>;
-  if (!employee) return <div className="error-message">Không tìm thấy nhân viên</div>;
+  if (!employee) return;
 
   return (
     <div className="page-container employee-detail-container">

@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public EmployeeDTO getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Nhân viên không tồn tại"));
         return modelMapper.map(user, EmployeeDTO.class);
     }
 
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
     public EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO) {
         // Lấy user hiện tại
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Nhân viên không tồn tại"));
 
         // Ánh xạ các trường từ EmployeeDTO vào User thủ công
         existingUser.setUsername(employeeDTO.getUsername());

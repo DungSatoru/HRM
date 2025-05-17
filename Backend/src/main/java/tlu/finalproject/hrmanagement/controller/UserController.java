@@ -25,22 +25,22 @@ public class UserController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getAllUsers() {
         List<EmployeeDTO> users = userService.getAllUsers();
-        return ResponseUtil.success(users, "Lấy danh sách người dùng thành công");
+        return ResponseUtil.success(users, "Lấy danh sách nhân viên thành công");
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<EmployeeDTO>> getUserById(@PathVariable Long id) {
         EmployeeDTO user = userService.getUserById(id);
         if (user == null) {
-            return ResponseUtil.notFound("Không tìm thấy người dùng với ID " + id);
+            return ResponseUtil.notFound("Không tìm thấy nhân viên với ID " + id);
         }
-        return ResponseUtil.success(user, "Lấy thông tin người dùng thành công");
+        return ResponseUtil.success(user, "Lấy thông tin nhân viên thành công");
     }
 
     @GetMapping("/department/{departmentId}")
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getUsersByDepartment(@PathVariable Long departmentId) {
         List<EmployeeDTO> users = userService.getUsersByDepartmentId(departmentId);
-        return ResponseUtil.success(users, "Lấy danh sách người dùng theo phòng ban thành công");
+        return ResponseUtil.success(users, "Lấy danh sách nhân viên theo phòng ban thành công");
     }
 
     @PostMapping
@@ -56,7 +56,7 @@ public class UserController {
             employeeDTO.setProfileImageUrl(imageUrl); // Gán lại URL ảnh vào DTO
         }
         EmployeeDTO createdUser = userService.createUser(employeeDTO);
-        return ResponseUtil.created(createdUser, "Tạo người dùng mới thành công");
+        return ResponseUtil.created(createdUser, "Tạo nhân viên mới thành công");
     }
 
     @PutMapping("/{id}")
@@ -75,8 +75,8 @@ public class UserController {
 
         EmployeeDTO updatedUser = userService.updateUser(id, employeeDTO);
         if (updatedUser == null) {
-            return ResponseUtil.notFound("Không tìm thấy người dùng với ID " + id);
+            return ResponseUtil.notFound("Không tìm thấy nhân viên với ID " + id);
         }
-        return ResponseUtil.success(updatedUser, "Cập nhật người dùng thành công");
+        return ResponseUtil.success(updatedUser, "Cập nhật nhân viên thành công");
     }
 }

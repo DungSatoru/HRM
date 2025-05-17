@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     long countByDepartment_DepartmentId(Long id);
+
+    long countByPosition_PositionId(Long id);
 }

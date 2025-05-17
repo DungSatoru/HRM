@@ -6,7 +6,7 @@ export const getDepartments = async () => {
     const response = await axiosClient.get('/departments');
     return response.data.data;
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách phòng ban:', error);
+    toast.error(error.response.data.message);
     throw error;
   }
 };
@@ -16,7 +16,7 @@ export const getDepartmentById = async (id) => {
     const response = await axiosClient.get(`/departments/${id}`);
     return response.data.data;
   } catch (error) {
-    console.error(`Lỗi khi lấy thông tin phòng ban với ID: ${id}`, error);
+    toast.error(error.response.data.message);
     throw error;
   }
 };
@@ -27,8 +27,7 @@ export const addDepartment = async (departmentData) => {
     toast.success('Thêm phòng ban thành công!');
     return response.data.data;
   } catch (error) {
-    toast.error('Đã xảy ra lỗi khi thêm phòng ban!');
-    console.error('Lỗi khi thêm phòng ban:', error);
+    toast.error(error.response.data.message);
     throw error;
   }
 };
@@ -36,11 +35,10 @@ export const addDepartment = async (departmentData) => {
 export const updateDepartment = async (id, updatedData) => {
   try {
     const response = await axiosClient.put(`/departments/${id}`, updatedData);
-    toast.success(`Cập nhật phòng ban với ID: ${id} thành công!`);
+    toast.success(response.data.message);
     return response.data.data;
   } catch (error) {
-    toast.error(`Đã xảy ra lỗi khi cập nhật phòng ban với ID: ${id}`);
-    console.error(`Lỗi khi cập nhật phòng ban với ID: ${id}`, error);
+    toast.error(error.response.data.message);
     throw error;
   }
 };
@@ -48,14 +46,9 @@ export const updateDepartment = async (id, updatedData) => {
 export const deleteDepartment = async (id) => {
   try {
     const response = await axiosClient.delete(`/departments/${id}`);
-    if (response.status === 200) {
-      toast.success('Xóa phòng ban thành công!');
-      return { message: 'Xóa phòng ban thành công' };
-    }
-    throw new Error('Xóa phòng ban thất bại');
+    toast.success(response.data.message);
   } catch (error) {
-    toast.error(`Đã xảy ra lỗi khi xóa phòng ban với ID: ${id}`);
-    console.error(`Lỗi khi xóa phòng ban với ID: ${id}`, error);
+    toast.error(error.response.data.message);
     throw error;
   }
 };

@@ -24,4 +24,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
                 GROUP BY d.departmentId, d.departmentName
             """)
     List<DepartmentDTO> getDepartmentList();
+
+    boolean existsByDepartmentNameIgnoreCase(String departmentName);
 }
