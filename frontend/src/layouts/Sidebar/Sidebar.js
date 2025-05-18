@@ -132,9 +132,6 @@ const Sidebar = () => {
                     <li>
                       <NavLink to="/attendance-history">Lịch sử chấm công</NavLink>
                     </li>
-                    <li>
-                      <NavLink to="/attendance-reports">Báo cáo chấm công</NavLink>
-                    </li>
                   </>
                 )}
               </ul>

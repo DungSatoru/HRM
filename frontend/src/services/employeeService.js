@@ -65,14 +65,3 @@ export const updateEmployee = async (id, updatedData, avatarFile) => {
     throw error;
   }
 };
-
-export const deleteEmployee = async (id) => {
-  try {
-    const response = await axiosClient.delete(`/users/${id}`);
-    toast.success(response.data.message);
-    return response.data.data;
-  } catch (error) {
-    toast.error(error.response.data.message);
-    throw error;
-  }
-};

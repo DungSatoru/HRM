@@ -17,6 +17,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \"Unauthorized - Token missing or invalid\"}");
+        response.getWriter().write("{\"error\": \"Không thể xác thực - Token hết hạn hoạ có lỗi\"}");
     }
 }

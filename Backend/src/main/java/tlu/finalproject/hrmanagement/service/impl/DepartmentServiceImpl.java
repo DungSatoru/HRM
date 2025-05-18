@@ -4,16 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
+import tlu.finalproject.hrmanagement.exception.BadRequestException;
 import tlu.finalproject.hrmanagement.exception.ConflictException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
-import tlu.finalproject.hrmanagement.exception.BadRequestException;  // Import thêm
 import tlu.finalproject.hrmanagement.model.Department;
 import tlu.finalproject.hrmanagement.repository.DepartmentRepository;
-import tlu.finalproject.hrmanagement.repository.UserRepository;  // Nếu bạn kiểm tra số lượng nhân viên
+import tlu.finalproject.hrmanagement.repository.UserRepository;
 import tlu.finalproject.hrmanagement.service.DepartmentService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +75,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Kiểm tra có nhân viên trong phòng ban không
             long userCount = userRepository.countByDepartment_DepartmentId(id);
             if (userCount > 0) {
-                throw new IllegalStateException("Phòng ban đã có nhân viên nên không thể xóa");
+                throw new ConflictException("Phòng ban đã có nhân viên nên không thể xóa");
             }
 
             // Kiểm tra xem phòng ban có tồn tại không

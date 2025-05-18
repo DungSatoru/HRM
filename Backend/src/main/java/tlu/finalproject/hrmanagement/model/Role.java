@@ -19,7 +19,4 @@ public class Role {
 
     @Column(name = "role_name", nullable = false, unique = true)
     String roleName;
-
-    @Column(name = "description")
-    String description;
 }

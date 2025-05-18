@@ -58,18 +58,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public EmployeeDTO createUser(EmployeeDTO employeeDTO) {
         User user = modelMapper.map(employeeDTO, User.class);
-        if (userRepository.existsByIdentity(employeeDTO.getIdentity())) {
+        if (userRepository.existsByIdentity(employeeDTO.getIdentity().trim())) {
             throw new ConflictException("CCCD đã tồn tại.");
         }
-        if (userRepository.existsByPhone(employeeDTO.getPhone())) {
+        if (userRepository.existsByPhone(employeeDTO.getPhone().trim())) {
             throw new ConflictException("Số điện thoại đã tồn tại.");
         }
 
-        if (userRepository.existsByEmail(employeeDTO.getEmail())) {
+        if (userRepository.existsByEmail(employeeDTO.getEmail().trim())) {
             throw new ConflictException("Email đã tồn tại.");
         }
 
-        if (userRepository.existsByUsername(employeeDTO.getUsername())) {
+        if (userRepository.existsByUsername(employeeDTO.getUsername().trim())) {
             throw new ConflictException("Tên đăng nhập đã tồn tại.");
         }
 

@@ -32,7 +32,7 @@ const Departments = () => {
   };
 
   const filteredDepartments = departments.filter((dep) =>
-    dep.departmentName?.toLowerCase().includes(searchTerm.toLowerCase())
+    dep.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const openModal = (action, department = {}) => {
@@ -75,6 +75,7 @@ const Departments = () => {
       closeModal();
     } catch (error) {
       console.error('Lỗi khi xóa phòng ban:', error);
+      closeModal();
     }
   };
 
@@ -108,17 +109,10 @@ const Departments = () => {
       key: 'actions',
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => openModal('Edit', record)}
-          >
+          <Button icon={<EditOutlined />} onClick={() => openModal('Edit', record)}>
             Sửa
           </Button>
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={() => openModal('Delete', record)}
-          >
+          <Button icon={<DeleteOutlined />} danger onClick={() => openModal('Delete', record)}>
             Xóa
           </Button>
         </Space>
@@ -167,7 +161,9 @@ const Departments = () => {
         cancelText="Hủy"
       >
         {modalAction === 'Delete' ? (
-          <p>Bạn có chắc chắn muốn xóa phòng ban <b>{selectedDepartment.departmentName}</b> không?</p>
+          <p>
+            Bạn có chắc chắn muốn xóa phòng ban <b>{selectedDepartment.departmentName}</b> không?
+          </p>
         ) : (
           <Form form={form} layout="vertical">
             <Form.Item

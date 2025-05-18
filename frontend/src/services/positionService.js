@@ -56,6 +56,9 @@ export const updatePosition = async (id, updatedData) => {
 export const deletePosition = async (id) => {
   try {
     const response = await axiosClient.delete(`/positions/${id}`);
+    if (response.status !== 200) {
+      throw new Error('Không thể xóa vị trí');
+    }
     toast.success(response.data.message);
   } catch (error) {
     toast.error(error.response.data.message);

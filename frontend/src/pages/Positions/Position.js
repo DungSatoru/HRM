@@ -79,20 +79,17 @@ const Positions = () => {
       fetchData(); // Gọi lại fetchData sau khi thêm hoặc sửa
       closeModal();
     } catch (error) {
-      console.error('Lỗi xử lý chức vụ:', error);
-      message.error('Xử lý thất bại!');
+      closeModal();
     }
   };
 
   const handleDelete = async () => {
     try {
       await deletePosition(selectedPosition.positionId);
-      message.success('Xóa chức vụ thành công!');
-      fetchData(); // Gọi lại fetchData sau khi xóa
+      fetchData();
       closeModal();
     } catch (error) {
-      console.error('Lỗi khi xóa chức vụ:', error);
-      message.error('Không thể xóa chức vụ');
+      closeModal();
     }
   };
 

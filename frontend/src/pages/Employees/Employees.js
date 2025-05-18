@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import { deleteEmployee } from '~/services/employeeService';
 import { fetchEmpDepPos } from '~/utils/fetchData';
-import { Table, Button, Modal, Input, Tag, Space, message } from 'antd';
+import { Table, Button, Input, Tag, Space } from 'antd';
 import Loading from '~/components/Loading/Loading';
-import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 
 const Employees = () => {
   const navigate = useNavigate();
