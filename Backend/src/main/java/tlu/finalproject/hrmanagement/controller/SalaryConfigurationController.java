@@ -2,6 +2,7 @@ package tlu.finalproject.hrmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.SalaryConfigurationDTO;
 import tlu.finalproject.hrmanagement.dto.common.ApiResponse;
@@ -17,12 +18,14 @@ public class SalaryConfigurationController {
     private final SalaryConfigurationService service;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<SalaryConfigurationDTO>>> getAllSalaryConfig() {
         List<SalaryConfigurationDTO> salaryConfigs = service.getAllSalaryConfig();
         return ResponseUtil.success(salaryConfigs, "Lấy danh sách cấu hình lương thành công");
     }
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<SalaryConfigurationDTO>> getByUserId(@PathVariable Long userId) {
         SalaryConfigurationDTO salaryConfig = service.getByUserId(userId);
         if (salaryConfig == null) {
@@ -32,12 +35,14 @@ public class SalaryConfigurationController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<SalaryConfigurationDTO>> createSalaryConfiguration(@RequestBody SalaryConfigurationDTO dto) {
         SalaryConfigurationDTO salaryConfigurationDTO = service.createSalaryConfiguration(dto);
         return ResponseUtil.created(salaryConfigurationDTO, "Tạo cấu hình lương thành công");
     }
 
     @PutMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<SalaryConfigurationDTO>> updateSalaryConfiguration(
             @PathVariable Long userId, @RequestBody SalaryConfigurationDTO dto) {
         SalaryConfigurationDTO salaryConfigurationDTO = service.updateSalaryConfiguration(userId, dto);
@@ -45,6 +50,7 @@ public class SalaryConfigurationController {
     }
 
     @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<Void>> deleteByUserId(@PathVariable Long userId) {
         boolean deleted = service.deleteByUserId(userId);
         if (!deleted) {

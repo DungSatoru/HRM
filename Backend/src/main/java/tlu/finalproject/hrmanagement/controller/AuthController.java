@@ -3,6 +3,7 @@ package tlu.finalproject.hrmanagement.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.AuthRequestDTO;
 import tlu.finalproject.hrmanagement.dto.AuthResponseDTO;

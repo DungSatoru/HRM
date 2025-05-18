@@ -1,6 +1,7 @@
 package tlu.finalproject.hrmanagement.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.PositionDTO;
 import tlu.finalproject.hrmanagement.dto.common.ApiResponse;
@@ -19,12 +20,14 @@ public class PositionController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<PositionDTO>>> getAllPositions() {
         List<PositionDTO> positions = positionService.getAllPosition();
         return ResponseUtil.success(positions, "Lấy danh sách chức vụ thành công");
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<PositionDTO>> getPositionById(@PathVariable Long id) {
         PositionDTO position = positionService.getPositionById(id);
         if (position == null) {
@@ -34,12 +37,14 @@ public class PositionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<PositionDTO>> createPosition(@RequestBody PositionDTO positionDTO) {
         PositionDTO createdPosition = positionService.createPosition(positionDTO);
         return ResponseUtil.created(createdPosition, "Thêm chức vụ mới thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
         PositionDTO updatedPosition = positionService.updatePosition(id, positionDTO);
         if (updatedPosition == null) {
@@ -48,7 +53,9 @@ public class PositionController {
         return ResponseUtil.success(updatedPosition, "Cập nhật chức vụ thành công");
     }
 
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<Void>> deletePosition(@PathVariable Long id) {
         boolean deleted = positionService.deletePosition(id);
         if (!deleted) {

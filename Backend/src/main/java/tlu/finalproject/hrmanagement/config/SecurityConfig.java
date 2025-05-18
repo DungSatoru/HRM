@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +20,7 @@ import tlu.finalproject.hrmanagement.exception.CustomAuthenticationEntryPoint;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
     private final CorsFilter corsFilter;
@@ -52,19 +54,19 @@ public class SecurityConfig {
                 .authorizeRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
                         .requestMatchers(HttpMethod.GET, "uploads/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/attendance/**").hasAnyRole("EMPLOYEE", "ADMIN", "HR")
-                        .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN", "HR") // Phân quyền cho chấm công
-
-                        .requestMatchers("/api/departments/**").hasRole("ADMIN") // Phân quyền cho quản lý roles, departments và positions
-
-                        .requestMatchers(HttpMethod.GET, "/api/positions/**", "/api/roles/**").hasAnyRole("EMPLOYEE", "ADMIN", "HR")
-                        .requestMatchers("/api/positions/**", "/api/roles/**").hasRole("ADMIN")
-
-                        .requestMatchers("/api/salary-bonuses/**", "/api/salary-config/**").hasAnyRole("ADMIN", "HR") // Phân quyền cho lương và thưởng
-                        .requestMatchers(HttpMethod.GET, "/api/salaries/employee/**").hasAnyRole("EMPLOYEE", "ADMIN", "HR")
-                        .requestMatchers("/api/salaries/**").hasAnyRole("ADMIN", "HR") .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "HR") // Quản lý người dùng
-
-                        .requestMatchers("/api/video/upload").hasRole("ADMIN") // Phân quyền cho video upload
+//                        .requestMatchers(HttpMethod.GET, "/api/attendance/**").hasAnyRole("EMPLOYEE", "ADMIN", "HR")
+//                        .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN", "HR") // Phân quyền cho chấm công
+//
+//                        .requestMatchers("/api/departments/**").hasRole("ADMIN") // Phân quyền cho quản lý roles, departments và positions
+//
+//                        .requestMatchers(HttpMethod.GET, "/api/positions/**", "/api/roles/**").hasAnyRole("EMPLOYEE", "ADMIN", "HR")
+//                        .requestMatchers("/api/positions/**", "/api/roles/**").hasRole("ADMIN")
+//
+//                        .requestMatchers("/api/salary-bonuses/**", "/api/salary-config/**").hasAnyRole("ADMIN", "HR") // Phân quyền cho lương và thưởng
+//                        .requestMatchers(HttpMethod.GET, "/api/salaries/employee/**").hasAnyRole("EMPLOYEE", "ADMIN", "HR")
+//                        .requestMatchers("/api/salaries/**").hasAnyRole("ADMIN", "HR") .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "HR") // Quản lý người dùng
+//
+//                        .requestMatchers("/api/video/upload").hasRole("ADMIN") // Phân quyền cho video upload
 
                         .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
                 )

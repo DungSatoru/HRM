@@ -2,6 +2,7 @@ package tlu.finalproject.hrmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.SalarySlipDTO;
 import tlu.finalproject.hrmanagement.dto.SalarySlipDetailDTO;
@@ -22,11 +23,13 @@ public class SalarySlipController {
     private final SalarySlipService salarySlipService;
 
     @GetMapping()
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<SalarySlipDTO>>> getSalarySlipsByMonth(@RequestParam String month) {
         return ResponseUtil.success(salarySlipService.getAllSalarySlipsByMonth(month), "Lấy danh sách bảng lương tháng " + month + " thành công");
     }
 
     @GetMapping("/employee/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<SalarySlipDetailDTO>> getSalarySlipDetail(
             @PathVariable Long userId,
             @RequestParam String month) {
@@ -45,6 +48,7 @@ public class SalarySlipController {
      * @return Message thành công
      */
     @PostMapping("/calculate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<String>> calculateAndSaveSalarySlip(
             @RequestParam Long userId,
             @RequestParam String month

@@ -1,6 +1,7 @@
 package tlu.finalproject.hrmanagement.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.DepartmentDTO;
 import tlu.finalproject.hrmanagement.dto.common.ApiResponse;
@@ -19,12 +20,14 @@ public class DepartmentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<DepartmentDTO>>> getAllDepartments() {
         List<DepartmentDTO> departments = departmentService.getAllDepartment();
         return ResponseUtil.success(departments, "Lấy danh sách phòng ban thành công");
     }
 
     @GetMapping("/{departmentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<DepartmentDTO>> getDepartmentById(@PathVariable Long departmentId) {
         DepartmentDTO department = departmentService.getDepartmentById(departmentId);
         if (department == null) {
@@ -34,12 +37,14 @@ public class DepartmentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<DepartmentDTO>> createDepartment(@RequestBody DepartmentDTO departmentDTO) {
         DepartmentDTO createdDepartment = departmentService.createDepartment(departmentDTO);
         return ResponseUtil.created(createdDepartment, "Tạo phòng ban mới thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<DepartmentDTO>> updateDepartment(@PathVariable Long id, @RequestBody DepartmentDTO departmentDTO) {
         DepartmentDTO updatedDepartment = departmentService.updateDepartment(id, departmentDTO);
         if (updatedDepartment == null) {
@@ -49,6 +54,7 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteDepartment(@PathVariable Long id) {
         boolean deleted = departmentService.deleteDepartment(id);
         if (!deleted) {

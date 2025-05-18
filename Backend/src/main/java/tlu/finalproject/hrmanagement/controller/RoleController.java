@@ -2,6 +2,7 @@ package tlu.finalproject.hrmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.RoleDTO;
 import tlu.finalproject.hrmanagement.dto.common.ApiResponse;
@@ -17,12 +18,14 @@ public class RoleController {
     private final RoleService roleService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<RoleDTO>>> getAllRoles() {
         List<RoleDTO> roles = roleService.getAllRole();
         return ResponseUtil.success(roles, "Lấy danh sách vai trò thành công");
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<RoleDTO>> getRoleById(@PathVariable Long id) {
         RoleDTO role = roleService.getRoleById(id);
         if (role == null) {
@@ -32,12 +35,14 @@ public class RoleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<RoleDTO>> createRole(@RequestBody RoleDTO roleDTO) {
         RoleDTO createdRole = roleService.createRole(roleDTO);
         return ResponseUtil.created(createdRole, "Tạo vai trò mới thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<RoleDTO>> updateRole(@PathVariable Long id, @RequestBody RoleDTO roleDTO) {
         RoleDTO updatedRole = roleService.updateRole(id, roleDTO);
         if (updatedRole == null) {
@@ -47,6 +52,7 @@ public class RoleController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteRole(@PathVariable Long id) {
         boolean deleted = roleService.deleteRole(id);
         if (!deleted) {

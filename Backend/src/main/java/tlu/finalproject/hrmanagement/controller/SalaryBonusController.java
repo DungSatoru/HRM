@@ -2,6 +2,7 @@ package tlu.finalproject.hrmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tlu.finalproject.hrmanagement.dto.SalaryBonusDTO;
 import tlu.finalproject.hrmanagement.dto.common.ApiResponse;
@@ -18,18 +19,21 @@ public class SalaryBonusController {
     private final SalaryBonusService service;
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<SalaryBonusDTO>>> getAllByUserId(@PathVariable Long userId) {
         List<SalaryBonusDTO> salaryBonuses = service.getAllByUserId(userId);
         return ResponseUtil.success(salaryBonuses, "Lấy danh sách thưởng lương thành công");
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<SalaryBonusDTO>> create(@RequestBody SalaryBonusDTO dto) {
         SalaryBonusDTO createdSalaryBonus = service.create(dto);
         return ResponseUtil.created(createdSalaryBonus, "Tạo thưởng lương thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<SalaryBonusDTO>> update(@PathVariable Long id, @RequestBody SalaryBonusDTO dto) {
         SalaryBonusDTO updatedSalaryBonus = service.update(id, dto);
         if (updatedSalaryBonus == null) {
@@ -39,6 +43,7 @@ public class SalaryBonusController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         boolean deleted = service.delete(id);
         if (!deleted) {

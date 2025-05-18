@@ -3,6 +3,7 @@ package tlu.finalproject.hrmanagement.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tlu.finalproject.hrmanagement.dto.EmployeeDTO;
@@ -23,12 +24,14 @@ public class UserController {
     private final FileStorageService fileStorageService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getAllUsers() {
         List<EmployeeDTO> users = userService.getAllUsers();
         return ResponseUtil.success(users, "Lấy danh sách nhân viên thành công");
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> getUserById(@PathVariable Long id) {
         EmployeeDTO user = userService.getUserById(id);
         if (user == null) {
@@ -38,12 +41,14 @@ public class UserController {
     }
 
     @GetMapping("/department/{departmentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getUsersByDepartment(@PathVariable Long departmentId) {
         List<EmployeeDTO> users = userService.getUsersByDepartmentId(departmentId);
         return ResponseUtil.success(users, "Lấy danh sách nhân viên theo phòng ban thành công");
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> createUser(
             @RequestPart("data") String employeeJson,
             @RequestPart(value = "image", required = false) MultipartFile imageFile
@@ -60,6 +65,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> updateUser(
             @PathVariable Long id,
             @RequestPart("data") String employeeJson, // 👈 nhận raw JSON
