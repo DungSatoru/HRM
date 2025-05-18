@@ -1,16 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
+import { getEmployeeById } from '~/services/employeeService';
 
 const Sidebar = () => {
   const fullName = localStorage.getItem('fullName') || 'Người dùng';
   const position = localStorage.getItem('positionName') || 'Nhân viên';
   const role = localStorage.getItem('roleName');
+  const [employee, setEmployee] = useState(null);
 
   // Phân quyền chi tiết
   const isAdmin = role === 'ROLE_ADMIN';
   const isHR = role === 'ROLE_HR';
   const isEmployee = role === 'ROLE_EMPLOYEE';
+
+  useEffect(() => {
+    fetchEmployeeDetail();
+  }, [localStorage.getItem('userId')]);
+
+  const fetchEmployeeDetail = async () => {
+    try {
+      const data = await getEmployeeById(localStorage.getItem('userId'));
+      setEmployee(data);
+    } catch (error) {
+      console.error('Lỗi khi tải thông tin nhân viên:', error);
+    }
+  };
 
   const [openSections, setOpenSections] = useState({
     collapsePhongBanVaChucVu: false,
@@ -35,7 +50,11 @@ const Sidebar = () => {
         <div className="row">
           <div className="col-md-3">
             <img
-              src="https://yt3.googleusercontent.com/teSofwgIZAZaLEFxJtRJkZxZV3KsMdO4BB-vuUkXPcEPdM2bvEPzn4k92VksjV4v49L-cJqGGQ=s900-c-k-c0x00ffffff-no-rj"
+              src={
+                employee && employee.profileImageUrl
+                  ? `${process.env.REACT_APP_SERVER_URL}${employee.profileImageUrl}`
+                  : 'https://cdn-icons-png.flaticon.com/512/219/219969.png'
+              }
               alt="Ảnh đại diện"
               className="profile-img"
             />
@@ -51,7 +70,7 @@ const Sidebar = () => {
         <p className="fw-bold">Chức năng chính</p>
         <ul className="list-unstyled">
           {/* Tổng quan - Tất cả đều xem được */}
-          {(isHR || isAdmin ) && (
+          {(isHR || isAdmin) && (
             <li>
               <NavLink to="/dashboard">
                 <i className="fa-solid fas fa-tachometer-alt"></i> Tổng quan
@@ -69,7 +88,7 @@ const Sidebar = () => {
           )}
 
           {/* Quản lý phòng ban và chức vụ - HR, Admin và Manager */}
-          {(isHR || isAdmin ) && (
+          {(isHR || isAdmin) && (
             <li>
               <NavLink
                 to="#collapsePhongBanVaChucVu"
@@ -177,37 +196,7 @@ const Sidebar = () => {
         </ul>
       </div>
 
-      {/* Admin menu - Chỉ Admin */}
-      {isAdmin && (
-        <div className="admin-menu">
-          <p className="fw-bold">Quản trị hệ thống</p>
-          <ul>
-            <li>
-              <NavLink to="#collapseUser" className="nav-item" onClick={() => handleToggle('collapseUser')}>
-                <div className="d-flex justify-content-between align-items-center">
-                  <span>
-                    <i className="fa-solid fa-user-shield"></i> Quản lý người dùng
-                  </span>
-                  <span className="dropdown-icon">
-                    <i className={`fa-solid ${openSections.collapseUser ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                  </span>
-                </div>
-              </NavLink>
-              <div className={`collapse ${openSections.collapseUser ? 'show' : ''}`} id="collapseUser">
-                <ul className="submenu">
-                  <li>
-                    <NavLink to="/user-permissions">Phân quyền người dùng</NavLink>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          </ul>
-        </div>
-      )}
-
-      {/* Cài đặt - Tất cả đều xem được */}
       <div className="other">
-        <p className="fw-bold">Khác</p>
         <ul>
           <li>
             <NavLink to="#collapseSetting" className="nav-item" onClick={() => handleToggle('collapseSetting')}>
@@ -232,20 +221,25 @@ const Sidebar = () => {
                     <NavLink to="/settings/face-training">Huấn luyện khuôn mặt</NavLink>
                   </li>
                 )}
-                <li>
-                  <NavLink
-                    to="/login"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      localStorage.clear();
-                      window.location.href = '/login';
-                    }}
-                  >
-                    Đăng xuất
-                  </NavLink>
-                </li>
+                {isAdmin && (
+                  <li>
+                    <NavLink to="/settings/user-permissions">Phân quyền người dùng</NavLink>
+                  </li>
+                )}
               </ul>
             </div>
+          </li>
+          <li>
+            <NavLink
+              to="/login"
+              onClick={(e) => {
+                e.preventDefault();
+                localStorage.clear();
+                window.location.href = '/login';
+              }}
+            >
+              Đăng xuất
+            </NavLink>
           </li>
         </ul>
       </div>

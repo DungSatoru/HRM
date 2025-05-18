@@ -50,10 +50,6 @@ const Header = () => {
         crumbs.push({ name: 'Lịch sử chấm công', link: '/attendance-history' });
         break;
 
-      case 'attendance-reports':
-        crumbs.push({ name: 'Chấm công', link: '/attendances' });
-        crumbs.push({ name: 'Báo cáo chấm công', link: '/attendance-reports' });
-        break;
 
       case 'salary':
         crumbs.push({ name: 'Lương và phúc lợi', link: '/salary' });

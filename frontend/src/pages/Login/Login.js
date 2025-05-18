@@ -16,9 +16,14 @@ export default function Login() {
     try {
       // Gọi loginService để thực hiện đăng nhập
       const data = await loginService.login(username, password);
+      if (localStorage.getItem('roleName') === 'ROLE_EMPLOYEE') {
+        window.location.href = '/attendances/user/' + localStorage.getItem('userId'); 
+      } else if (localStorage.getItem('roleName') === 'ROLE_HR') {
+        window.location.href = '/attendances';
+      } else if (localStorage.getItem('roleName') === 'ROLE_ADMIN') {
+        window.location.href = '/dashboard';
+      }
 
-      // Sau khi đăng nhập thành công, chuyển hướng đến trang chính
-      window.location.href = '/dashboard'; // Hoặc dùng `useNavigate` từ react-router-dom
     } catch (err) {
       // Xử lý lỗi khi đăng nhập
       setError('Tên đăng nhập hoặc mật khẩu không đúng');
