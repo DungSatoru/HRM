@@ -85,4 +85,18 @@ public class UserController {
         }
         return ResponseUtil.success(updatedUser, "Cập nhật nhân viên thành công");
     }
+
+    @PostMapping("/{id}/assign-role")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    public ResponseEntity<ApiResponse<String>> assignRole(@PathVariable Long id, @RequestParam Long roleId) {
+        try {
+            boolean success = userService.assignRole(id, roleId);
+            if (!success) {
+                return ResponseUtil.notFound("Không thể cập nhật vai trò cho nhân viên");
+            }
+            return ResponseUtil.success("Cập nhật quyền nhân viên thành công", "Cập nhật quyền nhân viên thành công");
+        } catch (ResourceNotFoundException e) {
+            return ResponseUtil.notFound("Không tìm thấy nhân viên hoặc vai trò");
+        }
+    }
 }

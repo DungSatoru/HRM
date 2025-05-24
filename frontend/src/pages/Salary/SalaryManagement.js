@@ -81,7 +81,7 @@ const SalaryManagement = () => {
 
       form.setFieldsValue({
         basicSalary: salaryConfig.basicSalary || 0,
-        insuranceBaseSalary: salaryConfig.insuranceBaseSalary || 'Đóng toàn bộ các khoản',
+        insuranceBaseSalary: salaryConfig.insuranceBaseSalary,
         overtimeRate: salaryConfig.overtimeRate || 0,
         otherAllowances: salaryConfig.otherAllowances || 0,
         bonusRate: salaryConfig.bonusRate || 0,
@@ -393,7 +393,7 @@ const SalaryManagement = () => {
           <Form.Item
             label="Ngày thưởng"
             name="bonusDate"
-            rules={[{ required: true, message: 'Vui lòng chọn ngày khấu trừ' }]}
+            rules={[{ required: true, message: 'Vui lòng chọn ngày thưởng' }]}
           >
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>

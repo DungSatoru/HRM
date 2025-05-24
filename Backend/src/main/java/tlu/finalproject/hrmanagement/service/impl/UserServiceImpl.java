@@ -151,4 +151,19 @@ public class UserServiceImpl implements UserService {
         // Trả về DTO
         return modelMapper.map(saved, EmployeeDTO.class);
     }
+
+    @Override
+    public boolean assignRole(Long userId, Long roleId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        Optional<Role> roleOpt = roleRepository.findById(roleId);
+
+        if (userOpt.isPresent() && roleOpt.isPresent()) {
+            User user = userOpt.get();
+            Role role = roleOpt.get();
+            user.setRole(role);
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
 }

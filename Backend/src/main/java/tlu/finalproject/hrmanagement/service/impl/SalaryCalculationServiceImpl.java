@@ -39,6 +39,12 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
 
     @Override
     public void calculateAndSaveSalarySlip(Long userId, LocalDate month) {
+        User user = findUserById(userId);
+        // Nếu trạng thái là INACTIVE thì không tính lương
+        if (user.getStatus() == Status.INACTIVE) {
+            return; // Dừng luôn, không tính lương nữa
+        }
+        
         String monthStr = formatMonthString(month);
 //        validateSalarySlipNotExists(userId, monthStr);
 
@@ -53,11 +59,7 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
             salarySlipRepository.delete(existingSlip.get());
         }
 
-        User user = findUserById(userId);
-        // Nếu trạng thái là INACTIVE thì không tính lương
-        if (user.getStatus() == Status.INACTIVE) {
-            return; // Dừng luôn, không tính lương nữa
-        }
+        
         SalaryConfiguration config = findSalaryConfigurationByUserId(userId);
 
         double basicSalary = config.getBasicSalary();

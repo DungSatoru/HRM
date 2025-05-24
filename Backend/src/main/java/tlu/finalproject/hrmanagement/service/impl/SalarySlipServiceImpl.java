@@ -68,8 +68,6 @@ public class SalarySlipServiceImpl implements SalarySlipService {
             }
         }
 
-
-
         // Map DTO
         EmployeeDTO employeeDTO = modelMapper.map(salarySlip.getUser(), EmployeeDTO.class);
         SalarySlipDTO slipDTO = modelMapper.map(salarySlip, SalarySlipDTO.class);
@@ -77,7 +75,6 @@ public class SalarySlipServiceImpl implements SalarySlipService {
                 .map(b -> modelMapper.map(b, SalaryBonusDTO.class)).toList();
         List<SalaryDeductionDTO> deductionDTOs = deductions.stream()
                 .map(d -> modelMapper.map(d, SalaryDeductionDTO.class)).toList();
-
 
         return SalarySlipDetailDTO.builder()
                 .employee(employeeDTO)

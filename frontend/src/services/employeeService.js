@@ -33,7 +33,7 @@ export const addEmployee = async (employeeData, avatarFile) => {
     const response = await axiosClient.post('/users', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
     toast.success('Thêm nhân viên thành công!');
@@ -55,13 +55,25 @@ export const updateEmployee = async (id, updatedData, avatarFile) => {
     const response = await axiosClient.put(`/users/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
     toast.success(response.data.message);
     return response.data.data;
   } catch (error) {
     toast.error(error.response.data.message);
+    throw error;
+  }
+};
+
+// Gán vai trò cho nhân viên
+export const assignRole = async (id, roleId) => {
+  try {
+  const response = await axiosClient.post(`/users/${id}/assign-role?roleId=${roleId}`);
+    toast.success('Cập nhật vai trò nhân viên thành công!');
+    return response.data.data;
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Lỗi khi phân quyền cho nhân viên');
     throw error;
   }
 };

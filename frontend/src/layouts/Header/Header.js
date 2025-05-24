@@ -50,7 +50,6 @@ const Header = () => {
         crumbs.push({ name: 'Lịch sử chấm công', link: '/attendance-history' });
         break;
 
-
       case 'salary':
         crumbs.push({ name: 'Lương và phúc lợi', link: '/salary' });
         if (path[1] === 'user') {
@@ -111,6 +110,10 @@ const Header = () => {
           crumbs.push({ name: 'Tài khoản của tôi', link: '/settings/account' });
         } else if (path[1] === 'security') {
           crumbs.push({ name: 'Cấu hình bảo mật', link: '/settings/security' });
+        } else if (path[1] === 'face-training') {
+          crumbs.push({ name: 'Huấn luyện khuôn mặt', link: '/settings/face-training' });
+        } else if (path[1] === 'user-permissions') {
+          crumbs.push({ name: 'Phân quyền người dùng', link: '/settings/user-permissions' });
         }
         break;
 

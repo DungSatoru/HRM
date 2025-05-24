@@ -58,6 +58,7 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
         salaryConfiguration.setBonusRate(dto.getBonusRate());
         salaryConfiguration.setOtherAllowances(dto.getOtherAllowances());
         salaryConfiguration.setOvertimeRate(dto.getOvertimeRate());
+        salaryConfiguration.setInsuranceBaseSalary(dto.getInsuranceBaseSalary());
 
         SalaryConfiguration saved = salaryConfigurationRepository.save(salaryConfiguration);
 

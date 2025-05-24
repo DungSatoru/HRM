@@ -4,7 +4,7 @@ import { getEmployees } from '~/services/employeeService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Loading from '~/components/Loading/Loading';
-import { Modal, Form, Input, DatePicker, TimePicker, Button, Select, List } from 'antd';
+import { Modal, Form, Input, DatePicker, TimePicker, Button, Select, List, Row, Col } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
@@ -108,65 +108,72 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
         <Loading />
       ) : (
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          {mode === 'create' && (
-            <Form.Item
-              label="Tìm kiếm nhân viên"
-              name="userId"
-              rules={[{ required: true, message: 'Vui lòng chọn nhân viên' }]}
-            >
-              <div style={{ position: 'relative' }}>
-                <Input
-                  placeholder="Nhập tên nhân viên..."
-                  value={searchTerm || selectedName}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setSelectedName('');
-                    form.setFieldsValue({
-                      userId: '',
-                      fullName: '',
-                    });
-                    setShowEmployeeList(true);
-                  }}
-                  onFocus={() => setShowEmployeeList(true)}
-                />
-                {showEmployeeList && searchTerm && filteredEmployees.length > 0 && (
-                  <List
-                    style={{
-                      position: 'absolute',
-                      zIndex: 1,
-                      width: '100%',
-                      maxHeight: 200,
-                      overflowY: 'auto',
-                      backgroundColor: '#fff',
-                      boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-                      marginTop: 4,
-                    }}
-                    dataSource={filteredEmployees}
-                    renderItem={(emp) => (
-                      <List.Item
-                        style={{ padding: '8px 12px', cursor: 'pointer' }}
-                        onClick={() => handleSelectEmployee(emp)}
-                      >
-                        {emp.fullName} ({emp.userId})
-                      </List.Item>
+          <Row gutter={16}>
+            <Col md={12}>
+              {mode === 'create' && (
+                <Form.Item
+                  label="Tìm kiếm nhân viên"
+                  name="userId"
+                  rules={[{ required: true, message: 'Vui lòng chọn nhân viên' }]}
+                >
+                  <div style={{ position: 'relative' }}>
+                    <Input
+                      placeholder="Nhập tên nhân viên..."
+                      value={searchTerm || selectedName}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setSelectedName('');
+                        form.setFieldsValue({
+                          userId: '',
+                          fullName: '',
+                        });
+                        setShowEmployeeList(true);
+                      }}
+                      onFocus={() => setShowEmployeeList(true)}
+                    />
+                    {showEmployeeList && searchTerm && filteredEmployees.length > 0 && (
+                      <List
+                        style={{
+                          position: 'absolute',
+                          zIndex: 1,
+                          width: '100%',
+                          maxHeight: 200,
+                          overflowY: 'auto',
+                          backgroundColor: '#fff',
+                          boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                          marginTop: 4,
+                        }}
+                        dataSource={filteredEmployees}
+                        renderItem={(emp) => (
+                          <List.Item
+                            style={{ padding: '8px 12px', cursor: 'pointer' }}
+                            onClick={() => handleSelectEmployee(emp)}
+                          >
+                            {emp.fullName} ({emp.userId})
+                          </List.Item>
+                        )}
+                      />
                     )}
-                  />
-                )}
-              </div>
-            </Form.Item>
-          )}
-
-          <Form.Item label="Ngày" name="date" rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}>
-            <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} disabled={mode === 'edit'} />
-          </Form.Item>
-
-          <Form.Item label="Giờ vào" name="checkIn">
-            <TimePicker format="HH:mm" style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item label="Giờ ra" name="checkOut">
-            <TimePicker format="HH:mm" style={{ width: '100%' }} />
-          </Form.Item>
+                  </div>
+                </Form.Item>
+              )}
+            </Col>
+            <Col md={12}>
+              <Form.Item label="Ngày" name="date" rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}>
+                <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} disabled={mode === 'edit'} />
+              </Form.Item>
+            </Col>
+            <Col md={12}>
+              <Form.Item label="Giờ vào" name="checkIn" rules={[{ required: true, message: 'Vui lòng chọn giờ vào' }]}>
+                <TimePicker format="HH:mm" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col md={12}>
+              <Form.Item label="Giờ ra" name="checkOut" rules={[{ required: true, message: 'Vui lòng chọn giờ ra' }]}>
+                <TimePicker format="HH:mm" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading}>

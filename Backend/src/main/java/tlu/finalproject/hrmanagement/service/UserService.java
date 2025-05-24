@@ -14,4 +14,5 @@ public interface UserService {
     EmployeeDTO createUser(EmployeeDTO employeeDTO);
 
     EmployeeDTO updateUser(Long id, EmployeeDTO employeeDTO);
+    boolean assignRole(Long userId, Long roleId);
 }

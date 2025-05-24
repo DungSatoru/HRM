@@ -16,6 +16,7 @@ import Salary from '~/pages/Salary/Salary';
 import SalaryReport from '~/pages/Reports/salaryReport';
 import SalarySlipPage from '~/pages/Salary/SalarySlipPage';
 import AttendanceByUser from '~/pages/Attendances/AttendanceByUser';
+import UserPermission from '~/pages/Settings/UserPermission/UserPermission';
 
 // ✅ Các route không cần đăng nhập
 const publicRoutes = [
@@ -45,10 +46,10 @@ const privateRoutes = [
 
   { path: '/salary-reports', component: SalaryReport },
 
-  
-
   { path: '/settings', component: Settings },
   { path: '/settings/face-training', component: FaceTrainingWrapper },
+  { path: '/settings/user-permissions', component: UserPermission },
+
 ];
 
 export { publicRoutes, privateRoutes };
