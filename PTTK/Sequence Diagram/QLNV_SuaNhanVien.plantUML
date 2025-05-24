@@ -1,0 +1,32 @@
+@startuml
+actor User
+participant "Boundary\n(Giao diện)" as Boundary
+participant "Control\n(Controller)" as Control
+participant "Entity\n(User, Department, Position, Role)" as Entity
+
+title Biểu đồ tuần tự - Sửa thông tin nhân viên
+
+User -> Boundary : Chọn nhân viên, sửa thông tin,\nnhấn "Lưu"
+Boundary -> Control : Gửi request cập nhật nhân viên (PUT /api/users/{id})
+Control -> Entity : Tìm nhân viên theo id
+Entity --> Control : Trả về đối tượng User
+alt Nhân viên tồn tại
+    Control -> Entity : Kiểm tra trùng lặp thông tin (nếu có)
+    Entity --> Control : Kết quả kiểm tra
+    alt Thông tin hợp lệ
+        Control -> Entity : Cập nhật các trường (username, email, phone, ...)
+        Control -> Entity : Cập nhật phòng ban, chức vụ, vai trò (nếu thay đổi)
+        Entity --> Control : Đối tượng đã cập nhật
+        Control -> Entity : Lưu nhân viên vào CSDL
+        Entity --> Control : Nhân viên đã lưu
+        Control -> Boundary : Trả về thông tin nhân viên đã cập nhật
+        Boundary -> User : Hiển thị thông báo thành công
+    else Thông tin không hợp lệ
+        Control -> Boundary : Trả về thông báo lỗi
+        Boundary -> User : Hiển thị lỗi
+    end
+else Nhân viên không tồn tại
+    Control -> Boundary : Trả về lỗi "Không tìm thấy nhân viên"
+    Boundary -> User : Hiển thị lỗi
+end
+@enduml

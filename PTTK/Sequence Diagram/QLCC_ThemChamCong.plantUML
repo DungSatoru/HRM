@@ -1,0 +1,21 @@
+@startuml
+title Biểu đồ tuần tự - Thêm chấm công
+
+actor User
+participant "Giao diện" as Boundary
+participant "Điều khiển" as Control
+participant "Cơ sở dữ liệu" as Entity
+
+User -> Boundary : Nhập thông tin chấm công, nhấn "Thêm"
+Boundary -> Control : Gửi yêu cầu thêm chấm công
+Control -> Entity : Lưu thông tin chấm công mới
+alt Có giờ ra và giờ ra sau 17:30
+    Control -> Entity : Kiểm tra và lưu làm thêm giờ nếu cần
+else Không có làm thêm giờ
+    note right: Không xử lý làm thêm giờ
+end
+Entity --> Control : Trả về kết quả lưu chấm công
+Control -> Boundary : Trả về kết quả cho giao diện
+Boundary -> User : Hiển thị thông báo thành công
+
+@enduml

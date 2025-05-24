@@ -1,0 +1,23 @@
+@startuml
+title Biểu đồ tuần tự - Thêm chức vụ
+
+actor User
+participant "Boundary\n(Giao diện)" as Boundary
+participant "Control\n(Controller)" as Control
+participant "Entity\n(Position)" as Entity
+
+User -> Boundary : Nhập thông tin chức vụ, nhấn "Thêm"
+Boundary -> Control : Gửi request POST /api/positions (dữ liệu chức vụ)
+Control -> Entity : Kiểm tra trùng tên chức vụ
+Entity --> Control : Kết quả kiểm tra
+alt Tên hợp lệ
+    Control -> Entity : Lưu chức vụ mới vào CSDL
+    Entity --> Control : Chức vụ đã lưu
+    Control -> Boundary : Trả về thông tin chức vụ mới
+    Boundary -> User : Hiển thị thông báo thành công
+else Tên đã tồn tại
+    Control -> Boundary : Trả về thông báo lỗi
+    Boundary -> User : Hiển thị lỗi
+end
+
+@enduml

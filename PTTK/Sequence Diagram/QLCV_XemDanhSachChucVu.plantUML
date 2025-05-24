@@ -1,0 +1,16 @@
+@startuml
+title Biểu đồ tuần tự - Xem danh sách chức vụ
+
+actor User
+participant "Boundary\n(Giao diện)" as Boundary
+participant "Control\n(Controller)" as Control
+participant "Entity\n(Position)" as Entity
+
+User -> Boundary : Truy cập trang "Danh sách chức vụ"
+Boundary -> Control : Gửi request GET /api/positions
+Control -> Entity : Truy vấn tất cả chức vụ từ CSDL
+Entity --> Control : Trả về danh sách chức vụ
+Control -> Boundary : Trả về danh sách chức vụ
+Boundary -> User : Hiển thị danh sách chức vụ
+
+@enduml

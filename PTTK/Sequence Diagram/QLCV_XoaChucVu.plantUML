@@ -1,0 +1,30 @@
+@startuml
+title Biểu đồ tuần tự - Xóa chức vụ
+
+actor User
+participant "Boundary\n(Giao diện)" as Boundary
+participant "Control\n(Controller)" as Control
+participant "Entity\n(Position)" as Entity
+
+User -> Boundary : Chọn chức vụ, nhấn "Xóa"
+Boundary -> Control : Gửi request DELETE /api/positions/{id}
+Control -> Entity : Tìm chức vụ theo id
+Entity --> Control : Trả về chức vụ
+alt Chức vụ tồn tại
+    Control -> Entity : Kiểm tra ràng buộc (có nhân viên đảm nhiệm không)
+    Entity --> Control : Kết quả kiểm tra
+    alt Không có nhân viên đảm nhiệm
+        Control -> Entity : Xóa chức vụ khỏi CSDL
+        Entity --> Control : Đã xóa chức vụ
+        Control -> Boundary : Trả về thông báo thành công
+        Boundary -> User : Hiển thị thông báo thành công
+    else Có nhân viên đảm nhiệm
+        Control -> Boundary : Trả về thông báo lỗi (không thể xóa)
+        Boundary -> User : Hiển thị lỗi
+    end
+else Không tìm thấy chức vụ
+    Control -> Boundary : Trả về lỗi "Không tìm thấy chức vụ"
+    Boundary -> User : Hiển thị lỗi
+end
+
+@enduml

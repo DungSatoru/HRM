@@ -1,0 +1,16 @@
+@startuml
+title Biểu đồ tuần tự - Xem danh sách phòng ban
+
+actor User
+participant "Boundary\n(Giao diện)" as Boundary
+participant "Control\n(Controller)" as Control
+participant "Entity\n(Department)" as Entity
+
+User -> Boundary : Truy cập trang "Danh sách phòng ban"
+Boundary -> Control : Gửi request GET /api/departments
+Control -> Entity : Truy vấn tất cả phòng ban từ CSDL
+Entity --> Control : Trả về danh sách phòng ban
+Control -> Boundary : Trả về danh sách phòng ban
+Boundary -> User : Hiển thị danh sách phòng ban
+
+@enduml

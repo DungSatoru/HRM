@@ -1,0 +1,23 @@
+@startuml
+title Biểu đồ tuần tự - Xóa chấm công
+
+actor User
+participant "Giao diện" as Boundary
+participant "Điều khiển" as Control
+participant "Cơ sở dữ liệu" as Entity
+
+User -> Boundary : Chọn bản ghi chấm công, nhấn "Xóa"
+Boundary -> Control : Gửi yêu cầu xóa chấm công
+Control -> Entity : Tìm bản ghi chấm công theo mã
+Entity --> Control : Trả về bản ghi chấm công
+alt Bản ghi tồn tại
+    Control -> Entity : Xóa bản ghi chấm công khỏi cơ sở dữ liệu
+    Entity --> Control : Xác nhận đã xóa
+    Control -> Boundary : Trả về kết quả cho giao diện
+    Boundary -> User : Hiển thị thông báo thành công
+else Không tìm thấy bản ghi
+    Control -> Boundary : Trả về thông báo lỗi
+    Boundary -> User : Hiển thị lỗi
+end
+
+@enduml

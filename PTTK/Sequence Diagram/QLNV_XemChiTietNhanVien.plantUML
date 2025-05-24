@@ -1,0 +1,15 @@
+@startuml
+actor User
+participant "Boundary\n(Giao diện)" as Boundary
+participant "Control\n(Controller)" as Control
+participant "Entity\n(User, Department, Position, Role)" as Entity
+
+title Biểu đồ tuần tự - Xem chi tiết nhân viên
+
+User -> Boundary : Nhấn "Xem chi tiết nhân viên"
+Boundary -> Control : Gửi request GET /api/users/{id}
+Control -> Entity : Truy vấn thông tin nhân viên theo id
+Entity --> Control : Trả về thông tin nhân viên (User, phòng ban, chức vụ, vai trò)
+Control -> Boundary : Trả về dữ liệu chi tiết nhân viên
+Boundary -> User : Hiển thị thông tin chi tiết nhân viên
+@enduml
