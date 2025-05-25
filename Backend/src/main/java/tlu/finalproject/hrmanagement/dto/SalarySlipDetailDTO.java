@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SalarySlipDetailDTO {
-    EmployeeDTO employee;                    // thông tin nhân viên
     SalarySlipDTO salarySlip;                // thông tin tổng hợp phiếu lương
     List<SalaryBonusDTO> bonusDetails;       // chi tiết từng khoản thưởng
     List<SalaryDeductionDTO> deductionDetails; // chi tiết từng khoản khấu trừ

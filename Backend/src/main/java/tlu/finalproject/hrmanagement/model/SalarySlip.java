@@ -55,8 +55,11 @@ public class SalarySlip {
     @Column(name = "total_deductions")
     Double totalDeductions;
 
-    @Column(name = "total_salary")
-    Double totalSalary;
+    @Column(name = "gross_income")
+    Double grossIncome;
+
+    @Column(name = "net_salary")
+    Double netSalary;
 
     @Column(name = "payment_date")
     LocalDate paymentDate;

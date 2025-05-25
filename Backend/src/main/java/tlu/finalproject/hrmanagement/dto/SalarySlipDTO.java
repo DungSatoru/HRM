@@ -29,7 +29,8 @@ public class SalarySlipDTO {
     Double nightOvertimePay;
     Double totalBonus;
     Double totalDeductions;
-    Double totalSalary;
+    Double grossIncome;
+    Double netSalary;
     LocalDate paymentDate;
     String salaryPeriod; // Ví dụ: "2025-05"
     LocalDate calculationDate;

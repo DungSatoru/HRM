@@ -69,7 +69,6 @@ public class SalarySlipServiceImpl implements SalarySlipService {
         List<SalaryDeduction> deductions = salaryDeductionRepository.findByUserUserIdAndDeductionDateBetween(userId, startDate, endDate);
 
         // Map DTO
-        EmployeeDTO employeeDTO = modelMapper.map(salarySlip.getUser(), EmployeeDTO.class);
         SalarySlipDTO slipDTO = modelMapper.map(salarySlip, SalarySlipDTO.class);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Nhân viên không tồn tại"));
@@ -83,7 +82,6 @@ public class SalarySlipServiceImpl implements SalarySlipService {
                 .map(d -> modelMapper.map(d, SalaryDeductionDTO.class)).toList();
 
         return SalarySlipDetailDTO.builder()
-                .employee(employeeDTO)
                 .salarySlip(slipDTO)
                 .bonusDetails(bonusDTOs)
                 .deductionDetails(deductionDTOs)

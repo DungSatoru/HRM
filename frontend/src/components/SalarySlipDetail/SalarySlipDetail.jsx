@@ -24,56 +24,47 @@ const SalarySlipDetail = ({ data }) => {
         <Descriptions column={2}>
           <Descriptions.Item label="ID Nhân viên">{salarySlip.userId}</Descriptions.Item>
           <Descriptions.Item label="Họ tên">{salarySlip.fullName}</Descriptions.Item>
-          <Descriptions.Item label="Phòng ban">{salarySlip.department?.departmentName || 'Chưa cập nhật'}</Descriptions.Item>
+          <Descriptions.Item label="Phòng ban">
+            {salarySlip.department?.departmentName || 'Chưa cập nhật'}
+          </Descriptions.Item>
           <Descriptions.Item label="Chức vụ">{salarySlip.position?.positionName || 'Chưa cập nhật'}</Descriptions.Item>
         </Descriptions>
       </Card>
 
       <Card title="Chi tiết bảng lương">
         <Descriptions column={2}>
-          <Descriptions.Item label="Lương dựa trên ngày công thực tế">
-            {salarySlip.actualBasicSalary.toLocaleString()}₫
-          </Descriptions.Item>
-          <Descriptions.Item label="Phụ cấp">
-            {salarySlip.otherAllowances.toLocaleString()}₫
-          </Descriptions.Item>
-          <Descriptions.Item label="Lương làm thêm ban ngày">
+          {/* 1. Thông tin cơ bản về thời gian */}
+          <Descriptions.Item label="Tháng lương">{salarySlip.salaryPeriod}</Descriptions.Item>
+          <Descriptions.Item label="Ngày tính lương">{salarySlip.calculationDate}</Descriptions.Item>
+          <Descriptions.Item label="Ngày thanh toán">{salarySlip.paymentDate}</Descriptions.Item>
+
+          {/* 2. Thông tin ngày công */}
+          <Descriptions.Item label="Số ngày công chuẩn">{salarySlip.standardWorkingDays}</Descriptions.Item>
+          <Descriptions.Item label="Số ngày công thực tế">{salarySlip.actualWorkingDays}</Descriptions.Item>
+          <Descriptions.Item label="Số giờ công chuẩn">{salarySlip.standardWorkingHours}</Descriptions.Item>
+          <Descriptions.Item label="Số giờ công thực tế">{salarySlip.actualWorkingHours}</Descriptions.Item>
+
+          {/* 3. Các khoản thu nhập */}
+          <Descriptions.Item label="Lương cơ bản">{salarySlip.actualBasicSalary.toLocaleString()}₫</Descriptions.Item>
+          <Descriptions.Item label="Phụ cấp">{salarySlip.otherAllowances.toLocaleString()}₫</Descriptions.Item>
+          <Descriptions.Item label="Lương làm thêm ngày">
             {salarySlip.dayOvertimePay.toLocaleString()}₫
           </Descriptions.Item>
-          <Descriptions.Item label="Lương làm thêm ban đêm">
+          <Descriptions.Item label="Lương làm thêm đêm">
             {salarySlip.nightOvertimePay.toLocaleString()}₫
           </Descriptions.Item>
-          <Descriptions.Item label="Tổng thưởng">
-            {salarySlip.totalBonus.toLocaleString()}₫
-          </Descriptions.Item>
-          <Descriptions.Item label="Tổng khấu trừ">
-            {salarySlip.totalDeductions.toLocaleString()}₫
-          </Descriptions.Item>
-          <Descriptions.Item label="Lương thực nhận">
-            {Math.round(salarySlip.totalSalary).toLocaleString()}₫
-          </Descriptions.Item>
-          <Descriptions.Item label="Ngày thanh toán">
-            {salarySlip.paymentDate}
-          </Descriptions.Item>
-          <Descriptions.Item label="Tháng lương">
-            {salarySlip.salaryPeriod}
-          </Descriptions.Item>
-          <Descriptions.Item label="Ngày tính lương">
-            {salarySlip.calculationDate}
-          </Descriptions.Item>
-          <Descriptions.Item label="Số ngày công chuẩn">
-            {salarySlip.standardWorkingDays}
-          </Descriptions.Item>
-          <Descriptions.Item label="Số ngày công thực tế">
-            {salarySlip.actualWorkingDays}
-          </Descriptions.Item>
-          <Descriptions.Item label="Số giờ công chuẩn">
-            {salarySlip.standardWorkingHours}
-          </Descriptions.Item>
-          <Descriptions.Item label="Số giờ công thực tế">
-            {salarySlip.actualWorkingHours}
-          </Descriptions.Item>
+          <Descriptions.Item label="Tổng thưởng">{salarySlip.totalBonus.toLocaleString()}₫</Descriptions.Item>
 
+          {/* 4. Các khoản khấu trừ */}
+          <Descriptions.Item label="Tổng khấu trừ">{salarySlip.totalDeductions.toLocaleString()}₫</Descriptions.Item>
+
+          {/* 5. Tổng kết */}
+          <Descriptions.Item label="Tổng thu nhập" span={2} style={{ fontWeight: 'bold' }}>
+            {Math.round(salarySlip.grossIncome).toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Lương thực nhận" span={2} style={{ fontWeight: 'bold', color: '#1890ff' }}>
+            {Math.round(salarySlip.netSalary).toLocaleString()}₫
+          </Descriptions.Item>
         </Descriptions>
       </Card>
 

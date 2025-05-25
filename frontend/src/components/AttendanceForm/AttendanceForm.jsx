@@ -23,22 +23,21 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         if (mode === 'edit' && attendanceId) {
           const data = await getAttendanceById(attendanceId);
-          console.log('Dữ liệu lấy được: ', data); // Debug log
           form.setFieldsValue({
+            userId: data.userId,
+            fullName: data.fullName,
             date: data.date ? moment(data.date) : null,
-            checkIn: data.checkIn,
-            checkOut: data.checkOut,
+            checkIn: data.checkIn ? moment(data.checkIn, 'HH:mm') : null,
+            checkOut: data.checkOut ? moment(data.checkOut, 'HH:mm') : null,
           });
+          setSelectedName(data.fullName);
         } else if (mode === 'create') {
           const empData = await getEmployees();
           setEmployees(empData);
-          form.setFieldsValue({
-            date: null,
-            checkIn: null,
-            checkOut: null,
-          });
+          form.resetFields();
         }
       } catch (error) {
         toast.error('Lỗi khi tải dữ liệu!');
@@ -69,8 +68,8 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
       const formattedData = {
         ...values,
         date: values.date.format('YYYY-MM-DD'),
-        checkIn: values.checkIn ? values.checkIn.format('HH:mm') : '',
-        checkOut: values.checkOut ? values.checkOut.format('HH:mm') : '',
+        checkIn: values.checkIn.format('HH:mm'),
+        checkOut: values.checkOut.format('HH:mm'),
       };
 
       if (mode === 'create') {
@@ -79,7 +78,7 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
           return;
         }
         await createAttendance(formattedData);
-      } else if (mode === 'edit') {
+      } else {
         await updateAttendance(attendanceId, formattedData);
       }
       onSuccess?.();
@@ -96,7 +95,9 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
     }
   };
 
-  const filteredEmployees = employees.filter((emp) => emp.fullName?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredEmployees = employees.filter((emp) => 
+    emp.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Modal
@@ -114,7 +115,7 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Row gutter={16}>
             <Col md={12}>
-              {mode === 'create' && (
+              {mode === 'create' ? (
                 <Form.Item
                   label="Tìm kiếm nhân viên"
                   name="userId"
@@ -160,6 +161,10 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
                     )}
                   </div>
                 </Form.Item>
+              ) : (
+                <Form.Item label="Nhân viên">
+                  <Input value={form.getFieldValue('fullName')} disabled />
+                </Form.Item>
               )}
             </Col>
             <Col md={12}>
@@ -169,12 +174,12 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
             </Col>
             <Col md={12}>
               <Form.Item label="Giờ vào" name="checkIn" rules={[{ required: true, message: 'Vui lòng chọn giờ vào' }]}>
-                <Input type="text" placeholder="HH:mm:ss" />
+                <TimePicker format="HH:mm" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col md={12}>
               <Form.Item label="Giờ ra" name="checkOut" rules={[{ required: true, message: 'Vui lòng chọn giờ ra' }]}>
-                <Input type="text" placeholder="HH:mm:ss" />
+                <TimePicker format="HH:mm" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
