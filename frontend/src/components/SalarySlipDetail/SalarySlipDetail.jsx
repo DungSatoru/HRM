@@ -1,8 +1,9 @@
 import React from 'react';
-import { Card, Descriptions, Table, Divider } from 'antd';
+import { Card, Descriptions, Table, Divider, Avatar } from 'antd';
 
 const SalarySlipDetail = ({ data }) => {
   if (!data) return <div>Không có dữ liệu</div>;
+
   const { employee, salarySlip, bonusDetails, deductionDetails, attendanceSummary, totalOvertimeHour } = data;
 
   const bonusColumns = [
@@ -21,25 +22,58 @@ const SalarySlipDetail = ({ data }) => {
     <div className="p-4 space-y-6">
       <Card title="Thông tin nhân viên">
         <Descriptions column={2}>
-          <Descriptions.Item label="Họ tên">{employee.fullName}</Descriptions.Item>
-          <Descriptions.Item label="Email">{employee.email}</Descriptions.Item>
-          <Descriptions.Item label="Số điện thoại">{employee.phone}</Descriptions.Item>
-          <Descriptions.Item label="Ngày vào làm">{employee.hireDate}</Descriptions.Item>
+          <Descriptions.Item label="ID Nhân viên">{salarySlip.userId}</Descriptions.Item>
+          <Descriptions.Item label="Họ tên">{salarySlip.fullName}</Descriptions.Item>
+          <Descriptions.Item label="Phòng ban">{salarySlip.department?.departmentName || 'Chưa cập nhật'}</Descriptions.Item>
+          <Descriptions.Item label="Chức vụ">{salarySlip.position?.positionName || 'Chưa cập nhật'}</Descriptions.Item>
         </Descriptions>
       </Card>
 
       <Card title="Chi tiết bảng lương">
         <Descriptions column={2}>
-          <Descriptions.Item label="Lương cơ bản">{salarySlip.basicSalary.toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Lương thực nhận">{Math.round(salarySlip.totalSalary).toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Phụ cấp">{salarySlip.otherAllowances.toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Lương làm thêm">{Math.round(salarySlip.overTimePay).toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Tổng thưởng">{salarySlip.bonus.toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Tổng khấu trừ">{salarySlip.deductions.toLocaleString()}₫</Descriptions.Item>
-          <Descriptions.Item label="Tháng">{salarySlip.month}</Descriptions.Item>
-          <Descriptions.Item label="Ngày thanh toán">{salarySlip.paymentDate}</Descriptions.Item>
-          <Descriptions.Item label="Tổng số ngày công">{attendanceSummary}</Descriptions.Item>
-          <Descriptions.Item label="Số giờ tăng ca">{Math.round(totalOvertimeHour)} giờ</Descriptions.Item>
+          <Descriptions.Item label="Lương dựa trên ngày công thực tế">
+            {salarySlip.actualBasicSalary.toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Phụ cấp">
+            {salarySlip.otherAllowances.toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Lương làm thêm ban ngày">
+            {salarySlip.dayOvertimePay.toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Lương làm thêm ban đêm">
+            {salarySlip.nightOvertimePay.toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Tổng thưởng">
+            {salarySlip.totalBonus.toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Tổng khấu trừ">
+            {salarySlip.totalDeductions.toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Lương thực nhận">
+            {Math.round(salarySlip.totalSalary).toLocaleString()}₫
+          </Descriptions.Item>
+          <Descriptions.Item label="Ngày thanh toán">
+            {salarySlip.paymentDate}
+          </Descriptions.Item>
+          <Descriptions.Item label="Tháng lương">
+            {salarySlip.salaryPeriod}
+          </Descriptions.Item>
+          <Descriptions.Item label="Ngày tính lương">
+            {salarySlip.calculationDate}
+          </Descriptions.Item>
+          <Descriptions.Item label="Số ngày công chuẩn">
+            {salarySlip.standardWorkingDays}
+          </Descriptions.Item>
+          <Descriptions.Item label="Số ngày công thực tế">
+            {salarySlip.actualWorkingDays}
+          </Descriptions.Item>
+          <Descriptions.Item label="Số giờ công chuẩn">
+            {salarySlip.standardWorkingHours}
+          </Descriptions.Item>
+          <Descriptions.Item label="Số giờ công thực tế">
+            {salarySlip.actualWorkingHours}
+          </Descriptions.Item>
+
         </Descriptions>
       </Card>
 

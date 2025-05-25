@@ -3,6 +3,7 @@ import { FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useState } from 'react';
 import { fetchAllDataForSalary } from '~/utils/fetchData';
+import { getSalarySlipsByMonth } from '~/services/salarySlipService';
 
 const { Option } = Select;
 
@@ -10,7 +11,7 @@ function Salary() {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
-  const [mappedEmployees, setMappedEmployees] = useState([]);
+  const [salarySlips, setSalarySlips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(moment().format('MM'));
   const [selectedYear, setSelectedYear] = useState(moment().format('YYYY'));
@@ -26,11 +27,10 @@ function Salary() {
   const handleSearch = async () => {
     const monthString = `${selectedYear}-${selectedMonth}`;
     setLoading(true);
+
     try {
-      const [employees, dept, pos] = await fetchAllDataForSalary(monthString);
-      setMappedEmployees(employees);
-      setDepartments(dept);
-      setPositions(pos);
+      const fetchData = await getSalarySlipsByMonth(monthString);
+      setSalarySlips(fetchData);
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu:', error);
     } finally {
@@ -40,24 +40,24 @@ function Salary() {
 
   const salarySlipsColumns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
+      title: 'ID Nhân viên',
+      dataIndex: 'userId',
+      key: 'userId',
     },
     {
       title: 'Nhân viên',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'fullName',
+      key: 'fullName',
     },
     {
       title: 'Tháng',
-      dataIndex: 'month',
-      key: 'month',
+      dataIndex: 'salaryPeriod',
+      key: 'salaryPeriod',
     },
     {
-      title: 'Lương cơ bản',
-      dataIndex: 'basicSalary',
-      key: 'basicSalary',
+      title: 'Lương cứng',
+      dataIndex: 'actualBasicSalary',
+      key: 'actualBasicSalary',
       render: (salary) => (
         <span style={{ color: 'blue' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
@@ -66,8 +66,8 @@ function Salary() {
     },
     {
       title: 'Phụ cấp',
-      dataIndex: 'otherAllowance',
-      key: 'otherAllowance',
+      dataIndex: 'otherAllowances',
+      key: 'otherAllowances',
       render: (allowance) => (
         <span style={{ color: 'blue' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(allowance)}
@@ -75,9 +75,19 @@ function Salary() {
       ),
     },
     {
-      title: 'Lương thêm giờ',
-      dataIndex: 'overTimePay',
-      key: 'overTimePay',
+      title: 'Lương thêm giờ(Ban ngày)',
+      dataIndex: 'dayOvertimePay',
+      key: 'dayOvertimePay',
+      render: (salary) => (
+        <span style={{ color: 'orange' }}>
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
+        </span>
+      ),
+    },
+    {
+      title: 'Lương thêm giờ(Ban đêm)',
+      dataIndex: 'nightOvertimePay',
+      key: 'nightOvertimePay',
       render: (salary) => (
         <span style={{ color: 'orange' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
@@ -86,8 +96,8 @@ function Salary() {
     },
     {
       title: 'Thưởng',
-      dataIndex: 'bonus',
-      key: 'bonus',
+      dataIndex: 'totalBonus',
+      key: 'totalBonus',
       render: (bonus) => (
         <span style={{ color: 'green' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bonus)}
@@ -96,8 +106,8 @@ function Salary() {
     },
     {
       title: 'Khấu trừ',
-      dataIndex: 'deduction',
-      key: 'deduction',
+      dataIndex: 'totalDeductions',
+      key: 'totalDeductions',
       render: (deduction) => (
         <span style={{ color: 'red' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(deduction)}
@@ -170,7 +180,7 @@ function Salary() {
 
         <Table
           columns={salarySlipsColumns}
-          dataSource={mappedEmployees}
+          dataSource={salarySlips}
           rowKey="id"
           pagination={{ pageSize: 10 }}
           loading={loading}

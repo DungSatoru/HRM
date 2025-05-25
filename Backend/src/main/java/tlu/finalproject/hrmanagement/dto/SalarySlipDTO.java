@@ -1,7 +1,9 @@
 package tlu.finalproject.hrmanagement.dto;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import tlu.finalproject.hrmanagement.model.User;
 
 import java.time.LocalDate;
 
@@ -14,13 +16,21 @@ import java.time.LocalDate;
 public class SalarySlipDTO {
     Long salarySlipId;
     Long userId;
-    Double basicSalary;
+    String fullName;
+    DepartmentDTO department;
+    PositionDTO position;
+    Double standardWorkingHours; // Số giờ công chuẩn ngày
+    Integer standardWorkingDays; // Số ngày công chuẩn tháng
+    Double actualWorkingHours; // Số giờ công thực tế
+    Double actualWorkingDays; // Số ngày công thực tế
     Double actualBasicSalary;
     Double otherAllowances;
-    Double overTimePay;
-    Double bonus;
-    Double deductions;
+    Double dayOvertimePay;
+    Double nightOvertimePay;
+    Double totalBonus;
+    Double totalDeductions;
     Double totalSalary;
     LocalDate paymentDate;
-    String month;
+    String salaryPeriod; // Ví dụ: "2025-05"
+    LocalDate calculationDate;
 }

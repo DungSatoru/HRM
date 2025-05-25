@@ -8,8 +8,8 @@ public interface OvertimeRecordProjection {
     Long getUserId();
     LocalTime getOvertimeStart();
     LocalTime getOvertimeEnd();
-    Double getOvertimeHour();
-    Double getOvertimePay();
+    Double getDayHours();
+    Double getNightHours();
     LocalDate getOvertimeDate();
     String getMonth();
 }

@@ -1,11 +1,9 @@
 package tlu.finalproject.hrmanagement.dto;
 
-import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tlu.finalproject.hrmanagement.model.Status;
+import tlu.finalproject.hrmanagement.model.EmploymentStatus;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @NoArgsConstructor
@@ -24,7 +22,7 @@ public class EmployeeDTO {
     Long roleId;
     Long departmentId;
     Long positionId;
-    Status status;
+    EmploymentStatus status;
     Date hireDate;
     Date createdAt;
     Boolean gender;

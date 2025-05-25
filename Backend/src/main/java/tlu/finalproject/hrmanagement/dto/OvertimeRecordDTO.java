@@ -17,8 +17,8 @@ public class OvertimeRecordDTO {
     Long userId;
     LocalTime overtimeStart;
     LocalTime overtimeEnd;
-    Double overtimeHour;
-    Double overtimePay;
+    Double dayHours;
+    Double nightHours;
     LocalDate overtimeDate;
     String month;
 }

@@ -16,6 +16,4 @@ public class SalarySlipDetailDTO {
     SalarySlipDTO salarySlip;                // thông tin tổng hợp phiếu lương
     List<SalaryBonusDTO> bonusDetails;       // chi tiết từng khoản thưởng
     List<SalaryDeductionDTO> deductionDetails; // chi tiết từng khoản khấu trừ
-    Integer attendanceSummary;
-    Double totalOvertimeHour;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'; 
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchEmpDepPos } from '~/utils/fetchData';
 import { Table, Button, Input, Tag, Space } from 'antd';
@@ -36,12 +36,9 @@ const Employees = () => {
   const handleSearch = (e) => {
     const { value } = e.target;
     setSearchTerm(value);
-    const filtered = employees.filter((emp) =>
-      emp.fullName?.toLowerCase().includes(value.toLowerCase())
-    );
+    const filtered = employees.filter((emp) => emp.fullName?.toLowerCase().includes(value.toLowerCase()));
     setFilteredEmployees(filtered);
   };
-
 
   const columns = [
     {
@@ -86,25 +83,31 @@ const Employees = () => {
       filters: [
         { text: 'Đang làm việc', value: 'ACTIVE' },
         { text: 'Đã nghỉ việc', value: 'INACTIVE' },
+        { text: 'Đang nghỉ phép', value: 'ON_LEAVE' },
+        { text: 'Đang thử việc', value: 'PROBATION' },
       ],
       onFilter: (value, record) => record.status === value,
-      render: (status) =>
-        status === 'ACTIVE' ? (
-          <Tag color="green">Đang làm việc</Tag>
-        ) : (
-          <Tag color="red">Đã nghỉ việc</Tag>
-        ),
+      render: (status) => {
+        switch (status) {
+          case 'ACTIVE':
+            return <Tag color="green">Đang làm việc</Tag>;
+          case 'INACTIVE':
+            return <Tag color="red">Đã nghỉ việc</Tag>;
+          case 'ON_LEAVE':
+            return <Tag color="gold">Đang nghỉ phép</Tag>;
+          case 'PROBATION':
+            return <Tag color="blue">Đang thử việc</Tag>;
+          default:
+            return <Tag color="default">{status}</Tag>;
+        }
+      },
     },
     {
       title: 'Thao tác',
       key: 'actions',
       render: (_, record) => (
         <Space size="middle">
-          <Button
-            type="default"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/employees/${record.userId}/edit`)}
-          >
+          <Button type="default" icon={<EditOutlined />} onClick={() => navigate(`/employees/${record.userId}/edit`)}>
             Sửa
           </Button>
         </Space>
@@ -136,12 +139,7 @@ const Employees = () => {
           {loading ? (
             <Loading />
           ) : (
-            <Table
-              columns={columns}
-              dataSource={filteredEmployees}
-              rowKey="userId"
-              pagination={{ pageSize: 10 }}
-            />
+            <Table columns={columns} dataSource={filteredEmployees} rowKey="userId" pagination={{ pageSize: 10 }} />
           )}
         </div>
       </div>

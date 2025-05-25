@@ -15,6 +15,8 @@ import {
   Space,
   Tag,
   Divider,
+  Row,
+  Col,
   InputNumber,
 } from 'antd';
 import {
@@ -81,10 +83,17 @@ const SalaryManagement = () => {
 
       form.setFieldsValue({
         basicSalary: salaryConfig.basicSalary || 0,
+        standardWorkingDays: salaryConfig.standardWorkingDays || 0,
+        dayOvertimeRate: salaryConfig.dayOvertimeRate || 0,
+        nightOvertimeRate: salaryConfig.nightOvertimeRate || 0,
         insuranceBaseSalary: salaryConfig.insuranceBaseSalary,
         overtimeRate: salaryConfig.overtimeRate || 0,
         otherAllowances: salaryConfig.otherAllowances || 0,
         bonusRate: salaryConfig.bonusRate || 0,
+        breakDurationMinutes: salaryConfig.breakDurationMinutes || 0,
+        workStartTime: salaryConfig.workStartTime,
+        workEndTime: salaryConfig.workEndTime,
+        holidayOvertimeRate: salaryConfig.holidayOvertimeRate || 0,
       });
     } catch (error) {
       message.error('Không thể lấy cấu hình lương cho nhân viên');
@@ -119,9 +128,27 @@ const SalaryManagement = () => {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => (
-        <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>{status === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ'}</Tag>
-      ),
+      filters: [
+        { text: 'Đang làm việc', value: 'ACTIVE' },
+        { text: 'Đã nghỉ việc', value: 'INACTIVE' },
+        { text: 'Đang nghỉ phép', value: 'ON_LEAVE' },
+        { text: 'Đang thử việc', value: 'PROBATION' },
+      ],
+      onFilter: (value, record) => record.status === value,
+      render: (status) => {
+        switch (status) {
+          case 'ACTIVE':
+            return <Tag color="green">Đang làm việc</Tag>;
+          case 'INACTIVE':
+            return <Tag color="red">Đã nghỉ việc</Tag>;
+          case 'ON_LEAVE':
+            return <Tag color="gold">Đang nghỉ phép</Tag>;
+          case 'PROBATION':
+            return <Tag color="blue">Đang thử việc</Tag>;
+          default:
+            return <Tag color="default">{status}</Tag>;
+        }
+      },
     },
     {
       title: 'Thao tác',
@@ -178,7 +205,7 @@ const SalaryManagement = () => {
       const formattedMonth = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`;
 
       for (let employee of mappedEmployees) {
-        if (employee.status === 'ACTIVE' && employee.basicSalary > 0) {
+        if ((employee.status === 'ACTIVE' || employee.status === 'PROBATION') && employee.basicSalary > 0) {
           const salaryData = {
             userId: employee.id,
             month: formattedMonth,
@@ -332,49 +359,116 @@ const SalaryManagement = () => {
           </Card>
         </TabPane>
       </Tabs>
-
       {/* Modal for Salary Config */}
       <Modal
         title={`Cấu hình lương cho ${selectedEmployee?.name}`}
         open={salaryConfigModalVisible}
         onCancel={() => setSalaryConfigModalVisible(false)}
         footer={null}
+        width={800} // ✅ tăng chiều rộng modal
       >
         <Form form={form} onFinish={handleSalaryConfigSubmit} layout="vertical">
-          <Form.Item
-            label="Lương cơ bản"
-            name="basicSalary"
-            rules={[{ required: true, message: 'Vui lòng nhập lương cơ bản' }]}
-          >
-            <Input type="number" min={0} step={1000} />
-          </Form.Item>
-          <Form.Item
-            label="Mức đóng bảo hiểm (Đóng bảo hiểm xã hội, y tế, thất nghiệp) *Nếu đóng full thì bỏ trống"
-            name="insuranceBaseSalary"
-          >
-            <Input type="text" min={0} step={50000} />
-          </Form.Item>
-          <Form.Item
-            label="Tỷ lệ làm thêm giờ"
-            name="overtimeRate"
-            rules={[{ required: true, message: 'Vui lòng nhập tỷ lệ làm thêm giờ' }]}
-          >
-            <Input type="number" min={0} step={0.1} />
-          </Form.Item>
-          <Form.Item label="Phụ cấp khác" name="otherAllowances">
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item label="Tỷ lệ thưởng" name="bonusRate">
-            <Input type="number" min={0} step={0.1} />
-          </Form.Item>
-          <Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Lương cơ bản"
+                name="basicSalary"
+                rules={[{ required: true, message: 'Vui lòng nhập lương cơ bản' }]}
+              >
+                <Input type="number" min={0} step={1000} />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Số ngày làm việc tiêu chuẩn"
+                name="standardWorkingDays"
+                rules={[{ required: true, message: 'Vui lòng nhập số ngày làm việc tiêu chuẩn' }]}
+              >
+                <Input type="number" min={0} step={1} />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item label="Mức lương đóng BHXH" name="insuranceBaseSalary">
+                <Input type="number" min={0} step={50000} />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item label="Phụ cấp khác" name="otherAllowances">
+                <Input type="number" min={0} step={10000} />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Tỷ lệ OT ngày thường"
+                name="dayOvertimeRate"
+                rules={[{ required: true, message: 'Nhập tỷ lệ OT ngày thường' }]}
+              >
+                <Input type="number" min={0} step={0.1} />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Tỷ lệ OT ban đêm"
+                name="nightOvertimeRate"
+                rules={[{ required: true, message: 'Nhập tỷ lệ OT ban đêm' }]}
+              >
+                <Input type="number" min={0} step={0.1} />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Tỷ lệ OT ngày lễ"
+                name="holidayOvertimeRate"
+                rules={[{ required: true, message: 'Nhập tỷ lệ OT ngày lễ' }]}
+              >
+                <Input type="number" min={0} step={0.1} />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Thời gian bắt đầu làm việc"
+                name="workStartTime"
+                rules={[{ required: true, message: 'Nhập giờ bắt đầu' }]}
+              >
+                <Input type="text" placeholder="HH:mm:ss" />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Thời gian kết thúc làm việc"
+                name="workEndTime"
+                rules={[{ required: true, message: 'Nhập giờ kết thúc' }]}
+              >
+                <Input type="text" placeholder="HH:mm:ss" />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Thời gian nghỉ (phút)"
+                name="breakDurationMinutes"
+                rules={[{ required: true, message: 'Nhập số phút nghỉ' }]}
+              >
+                <Input type="number" min={0} step={5} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item style={{ textAlign: 'right', marginTop: 16 }}>
             <Button type="primary" htmlType="submit">
               Lưu cấu hình
             </Button>
           </Form.Item>
         </Form>
       </Modal>
-
       {/* Modal for Bonus */}
       <Modal
         title={`Thêm thưởng cho ${selectedEmployee?.name}`}
@@ -411,7 +505,6 @@ const SalaryManagement = () => {
           </Form.Item>
         </Form>
       </Modal>
-
       {/* Modal for Deduction */}
       <Modal
         title={`Thêm khấu trừ cho ${selectedEmployee?.name}`}

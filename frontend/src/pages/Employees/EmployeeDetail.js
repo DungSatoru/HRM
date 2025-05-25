@@ -4,6 +4,40 @@ import { getDepartmentById } from '~/services/departmentService';
 import { getEmployeeById } from '~/services/employeeService';
 import { getPositionById } from '~/services/positionService';
 import { getRoleById } from '~/services/roleService';
+import { 
+  Card, 
+  Avatar, 
+  Tag, 
+  Button, 
+  Spin, 
+  Divider, 
+  Descriptions, 
+  Space,
+  Row,
+  Col,
+  Typography 
+} from 'antd';
+import {
+  UserOutlined,
+  IdcardOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  CalendarOutlined,
+  ManOutlined,
+  WomanOutlined,
+  HomeOutlined,
+  SolutionOutlined,
+  TeamOutlined,
+  StarOutlined,
+  ContactsOutlined,
+  FileTextOutlined,
+  BookOutlined,
+  ArrowLeftOutlined,
+  EditOutlined
+} from '@ant-design/icons';
+import dayjs from 'dayjs';
+
+const { Title, Text } = Typography;
 
 const EmployeeDetail = () => {
   const { id } = useParams();
@@ -36,124 +70,137 @@ const EmployeeDetail = () => {
     }
   };
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
-  if (!employee) return;
+  if (loading) return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Spin size="large" />
+    </div>
+  );
+  
+  if (!employee) return <div>Không tìm thấy thông tin nhân viên</div>;
+
+  const statusColor = employee.status === 'ACTIVE' ? 'green' : employee.status === 'INACTIVE' ? 'red' : 'orange';
+  const statusText = employee.status === 'ACTIVE' ? 'Đang làm việc' : employee.status === 'INACTIVE' ? 'Đã nghỉ việc' : 'Cấm hoạt động';
 
   return (
-    <div className="page-container employee-detail-container">
-      <h2 className="page-title">Hồ sơ nhân viên</h2>
-      <div className="card-container">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="card">
-              <div className="card-body">
-                <div className="row">
-                  {/* Hình ảnh nhân viên */}
-                  <div className="col-md-9 mb-4 d-flex align-items-center">
-                    <img
-                      src={
-                        employee.profileImageUrl
-                          ? `${process.env.REACT_APP_SERVER_URL}${employee.profileImageUrl}`
-                          : 'https://cdn-icons-png.flaticon.com/512/219/219969.png'
-                      }
-                      alt="Avatar"
-                      className="img-fluid rounded-circle"
-                      style={{ width: '100px', height: '100px' }}
-                    />
-                    <div className="profile-name ms-3">
-                      <h1 className="profile-name-text">{employee.fullName}</h1>
-                      <span
-                        className={`profile-status p-2 rounded text-white ${
-                          employee.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'
-                        }`}
-                      >
-                        {employee.status === 'ACTIVE' ? 'Đang làm việc' : 'Đã nghỉ việc'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="col-md-3 mb-4 d-flex justify-content-end align-items-center">
-                    <button className="btn btn-outline-secondary" onClick={() => navigate(`/employees/${id}/edit`)}>
-                      <i className="fas fa-edit me-1"></i> Chỉnh sửa
-                    </button>
-                  </div>
-                  <hr />
+    <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
+      <Row align="middle" style={{ marginBottom: 24 }}>
+        <Col>
+          <Button 
+            type="text" 
+            icon={<ArrowLeftOutlined />} 
+            onClick={() => navigate('/employees')}
+            style={{ marginRight: 16 }}
+          >
+            Quay lại
+          </Button>
+        </Col>
+        <Col flex="auto">
+          <Title level={2} style={{ textAlign: 'center', margin: 0 }}>Hồ sơ nhân viên</Title>
+        </Col>
+      </Row>
 
-                  {/* Cột trái */}
-                  <div className="col-md-6 mt-4">
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Tên tài khoản</label>
-                      <span className="profile-value">{employee.username}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Căn cước công dân</label>
-                      <span className="profile-value">{employee.identity}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Email</label>
-                      <span className="profile-value">{employee.email}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Số điện thoại</label>
-                      <span className="profile-value">{employee.phone}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Ngày sinh</label>
-                      <span className="profile-value">{new Date(employee.dateOfBirth).toLocaleDateString()}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Giới tính</label>
-                      <span className="profile-value">{employee.gender ? 'Nam' : 'Nữ'}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Địa chỉ</label>
-                      <span className="profile-value">{employee.address}</span>
-                    </div>
-                  </div>
-
-                  {/* Cột phải */}
-                  <div className="col-md-6 mt-4">
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Vai trò</label>
-                      <span className="profile-value">{roleName}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Chức vụ</label>
-                      <span className="profile-value">{positionName}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Phòng ban</label>
-                      <span className="profile-value">{departmentName}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Ngày vào làm</label>
-                      <span className="profile-value">{employee.hireDate}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Người liên hệ khẩn cấp</label>
-                      <span className="profile-value">{employee.emergencyContactName || 'Chưa cập nhật'}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">SĐT người liên hệ khẩn cấp</label>
-                      <span className="profile-value">{employee.emergencyContactPhone || 'Chưa cập nhật'}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Loại hợp đồng</label>
-                      <span className="profile-value">{employee.contractType || 'Chưa cập nhật'}</span>
-                    </div>
-                    <div className="profile-item">
-                      <label className="form-label fw-bold">Trình độ học vấn</label>
-                      <span className="profile-value">{employee.educationLevel || 'Chưa cập nhật'}</span>
-                    </div>
-                  </div>
-                </div>
+      <Card 
+        bordered={false} 
+        style={{ 
+          borderRadius: 8, 
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          marginBottom: 24
+        }}
+      >
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start', 
+          marginBottom: 24 
+        }}>
+          <Space size={24} align="center">
+            <Avatar
+              size={100}
+              src={
+                employee.profileImageUrl
+                  ? `${process.env.REACT_APP_SERVER_URL}${employee.profileImageUrl}`
+                  : null
+              }
+              icon={<UserOutlined />}
+              style={{ backgroundColor: '#f5f5f5', border: '2px solid #d9d9d9' }}
+            />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                <Title level={3} style={{ margin: 0, marginRight: 12 }}>{employee.fullName}</Title>
+                <Tag color={statusColor} style={{ fontSize: 14, padding: '2px 8px' }}>
+                  {statusText}
+                </Tag>
               </div>
+              <Text strong style={{ display: 'block', color: '#666', fontSize: 16 }}>
+                {positionName}
+              </Text>
+              <Text type="secondary" style={{ display: 'block', fontSize: 14 }}>
+                {departmentName}
+              </Text>
             </div>
-            <button className="btn btn-outline-secondary mt-3" onClick={() => navigate('/employees')}>
-              <i className="fa-solid fa-left-long"></i> Quay lại
-            </button>
-          </div>
+          </Space>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/employees/${id}/edit`)}
+          >
+            Chỉnh sửa
+          </Button>
         </div>
-      </div>
+
+        <Divider orientation="left" style={{ margin: '24px 0' }}>Thông tin cá nhân</Divider>
+        <Descriptions bordered column={2}>
+          <Descriptions.Item label={<span><IdcardOutlined /> Tên tài khoản</span>}>
+            {employee.username}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><IdcardOutlined /> CCCD</span>}>
+            {employee.identity}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><MailOutlined /> Email</span>}>
+            {employee.email}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><PhoneOutlined /> Số điện thoại</span>}>
+            {employee.phone}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><CalendarOutlined /> Ngày sinh</span>}>
+            {employee.dateOfBirth ? dayjs(employee.dateOfBirth).format('DD/MM/YYYY') : 'Chưa cập nhật'}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span>{employee.gender ? <ManOutlined /> : <WomanOutlined />} Giới tính</span>}>
+            {employee.gender ? 'Nam' : 'Nữ'}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><HomeOutlined /> Địa chỉ</span>} span={2}>
+            {employee.address || 'Chưa cập nhật'}
+          </Descriptions.Item>
+        </Descriptions>
+
+        <Divider orientation="left" style={{ margin: '24px 0' }}>Thông tin công việc</Divider>
+        <Descriptions bordered column={2}>
+          <Descriptions.Item label={<span><SolutionOutlined /> Vai trò</span>}>
+            {roleName}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><StarOutlined /> Chức vụ</span>}>
+            {positionName}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><TeamOutlined /> Phòng ban</span>}>
+            {departmentName}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><CalendarOutlined /> Ngày vào làm</span>}>
+            {dayjs(employee.hireDate).format('DD/MM/YYYY')}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><ContactsOutlined /> Người liên hệ khẩn</span>}>
+            {employee.emergencyContactName || 'Chưa cập nhật'}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><PhoneOutlined /> SĐT liên hệ khẩn</span>}>
+            {employee.emergencyContactPhone || 'Chưa cập nhật'}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><FileTextOutlined /> Loại hợp đồng</span>}>
+            {employee.contractType || 'Chưa cập nhật'}
+          </Descriptions.Item>
+          <Descriptions.Item label={<span><BookOutlined /> Trình độ học vấn</span>}>
+            {employee.educationLevel || 'Chưa cập nhật'}
+          </Descriptions.Item>
+        </Descriptions>
+      </Card>
     </div>
   );
 };

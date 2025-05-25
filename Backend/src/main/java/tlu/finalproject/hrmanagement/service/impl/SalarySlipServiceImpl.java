@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.*;
+import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.*;
 import tlu.finalproject.hrmanagement.repository.*;
 import tlu.finalproject.hrmanagement.service.SalarySlipService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,15 +28,35 @@ public class SalarySlipServiceImpl implements SalarySlipService {
 
     @Override
     public List<SalarySlipDTO> getAllSalarySlipsByMonth(String month) {
-        return salarySlipRepository.findByMonth(month).stream()
-                .map(slip -> modelMapper.map(slip, SalarySlipDTO.class))
-                .collect(Collectors.toList());
+        List<SalarySlip> slips = salarySlipRepository.findBySalaryPeriod(month);
+        List<SalarySlipDTO> dtos = new ArrayList<>();
+
+        for (SalarySlip slip : slips) {
+            SalarySlipDTO dto = new SalarySlipDTO();
+            dto = modelMapper.map(slip,SalarySlipDTO.class);
+            User user = userRepository.findById(slip.getUser().getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Nhân viên không tồn tại"));
+            dto.setFullName(user.getFullName());
+
+            // Map department và position sang DTO
+            if (user.getDepartment() != null) {
+                dto.setDepartment(modelMapper.map(user.getDepartment(), DepartmentDTO.class));
+            }
+
+            if (user.getPosition() != null) {
+                dto.setPosition(modelMapper.map(user.getPosition(), PositionDTO.class));
+            }
+
+            dtos.add(dto);
+        }
+
+        return dtos;
     }
 
     @Override
     public SalarySlipDetailDTO getSalarySlipDetail(Long userId, String month) {
         SalarySlip salarySlip = salarySlipRepository
-                .findByUserUserIdAndMonth(userId, month)
+                .findByUserUserIdAndSalaryPeriod(userId, month)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu lương"));
 
         // Tính khoảng thời gian đầu-cuối tháng
@@ -45,32 +67,16 @@ public class SalarySlipServiceImpl implements SalarySlipService {
         // Lấy bonus, deduction, attendance
         List<SalaryBonus> bonuses = salaryBonusRepository.findByUserUserIdAndBonusDateBetween(userId, startDate, endDate);
         List<SalaryDeduction> deductions = salaryDeductionRepository.findByUserUserIdAndDeductionDateBetween(userId, startDate, endDate);
-        List<Attendance> attendances = attendanceRepository.findByUserUserIdAndDateBetween(userId, startDate, endDate);
-
-        Object[] result1 = attendanceRepository.countAttendancesByUserAndDateRange(userId, startDate, endDate);
-        Integer totalWorkingDays =  attendances.size();
-
-
-        if (result1 != null && result1.length > 0 && result1[0] instanceof Object[]) {
-            Object[] innerArray = (Object[]) result1[0];
-            if (innerArray.length > 1) {
-                 totalWorkingDays = ((Long) innerArray[1]).intValue();
-            }
-        }
-
-        Object[] result2 = overtimeRecordRepository.getTotalOvertimeByUserIdNative(userId);
-        Double totalOTHours = 0.0;
-
-        if (result2 != null && result2.length > 0 && result2[0] instanceof Object[]) {
-            Object[] innerArray = (Object[]) result2[0];
-            if (innerArray.length > 1) {
-                totalOTHours = (Double) innerArray[1];
-            }
-        }
 
         // Map DTO
         EmployeeDTO employeeDTO = modelMapper.map(salarySlip.getUser(), EmployeeDTO.class);
         SalarySlipDTO slipDTO = modelMapper.map(salarySlip, SalarySlipDTO.class);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Nhân viên không tồn tại"));
+        slipDTO.setFullName(user.getFullName());
+        slipDTO.setDepartment(modelMapper.map(user.getDepartment(), DepartmentDTO.class));
+        slipDTO.setPosition(modelMapper.map(user.getPosition(), PositionDTO.class));
+
         List<SalaryBonusDTO> bonusDTOs = bonuses.stream()
                 .map(b -> modelMapper.map(b, SalaryBonusDTO.class)).toList();
         List<SalaryDeductionDTO> deductionDTOs = deductions.stream()
@@ -81,8 +87,6 @@ public class SalarySlipServiceImpl implements SalarySlipService {
                 .salarySlip(slipDTO)
                 .bonusDetails(bonusDTOs)
                 .deductionDetails(deductionDTOs)
-                .attendanceSummary(totalWorkingDays)
-                .totalOvertimeHour(totalOTHours)
                 .build();
     }
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -52,8 +51,8 @@ public class User {
     Position position;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'BANNED') DEFAULT 'ACTIVE'")
-    private Status status;
+    @Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'ON_LEAVE', 'PROBATION) DEFAULT 'ACTIVE'")
+    private EmploymentStatus status;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "hire_date")

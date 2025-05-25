@@ -1,11 +1,10 @@
 package tlu.finalproject.hrmanagement.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
+import java.time.Duration;
 import java.time.LocalTime;
 
 @Entity
@@ -23,21 +22,18 @@ public class OvertimeRecord {
     Long overtimeId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    User user;
+    @JoinColumn(name = "attendance_id")
+    Attendance attendance;
 
-    @Column(name = "overtime_start")
-    LocalTime overtimeStart;
+    @Column(name = "start_time")
+    LocalTime startTime;
 
-    @Column(name = "overtime_end")
-    LocalTime overtimeEnd;
+    @Column(name = "end_time")
+    LocalTime endTime;
 
-    @Column(name = "overtime_hour")
-    Double overtimeHour;
+    @Column(name = "day_hours")
+    Double dayHours;  // Số giờ OT ngày (17h-22h)
 
-    @Column(name = "overtime_pay")
-    Double overtimePay;
-
-    @Column(name = "overtime_date")
-    LocalDate overtimeDate;
+    @Column(name = "night_hours")
+    Double nightHours; // Số giờ OT đêm (sau 22h)
 }

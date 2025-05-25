@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.OvertimeRecordDTO;
 import tlu.finalproject.hrmanagement.dto.SalarySlipDTO;
+import tlu.finalproject.hrmanagement.exception.InternalServerErrorException;
 import tlu.finalproject.hrmanagement.exception.ResourceAlreadyExistsException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.*;
@@ -11,23 +12,22 @@ import tlu.finalproject.hrmanagement.projection.OvertimeRecordProjection;
 import tlu.finalproject.hrmanagement.repository.*;
 import tlu.finalproject.hrmanagement.service.SalaryCalculationService;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SalaryCalculationServiceImpl implements SalaryCalculationService {
-    private static final int STANDARD_WORKING_DAYS = 22;
-    private static final int WORKING_HOURS_PER_DAY = 8;
+
     private static final double BHXH_RATE = 0.08;
     private static final double BHYT_RATE = 0.015;
     private static final double BHTN_RATE = 0.01;
     private static final double PERSONAL_DEDUCTION = 11000000.0;
-    private static final double DEFAULT_OVERTIME_RATE = 1.5;
+
 
     private final SalaryDeductionRepository deductionRepository;
     private final UserRepository userRepository;
@@ -39,64 +39,182 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
 
     @Override
     public void calculateAndSaveSalarySlip(Long userId, LocalDate month) {
-        User user = findUserById(userId);
-        // Nếu trạng thái là INACTIVE thì không tính lương
-        if (user.getStatus() == Status.INACTIVE) {
+        // 1. Lấy thông tin nhân viên
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        // 2. Kiểm tra nhân viên có nghỉ phép hay đã nghỉ việc thì dừng
+        if (user.getStatus() == EmploymentStatus.INACTIVE || user.getStatus() == EmploymentStatus.ON_LEAVE) {
             return; // Dừng luôn, không tính lương nữa
         }
-        
+
+        // 3. Tìm và xóa phiếu lương, khấu trừ đã tồn tại của tháng
         String monthStr = formatMonthString(month);
-//        validateSalarySlipNotExists(userId, monthStr);
-
-        // Tìm phiếu lương đã tồn tại
-        Optional<SalarySlip> existingSlip = salarySlipRepository.findByUser_UserIdAndMonth(userId, monthStr);
-
-        // Xóa các khấu trừ liên quan
+        Optional<SalarySlip> existingSlip = salarySlipRepository.findByUser_UserIdAndSalaryPeriod(userId, monthStr);
         if (existingSlip.isPresent()) {
-           deleteStandardDeductions(userId, month);
-
-            // Xóa phiếu lương
+            deleteStandardDeductions(userId, month);
             salarySlipRepository.delete(existingSlip.get());
         }
 
-        
-        SalaryConfiguration config = findSalaryConfigurationByUserId(userId);
 
+        // 4. Lấy lấy thông tin cấu hình lương của nhân viên
+        SalaryConfiguration config = salaryConfigurationRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cấu hình lương cho nhân viên ID: " + userId));
+
+        // 5. Tính lương theo ngày của nhân viên và số ngày làm việc thực tế
         double basicSalary = config.getBasicSalary();
-        double dailySalary = calculateDailySalary(basicSalary);
+        if (user.getStatus() == EmploymentStatus.PROBATION) {
+            basicSalary *= 0.85;
+        }
+        double dailySalary = basicSalary / config.getStandardWorkingDays();
+        double standardWorkingHoursPerDay = (Duration.between(config.getWorkStartTime(), config.getWorkEndTime()).toMinutes() - config.getBreakDurationMinutes()) / 60;
+        double standardWorkingHoursPerMonth = config.getStandardWorkingDays() * standardWorkingHoursPerDay;
 
         // Lấy số ngày làm việc thực tế
         YearMonth yearMonth = YearMonth.from(month);
-        List<Attendance> attendances = getAttendanceRecords(userId, yearMonth);
-        int workingDays = countWorkingDays(attendances);
+        List<Attendance> attendances = attendanceRepository.findByUserIdAndYearAndMonth(userId, yearMonth.getYear(), yearMonth.getMonthValue());
 
-        // Tính lương cơ bản thực tế dựa trên số ngày làm việc
-        double actualBasicSalary = dailySalary * workingDays;
+        Map<LocalDate, List<Attendance>> groupedByDate = new HashMap<>();
+        for (Attendance att : attendances) {
+            groupedByDate.computeIfAbsent(att.getDate(), k -> new ArrayList<>()).add(att);
+        }
+
+        for (Map.Entry<LocalDate, List<Attendance>> entry : groupedByDate.entrySet()) {
+            List<Attendance> dailyAttendances = entry.getValue();
+
+            boolean hasValidCheckIn = dailyAttendances.stream().anyMatch(att -> att.getCheckIn() != null);
+            boolean hasValidCheckOut = dailyAttendances.stream().anyMatch(att -> att.getCheckOut() != null);
+
+            if (!hasValidCheckIn || !hasValidCheckOut) {
+                throw new InternalServerErrorException("Thiếu dữ liệu chấm công của nhân viên: " + user.getFullName());
+            }
+        }
+
+
+
+
+        long totalMinutesWorked = 0;
+        long totalMinutesLate = 0;
+        long totalMinutesEarlyLeave = 0;
+
+        LocalTime workStartTime = config.getWorkStartTime();
+        LocalTime workEndTime = config.getWorkEndTime();
+
+        for (Map.Entry<LocalDate, List<Attendance>> entry : groupedByDate.entrySet()) {
+            LocalDate date = entry.getKey();
+            List<Attendance> dailyAttendances = entry.getValue();
+
+            // Tìm checkIn sớm nhất
+            LocalTime earliestCheckIn = dailyAttendances.stream()
+                    .map(Attendance::getCheckIn)
+                    .min(LocalTime::compareTo)
+                    .orElse(workStartTime);
+
+            // Tìm checkOut muộn nhất
+            LocalTime latestCheckOut = dailyAttendances.stream()
+                    .map(Attendance::getCheckOut)
+                    .max(LocalTime::compareTo)
+                    .orElse(workEndTime);
+
+            // Tính thời gian làm việc trong giờ hành chính 8h-17h
+            LocalTime effectiveCheckIn = earliestCheckIn.isBefore(workStartTime) ? workStartTime : earliestCheckIn;
+            LocalTime effectiveCheckOut = latestCheckOut.isAfter(workEndTime) ? workEndTime : latestCheckOut;
+
+            if (effectiveCheckOut.isAfter(effectiveCheckIn)) {
+                long minutesWorked = Duration.between(effectiveCheckIn, effectiveCheckOut).toMinutes();
+                totalMinutesWorked += minutesWorked;
+            }
+
+            // Tính phút đi muộn
+            if (earliestCheckIn.isAfter(workStartTime)) {
+                totalMinutesLate += Duration.between(workStartTime, earliestCheckIn).toMinutes();
+            }
+
+            // Tính phút về sớm
+            if (latestCheckOut.isBefore(workEndTime)) {
+                totalMinutesEarlyLeave += Duration.between(latestCheckOut, workEndTime).toMinutes();
+            }
+        }
+
+        // Tính số ngày và giờ công chuẩn
+        double actualWorkingDays = groupedByDate.size();
+        double actualWorkingHour = (totalMinutesWorked / 60) - (actualWorkingDays * config.getBreakDurationMinutes() / 60); // Tổng số giờ làm việc hành chính - tổng số giờ nghỉ trưa - đi muộn - vể sớm
+
+        // Tính lương cơ bản thực tế dựa trên số giờ công trên tháng
+        double actualBasicSalary = dailySalary / standardWorkingHoursPerDay * actualWorkingHour;
+
 
         // Tính các khoản bảo hiểm và khấu trừ
         double insuranceBaseSalary = getInsuranceBaseSalary(config, basicSalary);
-        double otherAllowances = getOtherAllowances(config);
+        double otherAllowances = config.getOtherAllowances() != null ? config.getOtherAllowances() : 0;
 
         // Tính và lưu các khoản khấu trừ
-        List<SalaryDeduction> deductions = calculateAndSaveInsuranceDeductions(user, insuranceBaseSalary, month);
-        double totalInsurance = calculateTotalInsurance(deductions);
+        List<SalaryDeduction> deductions = new ArrayList<>();
+        double totalInsurance = 0.0;
+        if (user.getStatus() != EmploymentStatus.PROBATION) {
+            deductions = calculateAndSaveInsuranceDeductions(user, insuranceBaseSalary, month);
+            totalInsurance = calculateTotalInsurance(deductions);
+        }
+
 
         // Tính thuế TNCN
         double taxableIncome = calculateTaxableIncome(actualBasicSalary, totalInsurance, PERSONAL_DEDUCTION);
         double personalIncomeTax = calculatePersonalIncomeTax(taxableIncome);
         deductions.add(createAndSaveDeduction(user, "Thuế TNCN", personalIncomeTax, month));
 
-        // Tính tổng khấu trừ và thưởng
-        double totalBonus = calculateTotalBonus(userId, month);
-        double overtimeSalary = calculateOvertimeSalary(userId, month, config);
-        double totalDeductions = calculateTotalDeductions(userId, month);
+        // Tính tổng thưởng, khấu trừ
+        double totalBonusPay = calculateTotalBonus(userId, month);
+        double totalDeductionsPay = calculateTotalDeductions(userId, month);
+
+
+        // Tính tổng OT
+        List<OvertimeRecordProjection> overtimeRecords = overtimeRecordRepository.findByUserIdAndMonth(userId, yearMonth.getYear(), yearMonth.getMonthValue());
+        double totalDayHours = 0;
+        double totalNightHours = 0;
+
+        for (OvertimeRecordProjection projection : overtimeRecords) {
+            OvertimeRecordDTO recordDTO = mapProjectionToDTO(projection);
+
+            if (recordDTO.getDayHours() != null) {
+                totalDayHours += recordDTO.getDayHours();
+            }
+            if (recordDTO.getNightHours() != null) {
+                totalNightHours += recordDTO.getNightHours();
+            }
+        }
+
+
+        double dayOvertimePay = dailySalary / standardWorkingHoursPerDay * totalDayHours * config.getDayOvertimeRate();
+        double nightOvertimePay = dailySalary / standardWorkingHoursPerDay * totalNightHours * config.getNightOvertimeRate();
 
         // Tính lương tổng
-        double totalSalary = calculateTotalSalary(actualBasicSalary, totalBonus, overtimeSalary, otherAllowances, totalDeductions);
+        double totalSalary = 0.0;
+        if (user.getStatus() == EmploymentStatus.PROBATION) {
+            totalSalary = actualBasicSalary + totalBonusPay - totalDeductionsPay + dayOvertimePay + nightOvertimePay;
+        } else {
+            totalSalary = actualBasicSalary + totalBonusPay + otherAllowances - totalDeductionsPay + dayOvertimePay + nightOvertimePay;
+        }
 
         // Lưu phiếu lương
-        saveSalarySlip(user, month, basicSalary, actualBasicSalary, otherAllowances, totalBonus,
-                totalDeductions, overtimeSalary, totalSalary, monthStr);
+        SalarySlip salarySlip = SalarySlip.builder()
+                .user(user)
+                .standardWorkingHours(standardWorkingHoursPerMonth)
+                .standardWorkingDays(config.getStandardWorkingDays())
+                .actualWorkingHours(actualWorkingHour)
+                .actualWorkingDays(actualWorkingDays)
+                .actualBasicSalary((double) Math.round(actualBasicSalary))
+                .otherAllowances((double) Math.round(otherAllowances))
+                .dayOvertimePay((double) Math.round(dayOvertimePay))
+                .nightOvertimePay((double) Math.round(nightOvertimePay))
+                .totalBonus((double) Math.round(totalBonusPay))
+                .totalDeductions((double) Math.round(totalDeductionsPay))
+                .totalSalary((double) Math.round(totalSalary))
+                .paymentDate(month.withDayOfMonth(month.lengthOfMonth()))
+                .salaryPeriod(monthStr)
+                .calculationDate(LocalDate.now())
+                .build();
+
+        salarySlipRepository.save(salarySlip);
     }
 
     private void deleteStandardDeductions(Long userId, LocalDate month) {
@@ -124,44 +242,9 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         return month.toString().substring(0, 7); // Format yyyy-MM
     }
 
-    private void validateSalarySlipNotExists(Long userId, String monthStr) {
-        Optional<SalarySlip> existingSlip = salarySlipRepository.findByUser_UserIdAndMonth(userId, monthStr);
-        if (existingSlip.isPresent()) {
-            throw new ResourceAlreadyExistsException(
-                    "Phiếu lương cho nhân viên ID: " + userId + " tháng " + monthStr + " đã tồn tại!");
-        }
-    }
-
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
-    }
-
-    private SalaryConfiguration findSalaryConfigurationByUserId(Long userId) {
-        return salaryConfigurationRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cấu hình lương cho nhân viên ID: " + userId));
-    }
-
-    private double calculateDailySalary(double basicSalary) {
-        return basicSalary / STANDARD_WORKING_DAYS;
-    }
-
-    private List<Attendance> getAttendanceRecords(Long userId, YearMonth yearMonth) {
-        return attendanceRepository.findByUserIdAndYearAndMonth(userId, yearMonth.getYear(), yearMonth.getMonthValue());
-    }
-
-    private int countWorkingDays(List<Attendance> attendances) {
-        return (int) attendances.stream()
-                .filter(att -> att.getCheckIn() != null && att.getCheckOut() != null)
-                .count();
-    }
 
     private double getInsuranceBaseSalary(SalaryConfiguration config, double basicSalary) {
         return config.getInsuranceBaseSalary() != null ? config.getInsuranceBaseSalary() : basicSalary;
-    }
-
-    private double getOtherAllowances(SalaryConfiguration config) {
-        return config.getOtherAllowances() != null ? config.getOtherAllowances() : 0;
     }
 
     private List<SalaryDeduction> calculateAndSaveInsuranceDeductions(User user, double insuranceBaseSalary, LocalDate month) {
@@ -197,7 +280,7 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
                 .user(user)
                 .deductionType(type)
                 .amount(amount)
-                .deductionDate(month.withDayOfMonth(1))
+                .deductionDate(LocalDate.now())
                 .build();
     }
 
@@ -219,30 +302,6 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         return allDeductions.stream().mapToDouble(SalaryDeduction::getAmount).sum();
     }
 
-    private double calculateTotalSalary(double basicSalary, double bonus, double overtimeSalary,
-                                        double otherAllowances, double totalDeductions) {
-        return basicSalary + bonus + overtimeSalary + otherAllowances - totalDeductions;
-    }
-
-    private void saveSalarySlip(User user, LocalDate month, double basicSalary, double actualBasicSalary,
-                                double otherAllowances, double totalBonus, double totalDeductions,
-                                double overtimeSalary, double totalSalary, String monthStr) {
-        SalarySlip salarySlip = SalarySlip.builder()
-                .user(user)
-                .paymentDate(month.withDayOfMonth(month.lengthOfMonth()))
-                .basicSalary(basicSalary)
-                .actualBasicSalary(actualBasicSalary)
-                .otherAllowances(otherAllowances)
-                .bonus(totalBonus)
-                .deductions(totalDeductions)
-                .overTimePay(overtimeSalary)
-                .totalSalary(totalSalary)
-                .month(monthStr)
-                .build();
-
-        salarySlipRepository.save(salarySlip);
-    }
-
     private double calculatePersonalIncomeTax(double income) {
         if (income <= 0) return 0;
         if (income <= 5000000) return income * 0.05;
@@ -254,26 +313,6 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         return 18150000 + (income - 80000000) * 0.35;
     }
 
-    private double calculateOvertimeSalary(Long userId, LocalDate month, SalaryConfiguration config) {
-        YearMonth yearMonth = YearMonth.from(month);
-        String monthYearString = yearMonth.toString();
-
-        List<OvertimeRecordProjection> overtimeRecords = overtimeRecordRepository.findByUserIdAndMonth(userId, monthYearString);
-        double totalOvertimePay = 0;
-
-        for (OvertimeRecordProjection projection : overtimeRecords) {
-            OvertimeRecordDTO recordDTO = mapProjectionToDTO(projection);
-
-            if (recordDTO.getOvertimePay() != null) {
-                totalOvertimePay += recordDTO.getOvertimePay();
-            } else {
-                double pay = calculateAndSaveOvertimePay(userId, config, recordDTO);
-                totalOvertimePay += pay;
-            }
-        }
-
-        return totalOvertimePay;
-    }
 
     private OvertimeRecordDTO mapProjectionToDTO(OvertimeRecordProjection projection) {
         return OvertimeRecordDTO.builder()
@@ -281,41 +320,11 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
                 .userId(projection.getUserId())
                 .overtimeStart(projection.getOvertimeStart())
                 .overtimeEnd(projection.getOvertimeEnd())
-                .overtimeHour(projection.getOvertimeHour())
-                .overtimePay(projection.getOvertimePay())
+                .dayHours(projection.getDayHours())
+                .nightHours(projection.getNightHours())
                 .overtimeDate(projection.getOvertimeDate())
                 .month(projection.getMonth())
                 .build();
     }
 
-    private double calculateAndSaveOvertimePay(Long userId, SalaryConfiguration config, OvertimeRecordDTO recordDTO) {
-        double hourlyRate = calculateHourlyRate(config.getBasicSalary());
-        double overtimeRate = config.getOvertimeRate() != null ? config.getOvertimeRate() : DEFAULT_OVERTIME_RATE;
-        double calculatedPay = recordDTO.getOvertimeHour() * hourlyRate * overtimeRate;
-
-        // Lưu vào database
-        saveOvertimeRecord(userId, recordDTO, calculatedPay);
-
-        return calculatedPay;
-    }
-
-    private void saveOvertimeRecord(Long userId, OvertimeRecordDTO recordDTO, double calculatedPay) {
-        User user = User.builder().userId(userId).build();
-
-        OvertimeRecord overtimeRecord = OvertimeRecord.builder()
-                .overtimeId(recordDTO.getOvertimeId())
-                .user(user)
-                .overtimeStart(recordDTO.getOvertimeStart())
-                .overtimeEnd(recordDTO.getOvertimeEnd())
-                .overtimeHour(recordDTO.getOvertimeHour())
-                .overtimePay(calculatedPay)
-                .overtimeDate(recordDTO.getOvertimeDate())
-                .build();
-
-        overtimeRecordRepository.save(overtimeRecord);
-    }
-
-    private double calculateHourlyRate(double basicSalary) {
-        return basicSalary / (STANDARD_WORKING_DAYS * WORKING_HOURS_PER_DAY);
-    }
 }

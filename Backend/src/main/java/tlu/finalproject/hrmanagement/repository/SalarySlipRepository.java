@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface SalarySlipRepository extends JpaRepository<SalarySlip, Long> {
-    List<SalarySlip> findByMonth(String monthStr);
+    List<SalarySlip> findBySalaryPeriod(String monthStr);
 
-    Optional<SalarySlip> findByUser_UserIdAndMonth(Long userId, String monthStr);
+    Optional<SalarySlip> findByUser_UserIdAndSalaryPeriod(Long userId, String monthStr);
 
-    Optional<SalarySlip> findByUserUserIdAndMonth(Long userId, String month);
+    Optional<SalarySlip> findByUserUserIdAndSalaryPeriod(Long userId, String month);
 
 }

@@ -55,10 +55,15 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
                 .orElseThrow(() -> new ResourceNotFoundException("Cấu hình lương không tồn tại cho người dùng với ID: " + userId));
 
         salaryConfiguration.setBasicSalary(dto.getBasicSalary());
-        salaryConfiguration.setBonusRate(dto.getBonusRate());
+        salaryConfiguration.setStandardWorkingDays(dto.getStandardWorkingDays());
+        salaryConfiguration.setDayOvertimeRate(dto.getDayOvertimeRate());
+        salaryConfiguration.setNightOvertimeRate(dto.getNightOvertimeRate());
+        salaryConfiguration.setHolidayOvertimeRate(dto.getHolidayOvertimeRate());
         salaryConfiguration.setOtherAllowances(dto.getOtherAllowances());
-        salaryConfiguration.setOvertimeRate(dto.getOvertimeRate());
         salaryConfiguration.setInsuranceBaseSalary(dto.getInsuranceBaseSalary());
+        salaryConfiguration.setWorkStartTime(dto.getWorkStartTime());
+        salaryConfiguration.setWorkEndTime(dto.getWorkEndTime());
+        salaryConfiguration.setBreakDurationMinutes(dto.getBreakDurationMinutes());
 
         SalaryConfiguration saved = salaryConfigurationRepository.save(salaryConfiguration);
 

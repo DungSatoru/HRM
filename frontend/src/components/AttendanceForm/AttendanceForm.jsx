@@ -28,13 +28,17 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
           console.log('Dữ liệu lấy được: ', data); // Debug log
           form.setFieldsValue({
             date: data.date ? moment(data.date) : null,
-            checkIn: data.checkIn ? moment(data.checkIn, 'HH:mm') : null,
-            checkOut: data.checkOut ? moment(data.checkOut, 'HH:mm') : null,
-            note: data.note || '',
+            checkIn: data.checkIn,
+            checkOut: data.checkOut,
           });
         } else if (mode === 'create') {
           const empData = await getEmployees();
           setEmployees(empData);
+          form.setFieldsValue({
+            date: null,
+            checkIn: null,
+            checkOut: null,
+          });
         }
       } catch (error) {
         toast.error('Lỗi khi tải dữ liệu!');
@@ -165,12 +169,12 @@ const AttendanceForm = ({ visible, onClose, onSuccess, mode, attendanceId }) => 
             </Col>
             <Col md={12}>
               <Form.Item label="Giờ vào" name="checkIn" rules={[{ required: true, message: 'Vui lòng chọn giờ vào' }]}>
-                <TimePicker format="HH:mm" style={{ width: '100%' }} />
+                <Input type="text" placeholder="HH:mm:ss" />
               </Form.Item>
             </Col>
             <Col md={12}>
               <Form.Item label="Giờ ra" name="checkOut" rules={[{ required: true, message: 'Vui lòng chọn giờ ra' }]}>
-                <TimePicker format="HH:mm" style={{ width: '100%' }} />
+                <Input type="text" placeholder="HH:mm:ss" />
               </Form.Item>
             </Col>
           </Row>

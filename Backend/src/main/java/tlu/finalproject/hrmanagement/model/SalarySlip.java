@@ -6,7 +6,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "salary_slips")
@@ -25,9 +24,17 @@ public class SalarySlip {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    // Lương cơ bản theo hợp đồng
-    @Column(name = "basic_salary")
-    Double basicSalary;
+    @Column(name = "standard_working_hours")
+    Double standardWorkingHours; // Số giờ công chuẩn ngày
+
+    @Column(name = "standard_working_days")
+    Integer standardWorkingDays; // Số ngày công chuẩn tháng
+
+    @Column(name = "actual_working_hours")
+    Double actualWorkingHours; // Số giờ công thực tế
+
+    @Column(name = "actual_working_days")
+    Double actualWorkingDays; // Số ngày công thực tế
 
     // Lương cơ bản thực tế (dựa trên số ngày làm việc)
     @Column(name = "actual_basic_salary")
@@ -36,14 +43,17 @@ public class SalarySlip {
     @Column(name = "other_allowances")
     Double otherAllowances;
 
-    @Column(name = "overtime_pay")
-    Double overTimePay;
+    @Column(name = "day_overtime_Pay")
+    Double dayOvertimePay;
 
-    @Column(name = "bonus")
-    Double bonus;
+    @Column(name = "night_overtime_Pay")
+    Double nightOvertimePay;
 
-    @Column(name = "deductions")
-    Double deductions;
+    @Column(name = "total_bonus")
+    Double totalBonus;
+
+    @Column(name = "total_deductions")
+    Double totalDeductions;
 
     @Column(name = "total_salary")
     Double totalSalary;
@@ -51,6 +61,9 @@ public class SalarySlip {
     @Column(name = "payment_date")
     LocalDate paymentDate;
 
-    @Column(name = "month")
-    String month;
+    @Column(name = "salary_period")
+    String salaryPeriod; // Ví dụ: "2025-05"
+
+    @Column(name = "calculation_date")
+    LocalDate calculationDate;
 }

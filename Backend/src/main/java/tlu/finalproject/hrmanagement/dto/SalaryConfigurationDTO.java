@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import tlu.finalproject.hrmanagement.model.User;
 
+import java.time.LocalTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -14,8 +16,13 @@ public class SalaryConfigurationDTO {
     Long salaryConfigId;
     Long userId;
     Double basicSalary;
-    Double overtimeRate;
-    Double bonusRate;
+    Integer standardWorkingDays;
+    Double dayOvertimeRate;
+    Double nightOvertimeRate;
+    Double holidayOvertimeRate;
     Double otherAllowances;
     Double insuranceBaseSalary;
+    LocalTime workStartTime;
+    LocalTime workEndTime;
+    Integer breakDurationMinutes;
 }

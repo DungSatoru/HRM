@@ -15,6 +15,7 @@ import tlu.finalproject.hrmanagement.repository.*;
 import tlu.finalproject.hrmanagement.service.SalaryConfigurationService;
 import tlu.finalproject.hrmanagement.service.UserService;
 
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +84,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode("123"));
         }
 
-        user.setStatus(Optional.ofNullable(user.getStatus()).orElse(Status.ACTIVE));
+        user.setStatus(Optional.ofNullable(user.getStatus()).orElse(EmploymentStatus.ACTIVE));
         user.setCreatedAt(Optional.ofNullable(user.getCreatedAt()).orElse(new Date()));
 
         User savedUser = userRepository.save(user);
@@ -91,9 +92,14 @@ public class UserServiceImpl implements UserService {
         SalaryConfigurationDTO salaryConfigurationDTO = SalaryConfigurationDTO.builder()
                 .userId(savedUser.getUserId())
                 .basicSalary(0.0)
-                .bonusRate(0.0)
-                .overtimeRate(0.0)
+                .standardWorkingDays(22)
+                .dayOvertimeRate(1.5)
+                .nightOvertimeRate(1.5)
+                .holidayOvertimeRate(3.0)
                 .otherAllowances(0.0)
+                .workStartTime(LocalTime.of(8,0))
+                .workEndTime(LocalTime.of(17,0))
+                .breakDurationMinutes(60)
                 .build();
 
         salaryConfigurationService.createSalaryConfiguration(salaryConfigurationDTO);

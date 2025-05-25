@@ -1,17 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Input, Select, Button, DatePicker, message, Card, Spin } from 'antd';
+import { 
+  Form, 
+  Input, 
+  Select, 
+  Button, 
+  DatePicker, 
+  message, 
+  Card, 
+  Spin, 
+  Upload, 
+  Row, 
+  Col, 
+  Divider, 
+  Typography,
+  Avatar,
+  Space
+} from 'antd';
+import { 
+  PlusOutlined,
+  UserOutlined,
+  IdcardOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  CalendarOutlined,
+  ManOutlined,
+  WomanOutlined,
+  HomeOutlined,
+  SolutionOutlined,
+  TeamOutlined,
+  StarOutlined,
+  ContactsOutlined,
+  FileTextOutlined,
+  BookOutlined,
+  SaveOutlined,
+  CloseOutlined
+} from '@ant-design/icons';
 import { addEmployee, updateEmployee, getEmployeeById } from '~/services/employeeService';
 import { getDepartments } from '~/services/departmentService';
 import { getPositions } from '~/services/positionService';
-import { Upload } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-
-import moment from 'moment';
-import './EmployeeForm.css';
 import { getRoleById } from '~/services/roleService';
+import moment from 'moment';
 
 const { Option } = Select;
+const { Title } = Typography;
 
 const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
   const navigate = useNavigate();
@@ -94,7 +126,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
       gender: values.gender,
       dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : null,
       address: values.address,
-      profileImageUrl: values.profileImageUrl,
+      profileImageUrl: imageFile ? undefined : imageUrl.replace(SERVER_URL, ''),
       emergencyContactName: values.emergencyContactName,
       emergencyContactPhone: values.emergencyContactPhone,
       contractType: values.contractType,
@@ -127,237 +159,272 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
       reader.onerror = (error) => reject(error);
     });
 
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+    </div>
+  );
+
   return (
-    <div className="page-container employees-container">
-      <h2 className="page-title">{isEdit ? 'Chỉnh Sửa Thông Tin Nhân Viên' : 'Thêm Nhân Viên'}</h2>
-      <Card>
+    <div style={{ padding: 24 }}>
+      <Title level={3} style={{ marginBottom: 24 }}>
+        {isEdit ? 'Chỉnh Sửa Thông Tin Nhân Viên' : 'Thêm Nhân Viên'}
+      </Title>
+      
+      <Card 
+        bordered={false} 
+        style={{ 
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
+          borderRadius: 8
+        }}
+      >
         {loading ? (
-          <div className="loading-container">
+          <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
             <Spin size="large" />
           </div>
         ) : (
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmit}
-            // initialValues={{
-            //   roleName: 'Nhân viên',
-            //   status: 'ACTIVE',
-            // }}
-          >
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
             {/* Ảnh đại diện */}
-            <div className="row">
-              <div className="col-md-6">
+            <Row gutter={16}>
+              <Col span={24}>
                 <Form.Item label="Ảnh đại diện">
                   <Upload
                     name="avatar"
                     listType="picture-card"
-                    className="avatar-uploader"
                     showUploadList={false}
                     beforeUpload={async (file) => {
+                      const isImage = file.type.startsWith('image/');
+                      if (!isImage) {
+                        message.error('Bạn chỉ có thể tải lên file ảnh!');
+                        return false;
+                      }
+                      const isLt2M = file.size / 1024 / 1024 < 2;
+                      if (!isLt2M) {
+                        message.error('Ảnh phải nhỏ hơn 2MB!');
+                        return false;
+                      }
                       const base64 = await getBase64(file);
                       setImageUrl(base64);
                       setImageFile(file);
-                      return false; // Không upload ngay
+                      return false;
                     }}
+                    style={{ width: '100%' }}
                   >
                     {imageUrl ? (
-                      <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
+                      <Avatar 
+                        src={imageUrl} 
+                        size={100} 
+                        style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                      />
                     ) : (
-                      <div>
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                      </div>
+                      uploadButton
                     )}
                   </Upload>
                 </Form.Item>
-              </div>
-            </div>
+              </Col>
+            </Row>
 
             {/* Thông tin cá nhân */}
-            <div className="form-section">
-              <h6 className="section-title">
-                <i className="fas fa-id-card section-icon"></i>Thông tin cá nhân
-              </h6>
-              <div className="row">
-                <div className="col-md-4">
-                  <Form.Item
-                    label="Tên tài khoản"
-                    name="username"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản' }]}
-                  >
-                    <Input placeholder="Tên tài khoản" />
-                  </Form.Item>
-                </div>
-                <div className="col-md-4">
-                  <Form.Item
-                    label="Họ và Tên"
-                    name="fullName"
-                    rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
-                  >
-                    <Input placeholder="Họ và Tên" />
-                  </Form.Item>
-                </div>
-                <div className="col-md-4">
-                  <Form.Item
-                    label="Căn cước công dân"
-                    name="identity"
-                    rules={[{ required: true, message: 'Vui lòng nhập căn cước công dân' }]}
-                  >
-                    <Input placeholder="Căn cước công dân" />
-                  </Form.Item>
-                </div>
-              </div>
-            </div>
+            <Divider orientation="left" style={{ marginTop: 0 }}>
+              <SolutionOutlined /> Thông tin cá nhân
+            </Divider>
+            <Row gutter={16}>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label="Tên tài khoản"
+                  name="username"
+                  rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản' }]}
+                >
+                  <Input prefix={<UserOutlined />} placeholder="Tên tài khoản" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label="Họ và Tên"
+                  name="fullName"
+                  rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+                >
+                  <Input prefix={<UserOutlined />} placeholder="Họ và Tên" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label="Căn cước công dân"
+                  name="identity"
+                  rules={[{ required: true, message: 'Vui lòng nhập căn cước công dân' }]}
+                >
+                  <Input prefix={<IdcardOutlined />} placeholder="Căn cước công dân" />
+                </Form.Item>
+              </Col>
+            </Row>
 
             {/* Thông tin liên hệ */}
-            <div className="form-section">
-              <h6 className="section-title">
-                <i className="fas fa-address-book section-icon"></i>Thông tin liên hệ
-              </h6>
-              <div className="row">
-                <div className="col-md-6">
-                  <Form.Item
-                    label="Email"
-                    name="email"
-                    rules={[{ required: true, message: 'Vui lòng nhập email', type: 'email' }]}
-                  >
-                    <Input placeholder="Email" />
-                  </Form.Item>
-                </div>
-                <div className="col-md-6">
-                  <Form.Item
-                    label="Số điện thoại"
-                    name="phone"
-                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
-                  >
-                    <Input placeholder="Số điện thoại" />
-                  </Form.Item>
-                </div>
-              </div>
-            </div>
+            <Divider orientation="left">
+              <ContactsOutlined /> Thông tin liên hệ
+            </Divider>
+            <Row gutter={16}>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[{ required: true, message: 'Vui lòng nhập email', type: 'email' }]}
+                >
+                  <Input prefix={<MailOutlined />} placeholder="Email" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  label="Số điện thoại"
+                  name="phone"
+                  rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                >
+                  <Input prefix={<PhoneOutlined />} placeholder="Số điện thoại" />
+                </Form.Item>
+              </Col>
+            </Row>
 
             {/* Thông tin công việc */}
-            <div className="form-section">
-              <h6 className="section-title">
-                <i className="fas fa-briefcase section-icon"></i>Thông tin công việc
-              </h6>
-              <div className="row">
-                <div className="col-md-4">
-                  <Form.Item label="Vai trò" name="roleName">
-                    <Input value="Nhân viên" disabled />
-                  </Form.Item>
-                </div>
-                <div className="col-md-4">
-                  <Form.Item
-                    label="Chức vụ"
-                    name="positionId"
-                    rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
+            <Divider orientation="left">
+              <TeamOutlined /> Thông tin công việc
+            </Divider>
+            <Row gutter={16}>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item label="Vai trò" name="roleName">
+                  <Input prefix={<SolutionOutlined />} value="Nhân viên" disabled />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label="Chức vụ"
+                  name="positionId"
+                  rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
+                >
+                  <Select
+                    placeholder="Chọn chức vụ"
+                    suffixIcon={<StarOutlined />}
                   >
-                    <Select placeholder="Chọn chức vụ">
-                      {positions.map((pos) => (
-                        <Option key={pos.positionId} value={pos.positionId}>
-                          {pos.positionName}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="col-md-4">
-                  <Form.Item
-                    label="Phòng ban"
-                    name="departmentId"
-                    rules={[{ required: true, message: 'Vui lòng chọn phòng ban' }]}
+                    {positions.map((pos) => (
+                      <Option key={pos.positionId} value={pos.positionId}>
+                        {pos.positionName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label="Phòng ban"
+                  name="departmentId"
+                  rules={[{ required: true, message: 'Vui lòng chọn phòng ban' }]}
+                >
+                  <Select
+                    placeholder="Chọn phòng ban"
+                    suffixIcon={<TeamOutlined />}
                   >
-                    <Select placeholder="Chọn phòng ban">
-                      {departments.map((dep) => (
-                        <Option key={dep.departmentId} value={dep.departmentId}>
-                          {dep.departmentName}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="col-md-6">
-                  <Form.Item
-                    label="Trạng thái"
-                    name="status"
-                    rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
-                  >
-                    <Select>
-                      <Option value="ACTIVE">Đang làm việc</Option>
-                      <Option value="INACTIVE">Nghỉ việc</Option>
-                      <Option value="BANNED">Cấm hoạt động</Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="col-md-6">
-                  <Form.Item
-                    label="Ngày vào làm"
-                    name="hireDate"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngày vào làm' }]}
-                  >
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                </div>
-              </div>
-            </div>
+                    {departments.map((dep) => (
+                      <Option key={dep.departmentId} value={dep.departmentId}>
+                        {dep.departmentName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  label="Trạng thái"
+                  name="status"
+                  rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+                >
+                  <Select placeholder="Chọn trạng thái">
+                    <Option value="ACTIVE">Đang làm việc</Option>
+                    <Option value="INACTIVE">Nghỉ việc</Option>
+                    <Option value="ON_LEAVE">Đang nghỉ phép</Option>
+                    <Option value="PROBATION">Đang thử việc</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  label="Ngày vào làm"
+                  name="hireDate"
+                  rules={[{ required: true, message: 'Vui lòng chọn ngày vào làm' }]}
+                >
+                  <DatePicker 
+                    style={{ width: '100%' }} 
+                    suffixIcon={<CalendarOutlined />}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
             {/* Thông tin bổ sung */}
-            <div className="form-section">
-              <h6 className="section-title">
-                <i className="fas fa-user section-icon"></i>Thông tin bổ sung
-              </h6>
-              <div className="row">
-                <div className="col-md-4">
-                  <Form.Item label="Ngày sinh" name="dateOfBirth">
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                </div>
-                <div className="col-md-4">
-                  <Form.Item label="Giới tính" name="gender">
-                    <Select placeholder="Chọn giới tính">
-                      <Option value={true}>Nam</Option>
-                      <Option value={false}>Nữ</Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="col-md-4">
-                  <Form.Item label="Địa chỉ" name="address">
-                    <Input placeholder="Địa chỉ" />
-                  </Form.Item>
-                </div>
-                <div className="col-md-6">
-                  <Form.Item label="Người liên hệ khẩn" name="emergencyContactName">
-                    <Input placeholder="Tên người liên hệ" />
-                  </Form.Item>
-                </div>
-                <div className="col-md-6">
-                  <Form.Item label="SĐT người liên hệ" name="emergencyContactPhone">
-                    <Input placeholder="Số điện thoại" />
-                  </Form.Item>
-                </div>
-                <div className="col-md-6">
-                  <Form.Item label="Loại hợp đồng" name="contractType">
-                    <Input placeholder="Loại hợp đồng" />
-                  </Form.Item>
-                </div>
-                <div className="col-md-6">
-                  <Form.Item label="Trình độ học vấn" name="educationLevel">
-                    <Input placeholder="Trình độ học vấn" />
-                  </Form.Item>
-                </div>
-              </div>
-            </div>
+            <Divider orientation="left">
+              <UserOutlined /> Thông tin bổ sung
+            </Divider>
+            <Row gutter={16}>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item label="Ngày sinh" name="dateOfBirth">
+                  <DatePicker 
+                    style={{ width: '100%' }} 
+                    suffixIcon={<CalendarOutlined />}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item label="Giới tính" name="gender">
+                  <Select placeholder="Chọn giới tính">
+                    <Option value={true}><ManOutlined /> Nam</Option>
+                    <Option value={false}><WomanOutlined /> Nữ</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item label="Địa chỉ" name="address">
+                  <Input prefix={<HomeOutlined />} placeholder="Địa chỉ" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item label="Người liên hệ khẩn" name="emergencyContactName">
+                  <Input prefix={<ContactsOutlined />} placeholder="Tên người liên hệ" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item label="SĐT người liên hệ" name="emergencyContactPhone">
+                  <Input prefix={<PhoneOutlined />} placeholder="Số điện thoại" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item label="Loại hợp đồng" name="contractType">
+                  <Input prefix={<FileTextOutlined />} placeholder="Loại hợp đồng" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item label="Trình độ học vấn" name="educationLevel">
+                  <Input prefix={<BookOutlined />} placeholder="Trình độ học vấn" />
+                </Form.Item>
+              </Col>
+            </Row>
 
             {/* Actions */}
-            <div className="form-actions">
-              <Button type="primary" htmlType="submit" loading={submitting} className="submit-button">
-                {isEdit ? 'Lưu thay đổi' : 'Lưu'}
-              </Button>
-              <Button onClick={() => navigate('/employees')} disabled={submitting}>
-                Hủy
-              </Button>
+            <div style={{ marginTop: 24, textAlign: 'right' }}>
+              <Space>
+                <Button 
+                  onClick={() => navigate('/employees')} 
+                  disabled={submitting}
+                  icon={<CloseOutlined />}
+                >
+                  Hủy
+                </Button>
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  loading={submitting}
+                  icon={<SaveOutlined />}
+                >
+                  {isEdit ? 'Lưu thay đổi' : 'Lưu'}
+                </Button>
+              </Space>
             </div>
           </Form>
         )}
