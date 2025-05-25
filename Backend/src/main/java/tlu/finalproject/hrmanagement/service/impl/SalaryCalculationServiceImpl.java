@@ -27,6 +27,8 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
     private static final double BHTN_RATE = 0.01;
     private static final double PERSONAL_DEDUCTION = 11_000_000.0;
     private static final double PROBATION_RATE = 0.85;
+    private static final double DEPENDENT_DEDUCTION = 4_400_000.0;
+
 
     // Repositories
     private final SalaryDeductionRepository deductionRepository;
@@ -203,7 +205,9 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
 
         // 10. Tính thuế TNCN dựa trên toàn bộ thu nhập chịu thuế
         // Thu nhập chịu thuế = Tổng thu nhập - Tổng tiền bảo hiểm - Giảm trừ cá nhân
-        double taxableIncome = Math.max(totalIncomeBeforeDeductions - totalInsurance - PERSONAL_DEDUCTION, 0);
+        int numberOfDependents = config.getNumberOfDependents() != null ? config.getNumberOfDependents() : 0;
+        double totalDeduction = PERSONAL_DEDUCTION + (numberOfDependents * DEPENDENT_DEDUCTION);
+        double taxableIncome = Math.max(totalIncomeBeforeDeductions - totalInsurance - totalDeduction, 0);
         double personalIncomeTax = calculatePersonalIncomeTax(taxableIncome);
 
         // Tạo đối tượng khấu trừ mới cho thuế TNCN

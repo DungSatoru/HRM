@@ -46,11 +46,14 @@ public class SalaryConfiguration {
     Double insuranceBaseSalary;
 
     @Column(name = "work_start_time", columnDefinition = "TIME DEFAULT '08:00'")
-    private LocalTime workStartTime = LocalTime.of(8, 0);
+    LocalTime workStartTime = LocalTime.of(8, 0);
 
     @Column(name = "work_end_time", columnDefinition = "TIME DEFAULT '17:00'")
-    private LocalTime workEndTime = LocalTime.of(17, 0);
+    LocalTime workEndTime = LocalTime.of(17, 0);
 
     @Column(name = "break_duration_minutes", columnDefinition = "INT DEFAULT 60")
-    private Integer breakDurationMinutes = 60;
+    Integer breakDurationMinutes = 60;
+
+    @Column(name = "number_of_dependents", columnDefinition = "INT DEFAULT 0")
+    Integer numberOfDependents = 0;
 }

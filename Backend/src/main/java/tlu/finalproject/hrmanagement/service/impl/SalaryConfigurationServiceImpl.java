@@ -64,6 +64,7 @@ public class SalaryConfigurationServiceImpl implements SalaryConfigurationServic
         salaryConfiguration.setWorkStartTime(dto.getWorkStartTime());
         salaryConfiguration.setWorkEndTime(dto.getWorkEndTime());
         salaryConfiguration.setBreakDurationMinutes(dto.getBreakDurationMinutes());
+        salaryConfiguration.setNumberOfDependents(dto.getNumberOfDependents());
 
         SalaryConfiguration saved = salaryConfigurationRepository.save(salaryConfiguration);
 

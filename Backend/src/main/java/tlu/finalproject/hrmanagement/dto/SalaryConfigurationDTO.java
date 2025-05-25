@@ -25,4 +25,5 @@ public class SalaryConfigurationDTO {
     LocalTime workStartTime;
     LocalTime workEndTime;
     Integer breakDurationMinutes;
+    Integer numberOfDependents;
 }

@@ -94,6 +94,7 @@ const SalaryManagement = () => {
         workStartTime: salaryConfig.workStartTime,
         workEndTime: salaryConfig.workEndTime,
         holidayOvertimeRate: salaryConfig.holidayOvertimeRate || 0,
+        numberOfDependents: salaryConfig.numberOfDependents || 0,
       });
     } catch (error) {
       message.error('Không thể lấy cấu hình lương cho nhân viên');
@@ -458,6 +459,15 @@ const SalaryManagement = () => {
                 rules={[{ required: true, message: 'Nhập số phút nghỉ' }]}
               >
                 <Input type="number" min={0} step={5} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Số người phụ thuộc"
+                name="numberOfDependents"
+                rules={[{ required: true, message: 'Nhập số người phụ thuộc' }]}
+              >
+                <Input type="number" min={0} step={1} />
               </Form.Item>
             </Col>
           </Row>
