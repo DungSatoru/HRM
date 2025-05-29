@@ -2,6 +2,10 @@
 import websocket
 import json
 from datetime import datetime
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+import pygame
+import time
 
 class WebSocketClient:
     def send_attendance_to_server(self, user_id):
@@ -21,7 +25,19 @@ class WebSocketClient:
 
             ws.send(json.dumps(data))
             response = ws.recv()
-            print("Server Response:", response)
+            
+            if response == "success":
+                # Đường dẫn file âm thanh
+                file_path = r"D:\Documents\THUYLOIUNIVERSITY\Semester8\GraduationProject\HRM\Backend\src\main\resources\audio\success.wav"
+
+                # Khởi tạo pygame mixer
+                pygame.mixer.init()
+                pygame.mixer.music.load(file_path)
+                pygame.mixer.music.play()
+
+                # Chờ phát xong
+                while pygame.mixer.music.get_busy():
+                    time.sleep(0.1)
 
             ws.close()
         except Exception as e:

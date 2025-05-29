@@ -1,3 +1,4 @@
+#  python main.py --ip 192.168.0.117 --user admin --password L23F65D3
 # main.py - Main application file
 import os, sys
 import time

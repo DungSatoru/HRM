@@ -71,28 +71,19 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public boolean deleteDepartment(Long id) {
-        try {
-            // Kiểm tra có nhân viên trong phòng ban không
-            long userCount = userRepository.countByDepartment_DepartmentId(id);
-            if (userCount > 0) {
-                throw new ConflictException("Phòng ban đã có nhân viên nên không thể xóa");
-            }
-
-            // Kiểm tra xem phòng ban có tồn tại không
-            departmentRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Phng ban không tồn tại"));
-
-            // Xóa phòng ban
-            departmentRepository.deleteById(id);
-            return true;
-
-        } catch (IllegalStateException e) {
-            throw new BadRequestException(e.getMessage());
-        } catch (ResourceNotFoundException e) {
-            throw e;  // Ném lại lỗi nếu phòng ban không tồn tại
-        } catch (Exception e) {
-            throw new RuntimeException("Không thể xóa phòng ban", e);
+        // Kiểm tra có nhân viên trong phòng ban không
+        long userCount = userRepository.countByDepartment_DepartmentId(id);
+        if (userCount > 0) {
+            throw new ConflictException("Phòng ban đã có nhân viên nên không thể xóa");
         }
+
+        // Kiểm tra xem phòng ban có tồn tại không
+        departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Phòng ban không tồn tại"));
+
+        // Xóa phòng ban
+        departmentRepository.deleteById(id);
+        return true;
     }
 
 }

@@ -16,6 +16,7 @@ import tlu.finalproject.hrmanagement.repository.OvertimeRecordRepository;
 import tlu.finalproject.hrmanagement.repository.SalaryConfigurationRepository;
 import tlu.finalproject.hrmanagement.repository.UserRepository;
 import tlu.finalproject.hrmanagement.service.AttendanceService;
+import tlu.finalproject.hrmanagement.utils.AudioPlayer;
 
 import java.time.*;
 import java.time.format.DateTimeParseException;
@@ -235,7 +236,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                 }
             }
 
-            if (lastUnfinished.getCheckOut() == null) {
+            if (lastUnfinished != null && lastUnfinished.getCheckOut() == null) {
                 return recordCheckOut(lastUnfinished, eventTime, userId, date);
             } else {
                 return createNewCheckIn(user, date, eventTime);
@@ -249,7 +250,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         newAttendance.setDate(date);
         newAttendance.setCheckIn(eventTime);
         attendanceRepository.save(newAttendance);
-        return "Đã ghi nhận check-in lúc " + eventTime;
+        AudioPlayer.playSound("audio/success.wav");
+//        return "Đã ghi nhận check-in lúc " + eventTime;
+        return "success";
     }
 
     private String recordCheckOut(Attendance record, LocalTime eventTime, Long userId, LocalDate date) {
@@ -265,7 +268,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (record.getCheckOut() != null && record.getCheckOut().isAfter(config.getWorkEndTime())) {
             handleOvertime(record, config);
         }
-
-        return "Đã ghi nhận check-out lúc " + eventTime;
+        AudioPlayer.playSound("audio/success.wav");
+        return "success";
     }
 }
