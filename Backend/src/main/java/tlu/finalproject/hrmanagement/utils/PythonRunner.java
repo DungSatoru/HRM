@@ -1,4 +1,4 @@
-package tlu.finalproject.hrmanagement;
+package tlu.finalproject.hrmanagement.utils;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
