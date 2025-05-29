@@ -202,7 +202,7 @@ const Sidebar = () => {
             <NavLink to="#collapseSetting" className="nav-item" onClick={() => handleToggle('collapseSetting')}>
               <div className="d-flex justify-content-between align-items-center">
                 <span>
-                  <i className="fa-solid fa-cogs"></i> Cài đặt
+                  <i className="fa-solid fa-cogs"></i> Quản trị hệ thống
                 </span>
                 <span className="dropdown-icon">
                   <i className={`fa-solid ${openSections.collapseSetting ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
@@ -211,11 +211,6 @@ const Sidebar = () => {
             </NavLink>
             <div className={`collapse ${openSections.collapseSetting ? 'show' : ''}`} id="collapseSetting">
               <ul className="submenu">
-                {(isHR || isAdmin) && (
-                  <li>
-                    <NavLink to="/settings/security">Cấu hình bảo mật</NavLink>
-                  </li>
-                )}
                 {isAdmin && (
                   <li>
                     <NavLink to="/settings/face-training">Huấn luyện khuôn mặt</NavLink>

@@ -99,21 +99,17 @@ const Header = () => {
         crumbs.push({ name: 'Phân quyền người dùng', link: '/user-permissions' });
         break;
 
-      case 'system-settings':
-        crumbs.push({ name: 'Quản lý người dùng', link: '/system-settings' });
-        crumbs.push({ name: 'Cấu hình hệ thống', link: '/system-settings' });
-        break;
 
-      case 'settings':
-        crumbs.push({ name: 'Cài đặt', link: '/settings' });
+      case 'system-management':
+        crumbs.push({ name: 'Quản trị hệ thống', link: '/system-management' });
         if (path[1] === 'account') {
-          crumbs.push({ name: 'Tài khoản của tôi', link: '/settings/account' });
+          crumbs.push({ name: 'Tài khoản của tôi', link: '/system-management/account' });
         } else if (path[1] === 'security') {
-          crumbs.push({ name: 'Cấu hình bảo mật', link: '/settings/security' });
+          crumbs.push({ name: 'Cấu hình bảo mật', link: '/system-management/security' });
         } else if (path[1] === 'face-training') {
-          crumbs.push({ name: 'Huấn luyện khuôn mặt', link: '/settings/face-training' });
+          crumbs.push({ name: 'Huấn luyện khuôn mặt', link: '/system-management/face-training' });
         } else if (path[1] === 'user-permissions') {
-          crumbs.push({ name: 'Phân quyền người dùng', link: '/settings/user-permissions' });
+          crumbs.push({ name: 'Phân quyền người dùng', link: '/system-management/user-permissions' });
         }
         break;
 

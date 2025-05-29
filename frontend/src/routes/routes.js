@@ -4,7 +4,6 @@ import EmployeeCreate from '~/pages/Employees/EmployeeCreate';
 import Departments from '~/pages/Departments/Departments.js';
 import EmployeeDetail from '~/pages/Employees/EmployeeDetail';
 import EmployeeEdit from '~/pages/Employees/EmployeeEdit';
-import Settings from '~/pages/Settings/Settings.js';
 import FaceTrainingWrapper from '~/pages/Settings/FaceTraining/FaceTraining.js';
 import Dashboard from '~/pages/Dashboard/Dashboard';
 import Role from '~/pages/Positions/Position';
@@ -46,7 +45,6 @@ const privateRoutes = [
 
   { path: '/salary-reports', component: SalaryReport },
 
-  { path: '/settings', component: Settings },
   { path: '/settings/face-training', component: FaceTrainingWrapper },
   { path: '/settings/user-permissions', component: UserPermission },
 

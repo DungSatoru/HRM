@@ -115,9 +115,9 @@ function Salary() {
       ),
     },
     {
-      title: 'Tổng lương',
-      dataIndex: 'totalSalary',
-      key: 'totalSalary',
+      title: 'Thực nhận',
+      dataIndex: 'netSalary',
+      key: 'netSalary',
       render: (salary) => (
         <span style={{ color: 'green', fontWeight: 'bold' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
