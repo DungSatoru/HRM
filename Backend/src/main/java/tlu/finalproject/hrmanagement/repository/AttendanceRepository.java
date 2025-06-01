@@ -12,8 +12,8 @@ import java.util.List;
 
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
-    @Query("SELECT a FROM Attendance a WHERE a.user.userId = :userId AND a.date = :date ORDER BY a.checkIn DESC")
-    List<Attendance> findAttendancesByUserAndDate(@Param("userId") Long userId, @Param("date") LocalDate date);
+    @Query("SELECT a FROM Attendance a WHERE a.user.userId = :userId AND a.date = :date AND a.checkOut IS NULL")
+    Attendance findAttendancesByUserAndDateAndCheckoutIsNull(@Param("userId") Long userId, @Param("date") LocalDate date);
 
     @Query("""
                 SELECT new tlu.finalproject.hrmanagement.dto.AttendanceDTO(

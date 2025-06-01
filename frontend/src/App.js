@@ -10,8 +10,6 @@ import locale from 'antd/es/date-picker/locale/vi_VN'; // Import locale tiếng 
 // Component kiểm tra token
 function RequireAuth() {
   const token = localStorage.getItem('token');
-  console.log('Token:', token);  // Debugging token
-
   if (!token) {
     return <Navigate to="/login" replace />;
   }

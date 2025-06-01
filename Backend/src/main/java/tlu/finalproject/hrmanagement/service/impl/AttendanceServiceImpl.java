@@ -28,13 +28,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AttendanceServiceImpl implements AttendanceService {
-    // Constants
-    private LocalTime STANDARD_START_TIME;
-    private LocalTime STANDARD_END_TIME;
-
-    private int WORKING_DAYS_PER_MONTH = 22;
-    private int WORKING_HOURS_PER_DAY = 8;
-
     // Repositories
     private final AttendanceRepository attendanceRepository;
     private final SalaryConfigurationRepository salaryConfigurationRepository;
@@ -76,6 +69,75 @@ public class AttendanceServiceImpl implements AttendanceService {
         return modelMapper.map(saved, AttendanceDTO.class);
     }
 
+    @Transactional
+    @Override
+    public AttendanceDTO updateAttendance(Long id, AttendanceDTO attendanceDTO) {
+
+        // 1. Lấy thông tin attendance hiện tại
+        Attendance attendance = attendanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
+
+        // 2. Lưu lại giờ checkOut cũ để kiểm tra thay đổi
+        LocalTime oldCheckOut = attendance.getCheckOut();
+
+        // 3. Cập nhật thông tin mới
+        attendance.setCheckIn(attendanceDTO.getCheckIn());
+        attendance.setCheckOut(attendanceDTO.getCheckOut());
+        attendance.setDate(attendanceDTO.getDate());
+        Attendance saved = attendanceRepository.save(attendance);
+
+        // 4. Lấy cấu hình lương
+        SalaryConfiguration config = salaryConfigurationRepository.findByUser_UserId(attendance.getUser().getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy cấu hình lương cho nhân viên ID: " + attendance.getUser().getUserId()));
+
+        // 5. Xử lý OT trong các trường hợp:
+        // - CheckOut mới muộn hơn giờ làm chuẩn
+        // - CheckOut cũ không OT nhưng checkOut mới có OT
+        // - CheckOut thay đổi nhưng vẫn trong khoảng OT
+        if (attendance.getCheckOut() != null) {
+            handleOvertimeUpdate(attendance, config, oldCheckOut);
+        }
+
+        return modelMapper.map(saved, AttendanceDTO.class);
+    }
+
+    @Override
+    public boolean deleteAttendance(Long id) {
+        Attendance attendance = attendanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
+        overtimeRecordRepository.deleteByAttendance(attendance);
+        attendanceRepository.delete(attendance);
+        return true;
+    }
+
+    @Override
+    public List<AttendanceDTO> getAttendancesByUserAndDateRange(Long userId, LocalDate start, LocalDate end) {
+        if (userId == null || start == null || end == null) {
+            throw new BadRequestException("Thiếu thông tin truy vấn (ID nhân viên, ngày bắt đầu, ngày kết thúc).");
+        }
+        return attendanceRepository.findAttendancesByUserAndDateRange(userId, start, end);
+    }
+
+    @Override
+    public String handleSocketAttendance(Long userId, LocalDateTime time) {
+        if (userId == null || time == null) {
+            throw new BadRequestException("Thiếu thông tin chấm công.");
+        }
+        LocalDate date = time.toLocalDate();
+        LocalTime eventTime = time.toLocalTime();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + userId));
+
+        Attendance todayRecords = attendanceRepository.findAttendancesByUserAndDateAndCheckoutIsNull(userId, date);
+
+        if (todayRecords != null && todayRecords.getCheckOut() == null) {
+            return recordCheckOut(todayRecords, eventTime);
+        } else {
+            return createNewCheckIn(user, date, eventTime);
+        }
+    }
+
     private void handleOvertime(Attendance attendance, SalaryConfiguration config) {
         LocalTime standardEndTime = config.getWorkEndTime();
         LocalTime nightStart = LocalTime.of(22, 0);
@@ -105,39 +167,6 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private double calculateHoursBetween(LocalTime start, LocalTime end) {
         return Duration.between(start, end).toMinutes() / 60.0;
-    }
-
-
-    @Transactional
-    @Override
-    public AttendanceDTO updateAttendance(Long id, AttendanceDTO attendanceDTO) {
-        // 1. Lấy thông tin attendance hiện tại
-        Attendance attendance = attendanceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
-
-        // 2. Lưu lại giờ checkOut cũ để kiểm tra thay đổi
-        LocalTime oldCheckOut = attendance.getCheckOut();
-
-        // 3. Cập nhật thông tin mới
-        attendance.setCheckIn(attendanceDTO.getCheckIn());
-        attendance.setCheckOut(attendanceDTO.getCheckOut());
-        attendance.setDate(attendanceDTO.getDate());
-
-        // 4. Lấy cấu hình lương
-        SalaryConfiguration config = salaryConfigurationRepository.findByUser_UserId(attendance.getUser().getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy cấu hình lương cho nhân viên ID: " + attendance.getUser().getUserId()));
-
-        // 5. Xử lý OT trong các trường hợp:
-        // - CheckOut mới muộn hơn giờ làm chuẩn
-        // - CheckOut cũ không OT nhưng checkOut mới có OT
-        // - CheckOut thay đổi nhưng vẫn trong khoảng OT
-        if (attendance.getCheckOut() != null) {
-            handleOvertimeUpdate(attendance, config, oldCheckOut);
-        }
-
-        Attendance saved = attendanceRepository.save(attendance);
-        return modelMapper.map(saved, AttendanceDTO.class);
     }
 
 
@@ -197,52 +226,6 @@ public class AttendanceServiceImpl implements AttendanceService {
         overtimeRecordRepository.save(ot);
     }
 
-    @Override
-    public boolean deleteAttendance(Long id) {
-        Attendance attendance = attendanceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
-        overtimeRecordRepository.deleteByAttendance(attendance);
-        attendanceRepository.delete(attendance);
-        return true;
-    }
-
-    @Override
-    public List<AttendanceDTO> getAttendancesByUserAndDateRange(Long userId, LocalDate start, LocalDate end) {
-        if (userId == null || start == null || end == null) {
-            throw new BadRequestException("Thiếu thông tin truy vấn (ID nhân viên, ngày bắt đầu, ngày kết thúc).");
-        }
-        return attendanceRepository.findAttendancesByUserAndDateRange(userId, start, end);
-    }
-
-    @Override
-    public String handleSocketAttendance(Long userId, LocalDateTime time) {
-        if (userId == null || time == null) {
-            throw new BadRequestException("Thiếu thông tin chấm công.");
-        }
-        LocalDate date = time.toLocalDate();
-        LocalTime eventTime = time.toLocalTime();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + userId));
-
-        List<Attendance> todayRecords = attendanceRepository.findAttendancesByUserAndDate(userId, date);
-
-        if (todayRecords.isEmpty()) {
-            return createNewCheckIn(user, date, eventTime);
-        } else {
-            Attendance lastUnfinished = null;
-            for (Attendance record : todayRecords) {
-                if (record.getCheckOut() == null) {
-                    return recordCheckOut(record, eventTime, userId, date);
-                }
-            }
-
-            if (lastUnfinished != null && lastUnfinished.getCheckOut() == null) {
-                return recordCheckOut(lastUnfinished, eventTime, userId, date);
-            } else {
-                return createNewCheckIn(user, date, eventTime);
-            }
-        }
-    }
 
     private String createNewCheckIn(User user, LocalDate date, LocalTime eventTime) {
         Attendance newAttendance = new Attendance();
@@ -250,12 +233,11 @@ public class AttendanceServiceImpl implements AttendanceService {
         newAttendance.setDate(date);
         newAttendance.setCheckIn(eventTime);
         attendanceRepository.save(newAttendance);
-        AudioPlayer.playSound("audio/success.wav");
 //        return "Đã ghi nhận check-in lúc " + eventTime;
         return "success";
     }
 
-    private String recordCheckOut(Attendance record, LocalTime eventTime, Long userId, LocalDate date) {
+    private String recordCheckOut(Attendance record, LocalTime eventTime) {
         record.setCheckOut(eventTime);
         attendanceRepository.save(record);
 
@@ -268,7 +250,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (record.getCheckOut() != null && record.getCheckOut().isAfter(config.getWorkEndTime())) {
             handleOvertime(record, config);
         }
-        AudioPlayer.playSound("audio/success.wav");
+//        AudioPlayer.playSound("audio/success.wav");
         return "success";
     }
 }

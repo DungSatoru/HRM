@@ -4,8 +4,6 @@ import { toast } from 'react-toastify'; // Thêm toast
 // Lấy danh sách chấm công theo ngày
 export const getAttendances = async (date) => {
   try {
-    console.log(localStorage.getItem('token'));
-    
     const response = await axiosClient.get(`/attendance?date=${date}`);
     return response.data.data;
   } catch (error) {

@@ -92,12 +92,6 @@ const UserAttendanceHistory = () => {
     }
   };
 
-  const handleAddNew = () => {
-    setFormMode('create');
-    setEditingId(null);
-    setFormVisible(true);
-  };
-
   const handleEdit = (id) => {
     setFormMode('edit');
     setEditingId(id);
@@ -226,11 +220,6 @@ const UserAttendanceHistory = () => {
                   onChange={handleDateChange}
                   format="DD/MM/YYYY"
                 />
-                {selectedUser && (
-                  <Button type="primary" onClick={handleAddNew}>
-                    Thêm mới
-                  </Button>
-                )}
               </Space>
             }
           >

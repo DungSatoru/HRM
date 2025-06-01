@@ -132,9 +132,6 @@ const UserPermission = () => {
           onChange={handleSearchChange}
           style={{ width: '80%', padding: '8px' }}
         />
-        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}} style={{ marginLeft: '10px' }}>
-          Tìm kiếm
-        </Button>
       </div>
 
       {/* Bảng danh sách người dùng */}
