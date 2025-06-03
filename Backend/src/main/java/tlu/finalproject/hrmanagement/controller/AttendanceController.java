@@ -23,7 +23,7 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @GetMapping()
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<List<AttendanceDTO>>> getAttendancesByDate(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<AttendanceDTO> attendanceList = attendanceService.getAttendancesByDate(date);
@@ -53,7 +53,7 @@ public class AttendanceController {
 
     // Thêm dữ liệu chấm công mới
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<AttendanceDTO>> createAttendance(@RequestBody AttendanceDTO attendanceDTO) {
         AttendanceDTO dto = attendanceService.createAttendance(attendanceDTO);
         return ResponseUtil.success(dto, "Thêm dữ liệu chấm công thành công");
@@ -61,7 +61,7 @@ public class AttendanceController {
 
     // Xóa dữ liệu chấm công theo ID
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<Void>> deleteAttendance(@PathVariable Long id) {
         boolean deleted = attendanceService.deleteAttendance(id);
         if (!deleted) {
@@ -73,8 +73,9 @@ public class AttendanceController {
     }
 
 
+    // Sửa bản ghi chấm công
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<AttendanceDTO>> updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
         AttendanceDTO updatedAttendance = attendanceService.updateAttendance(id, attendanceDTO);
         if (updatedAttendance == null) {

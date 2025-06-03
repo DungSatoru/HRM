@@ -22,8 +22,6 @@ public class SalarySlipServiceImpl implements SalarySlipService {
     private final ModelMapper modelMapper;
     private final SalaryBonusRepository salaryBonusRepository;
     private final SalaryDeductionRepository salaryDeductionRepository;
-    private final AttendanceRepository attendanceRepository;
-    private final OvertimeRecordRepository overtimeRecordRepository;
     private final UserRepository userRepository;
 
     @Override

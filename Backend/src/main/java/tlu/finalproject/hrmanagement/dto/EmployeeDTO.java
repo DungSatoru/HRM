@@ -2,6 +2,8 @@ package tlu.finalproject.hrmanagement.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import tlu.finalproject.hrmanagement.model.ContractType;
+import tlu.finalproject.hrmanagement.model.EducationLevel;
 import tlu.finalproject.hrmanagement.model.EmploymentStatus;
 
 import java.util.Date;
@@ -31,6 +33,6 @@ public class EmployeeDTO {
     String profileImageUrl;
     String emergencyContactName;
     String emergencyContactPhone;
-    String contractType;
-    String educationLevel;
+    ContractType contractType;
+    EducationLevel educationLevel;
 }

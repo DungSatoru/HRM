@@ -37,14 +37,14 @@ public class PositionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<PositionDTO>> createPosition(@RequestBody PositionDTO positionDTO) {
         PositionDTO createdPosition = positionService.createPosition(positionDTO);
         return ResponseUtil.created(createdPosition, "Thêm chức vụ mới thành công");
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionDTO positionDTO) {
         PositionDTO updatedPosition = positionService.updatePosition(id, positionDTO);
         if (updatedPosition == null) {
@@ -55,7 +55,7 @@ public class PositionController {
 
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<Void>> deletePosition(@PathVariable Long id) {
         boolean deleted = positionService.deletePosition(id);
         if (!deleted) {

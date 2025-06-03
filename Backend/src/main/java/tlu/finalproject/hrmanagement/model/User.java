@@ -51,16 +51,16 @@ public class User {
     Position position;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'ON_LEAVE', 'PROBATION) DEFAULT 'ACTIVE'")
-    private EmploymentStatus status;
+    @Column(name = "status", length = 100)
+    EmploymentStatus status;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "hire_date")
-    private Date hireDate;
+    Date hireDate;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false, name = "created_at")
-    private Date createdAt = new Date();
+    Date createdAt = new Date();
 
     @Column(name = "gender", nullable = true)
     Boolean gender;
@@ -80,9 +80,11 @@ public class User {
     @Column(name = "emergency_contact_phone", length = 15)
     String emergencyContactPhone;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "contract_type", length = 50)
-    String contractType;
+    ContractType contractType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "education_level", length = 100)
-    String educationLevel;
+    EducationLevel educationLevel;
 }

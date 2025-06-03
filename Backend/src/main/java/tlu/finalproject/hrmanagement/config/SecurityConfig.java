@@ -52,8 +52,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // Disable CSRF
                 .addFilterBefore(corsFilter, CorsFilter.class)  // Thêm CORS filter
                 .authorizeRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
-                        .requestMatchers(HttpMethod.GET, "uploads/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()  // Cho phép truy cập vào login, token
+                                .requestMatchers(HttpMethod.GET, "uploads/**").permitAll()
 //                        .requestMatchers(HttpMethod.GET, "/api/attendance/**").hasAnyRole("EMPLOYEE", "ADMIN", "HR")
 //                        .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN", "HR") // Phân quyền cho chấm công
 //
@@ -68,7 +68,7 @@ public class SecurityConfig {
 //
 //                        .requestMatchers("/api/video/upload").hasRole("ADMIN") // Phân quyền cho video upload
 
-                        .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
+                                .anyRequest().authenticated()  // Các request khác yêu cầu có token hợp lệ
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtTokenProvider.jwtDecoder()))  // Sử dụng JwtDecoder để giải mã token

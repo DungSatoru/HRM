@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> createUser(
             @RequestPart("data") String employeeJson,
             @RequestPart(value = "image", required = false) MultipartFile imageFile
@@ -65,14 +65,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> updateUser(
             @PathVariable Long id,
-            @RequestPart("data") String employeeJson, // 👈 nhận raw JSON
+            @RequestPart("data") String employeeJson, // nhận raw JSON
             @RequestPart(value = "image", required = false) MultipartFile imageFile
     ) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        EmployeeDTO employeeDTO = objectMapper.readValue(employeeJson, EmployeeDTO.class); // 👈 parse JSON
+        EmployeeDTO employeeDTO = objectMapper.readValue(employeeJson, EmployeeDTO.class); // parse JSON
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String imageUrl = fileStorageService.saveFile(imageFile);
@@ -87,7 +87,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/assign-role")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<String>> assignRole(@PathVariable Long id, @RequestParam Long roleId) {
         try {
             boolean success = userService.assignRole(id, roleId);

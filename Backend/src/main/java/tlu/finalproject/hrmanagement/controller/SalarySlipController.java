@@ -23,7 +23,7 @@ public class SalarySlipController {
     private final SalarySlipService salarySlipService;
 
     @GetMapping()
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<List<SalarySlipDTO>>> getSalarySlipsByMonth(@RequestParam String month) {
         return ResponseUtil.success(salarySlipService.getAllSalarySlipsByMonth(month), "Lấy danh sách bảng lương tháng " + month + " thành công");
     }
@@ -48,7 +48,7 @@ public class SalarySlipController {
      * @return Message thành công
      */
     @PostMapping("/calculate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasAnyRole('HR')")
     public ResponseEntity<ApiResponse<String>> calculateAndSaveSalarySlip(
             @RequestParam Long userId,
             @RequestParam String month

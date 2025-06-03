@@ -45,7 +45,7 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + userId));
 
-        if (user.getStatus() == EmploymentStatus.INACTIVE || user.getStatus() == EmploymentStatus.ON_LEAVE) {
+        if (user.getStatus() != EmploymentStatus.ACTIVE || user.getStatus() != EmploymentStatus.PROBATION) {
             return;
         }
 
