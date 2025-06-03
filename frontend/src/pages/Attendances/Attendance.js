@@ -185,7 +185,7 @@ const Attendance = () => {
             onChange={(date) => setSelectedDate(date)}
             suffixIcon={<CalendarOutlined />}
           />
-          <Badge count={`${attendances.length} nhân viên`} style={{ backgroundColor: '#1890ff' }} />
+          <Badge count={`${attendances.length} bản ghi`} style={{ backgroundColor: '#1890ff' }} />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             Tạo mới chấm công
           </Button>

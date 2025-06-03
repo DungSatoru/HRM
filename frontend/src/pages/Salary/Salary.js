@@ -2,19 +2,18 @@ import { Table, Button, Select, Card, Space } from 'antd';
 import { FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useState } from 'react';
-import { fetchAllDataForSalary } from '~/utils/fetchData';
 import { getSalarySlipsByMonth } from '~/services/salarySlipService';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
 function Salary() {
-  const [employees, setEmployees] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [positions, setPositions] = useState([]);
   const [salarySlips, setSalarySlips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(moment().format('MM'));
   const [selectedYear, setSelectedYear] = useState(moment().format('YYYY'));
+
+  const navigate = useNavigate();
 
   const handleMonthChange = (value) => {
     setSelectedMonth(value);
@@ -43,21 +42,30 @@ function Salary() {
       title: 'ID Nhân viên',
       dataIndex: 'userId',
       key: 'userId',
+      sorter: (a, b) => a.userId - b.userId,
     },
     {
       title: 'Nhân viên',
       dataIndex: 'fullName',
       key: 'fullName',
+      sorter: (a, b) => a.fullName.localeCompare(b.fullName),
+      render: (text, record) => (
+        <Button type="link" onClick={() => navigate(`/salary/employee/${record.userId}`)}>
+          {text}
+        </Button>
+      ),
     },
     {
       title: 'Tháng',
       dataIndex: 'salaryPeriod',
       key: 'salaryPeriod',
+      sorter: (a, b) => a.salaryPeriod.localeCompare(b.salaryPeriod),
     },
     {
       title: 'Lương cứng',
       dataIndex: 'actualBasicSalary',
       key: 'actualBasicSalary',
+      sorter: (a, b) => a.actualBasicSalary - b.actualBasicSalary,
       render: (salary) => (
         <span style={{ color: 'blue' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
@@ -68,6 +76,7 @@ function Salary() {
       title: 'Phụ cấp',
       dataIndex: 'otherAllowances',
       key: 'otherAllowances',
+      sorter: (a, b) => a.otherAllowances - b.otherAllowances,
       render: (allowance) => (
         <span style={{ color: 'blue' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(allowance)}
@@ -78,6 +87,7 @@ function Salary() {
       title: 'Lương thêm giờ(Ban ngày)',
       dataIndex: 'dayOvertimePay',
       key: 'dayOvertimePay',
+      sorter: (a, b) => a.dayOvertimePay - b.dayOvertimePay,
       render: (salary) => (
         <span style={{ color: 'orange' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
@@ -88,6 +98,7 @@ function Salary() {
       title: 'Lương thêm giờ(Ban đêm)',
       dataIndex: 'nightOvertimePay',
       key: 'nightOvertimePay',
+      sorter: (a, b) => a.nightOvertimePay - b.nightOvertimePay,
       render: (salary) => (
         <span style={{ color: 'orange' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}
@@ -98,6 +109,7 @@ function Salary() {
       title: 'Thưởng',
       dataIndex: 'totalBonus',
       key: 'totalBonus',
+      sorter: (a, b) => a.totalBonus - b.totalBonus,
       render: (bonus) => (
         <span style={{ color: 'green' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bonus)}
@@ -108,6 +120,7 @@ function Salary() {
       title: 'Khấu trừ',
       dataIndex: 'totalDeductions',
       key: 'totalDeductions',
+      sorter: (a, b) => a.totalDeductions - b.totalDeductions,
       render: (deduction) => (
         <span style={{ color: 'red' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(deduction)}
@@ -118,6 +131,7 @@ function Salary() {
       title: 'Thực nhận',
       dataIndex: 'netSalary',
       key: 'netSalary',
+      sorter: (a, b) => a.netSalary - b.netSalary,
       render: (salary) => (
         <span style={{ color: 'green', fontWeight: 'bold' }}>
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salary)}

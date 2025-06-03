@@ -41,7 +41,7 @@ const privateRoutes = [
 
   { path: '/Salary', component: Salary },
   { path: '/manage-Salary', component: SalaryManagement },
-  { path: '/salary/employee/:id', component: SalarySlipPage },
+  { path: '/salary/employee/:userId', component: SalarySlipPage },
 
   { path: '/salary-reports', component: SalaryReport },
 

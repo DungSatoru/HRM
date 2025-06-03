@@ -3,9 +3,10 @@ import { Route, BrowserRouter as Router, Routes, Outlet, Navigate } from 'react-
 import { privateRoutes, publicRoutes } from './routes/routes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import 'antd/dist/reset.css'; // AntD v5 yêu cầu import reset
 
 import { ConfigProvider } from 'antd';
-import locale from 'antd/es/date-picker/locale/vi_VN'; // Import locale tiếng Việt
+import locale from 'antd/es/date-picker/locale/vi_VN';
 
 // Component kiểm tra token
 function RequireAuth() {

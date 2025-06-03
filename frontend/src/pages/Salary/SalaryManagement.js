@@ -17,7 +17,6 @@ import {
   Divider,
   Row,
   Col,
-  InputNumber,
 } from 'antd';
 import {
   DollarOutlined,
@@ -26,12 +25,10 @@ import {
   SettingOutlined,
   TrophyOutlined,
   FileTextOutlined,
-  BarChartOutlined,
-  CheckCircleOutlined,
 } from '@ant-design/icons';
 import moment from 'moment';
-import { getSalaryConfigByUserId, getSalaryConfigList, updateSalaryConfig } from '~/services/salaryConfigService';
-import { fetchAllDataForSalary, fetchAllDataForSalaryManagement } from '~/utils/fetchData';
+import { getSalaryConfigByUserId, updateSalaryConfig } from '~/services/salaryConfigService';
+import { fetchAllDataForSalaryManagement } from '~/utils/fetchData';
 import { createSalaryBonus } from '~/services/salaryBonusService';
 import { createSalaryDeduction } from '~/services/deductionService';
 import { calculateSalary } from '~/services/salarySlipService';
@@ -510,7 +507,7 @@ const SalaryManagement = () => {
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Thêm thưởng
+              Lưu
             </Button>
           </Form.Item>
         </Form>
@@ -546,7 +543,7 @@ const SalaryManagement = () => {
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Thêm khấu trừ
+              Lưu
             </Button>
           </Form.Item>
         </Form>

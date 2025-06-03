@@ -6,8 +6,8 @@ import { getEmployeeById } from '~/services/employeeService';
 const Sidebar = () => {
   const fullName = localStorage.getItem('fullName') || 'Người dùng';
   const position = localStorage.getItem('positionName') || 'Nhân viên';
-  const role = localStorage.getItem('roleName');
   const [employee, setEmployee] = useState(null);
+  const role = localStorage.getItem('roleName');
 
   // Phân quyền chi tiết
   const isAdmin = role === 'ROLE_ADMIN';
@@ -70,7 +70,7 @@ const Sidebar = () => {
         <p className="fw-bold">Chức năng chính</p>
         <ul className="list-unstyled">
           {/* Tổng quan - Tất cả đều xem được */}
-          {(isHR || isAdmin) && (
+          {(isAdmin) && (
             <li>
               <NavLink to="/dashboard">
                 <i className="fa-solid fas fa-tachometer-alt"></i> Tổng quan
@@ -79,7 +79,7 @@ const Sidebar = () => {
           )}
 
           {/* Quản lý nhân viên - HR và Admin */}
-          {(isHR || isAdmin) && (
+          {(isHR) && (
             <li>
               <NavLink to="/employees">
                 <i className="fa-solid fa-users"></i> Nhân viên
@@ -113,12 +113,12 @@ const Sidebar = () => {
                 id="collapsePhongBanVaChucVu"
               >
                 <ul className="submenu">
-                  {isAdmin && (
+                  {(isHR || isAdmin) && (
                     <li>
                       <NavLink to="/departments">Quản lý phòng ban</NavLink>
                     </li>
                   )}
-                  {(isHR || isAdmin) && (
+                  {(isHR) && (
                     <li>
                       <NavLink to="/roles">Quản lý chức vụ</NavLink>
                     </li>
@@ -143,7 +143,7 @@ const Sidebar = () => {
             <div className={`collapse ${openSections.collapseChamCong ? 'show' : ''}`} id="collapseChamCong">
               <ul className="submenu">
                 <NavLink to={`/attendances/user/${localStorage.getItem('userId')}`}>Chấm công của tôi</NavLink>
-                {(isHR || isAdmin) && (
+                {(isHR) && (
                   <>
                     <li>
                       <NavLink to="/attendances">Chấm công nhân viên</NavLink>
@@ -180,7 +180,7 @@ const Sidebar = () => {
                 <li>
                   <NavLink to={`/salary/employee/${localStorage.getItem('userId')}`}>Bảng lương của tôi</NavLink>
                 </li>
-                {(isHR || isAdmin) && (
+                {(isHR) && (
                   <>
                     <li>
                       <NavLink to="/salary">Bảng lương nhân viên</NavLink>
@@ -193,37 +193,34 @@ const Sidebar = () => {
               </ul>
             </div>
           </li>
-        </ul>
-      </div>
-
-      <div className="other">
-        <ul>
-          <li>
-            <NavLink to="#collapseSetting" className="nav-item" onClick={() => handleToggle('collapseSetting')}>
-              <div className="d-flex justify-content-between align-items-center">
-                <span>
-                  <i className="fa-solid fa-cogs"></i> Quản trị hệ thống
-                </span>
-                <span className="dropdown-icon">
-                  <i className={`fa-solid ${openSections.collapseSetting ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                </span>
+          {isAdmin && (
+            <li>
+              <NavLink to="#collapseSetting" className="nav-item" onClick={() => handleToggle('collapseSetting')}>
+                <div className="d-flex justify-content-between align-items-center">
+                  <span>
+                    <i className="fa-solid fa-cogs"></i> Quản trị hệ thống
+                  </span>
+                  <span className="dropdown-icon">
+                    <i className={`fa-solid ${openSections.collapseSetting ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                  </span>
+                </div>
+              </NavLink>
+              <div className={`collapse ${openSections.collapseSetting ? 'show' : ''}`} id="collapseSetting">
+                <ul className="submenu">
+                  {isAdmin && (
+                    <li>
+                      <NavLink to="/settings/face-training">Huấn luyện khuôn mặt</NavLink>
+                    </li>
+                  )}
+                  {isAdmin && (
+                    <li>
+                      <NavLink to="/settings/user-permissions">Phân quyền người dùng</NavLink>
+                    </li>
+                  )}
+                </ul>
               </div>
-            </NavLink>
-            <div className={`collapse ${openSections.collapseSetting ? 'show' : ''}`} id="collapseSetting">
-              <ul className="submenu">
-                {isAdmin && (
-                  <li>
-                    <NavLink to="/settings/face-training">Huấn luyện khuôn mặt</NavLink>
-                  </li>
-                )}
-                {isAdmin && (
-                  <li>
-                    <NavLink to="/settings/user-permissions">Phân quyền người dùng</NavLink>
-                  </li>
-                )}
-              </ul>
-            </div>
-          </li>
+            </li>
+          )}
           <li>
             <NavLink
               to="/login"

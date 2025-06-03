@@ -14,6 +14,13 @@ const Departments = () => {
   const [selectedDepartment, setSelectedDepartment] = useState({});
   const [form] = Form.useForm();
 
+  const role = localStorage.getItem('roleName');
+
+  // Phân quyền chi tiết
+  const isAdmin = role === 'ROLE_ADMIN';
+  const isHR = role === 'ROLE_HR';
+  const isEmployee = role === 'ROLE_EMPLOYEE';
+
   useEffect(() => {
     fetchDepartments();
   }, []);
@@ -109,12 +116,16 @@ const Departments = () => {
       key: 'actions',
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => openModal('Edit', record)}>
-            Sửa
-          </Button>
-          <Button icon={<DeleteOutlined />} danger onClick={() => openModal('Delete', record)}>
-            Xóa
-          </Button>
+          {isAdmin && (
+            <>
+              <Button icon={<EditOutlined />} onClick={() => openModal('Edit', record)}>
+                Sửa
+              </Button>
+              <Button icon={<DeleteOutlined />} danger onClick={() => openModal('Delete', record)}>
+                Xóa
+              </Button>
+            </>
+          )}
         </Space>
       ),
     },
@@ -133,9 +144,11 @@ const Departments = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: 300 }}
           />
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('Add')}>
-            Thêm phòng ban
-          </Button>
+          {localStorage.getItem('roleName') === 'ROLE_ADMIN' && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('Add')}>
+              Thêm phòng ban
+            </Button>
+          )}
         </Space>
       </Card>
 

@@ -46,11 +46,13 @@ const Employees = () => {
       dataIndex: 'userId',
       key: 'userId',
       width: 80,
+      sorter: (a, b) => a.userId - b.userId,
     },
     {
       title: 'Tên nhân viên',
       dataIndex: 'fullName',
       key: 'fullName',
+      sorter: (a, b) => a.fullName.localeCompare(b.fullName),
       render: (text, record) => (
         <Button type="link" onClick={() => navigate(`/employees/${record.userId}`)}>
           {text}
@@ -61,20 +63,30 @@ const Employees = () => {
       title: 'Phòng ban',
       dataIndex: 'departmentName',
       key: 'departmentName',
-      filters: departments.map((dep) => ({ text: dep.departmentName, value: dep.departmentName })),
+      filters: departments.map((dep) => ({
+        text: dep.departmentName,
+        value: dep.departmentName,
+      })),
+      filterMultiple: true, // Cho phép chọn nhiều
+      filterSearch: true, // Thêm thanh tìm kiếm
       onFilter: (value, record) => record.departmentName === value,
     },
     {
       title: 'Chức vụ',
       dataIndex: 'positionName',
       key: 'positionName',
-      filters: positions.map((pos) => ({ text: pos.positionName, value: pos.positionName })),
+      filters: positions.map((pos) => ({
+        text: pos.positionName,
+        value: pos.positionName,
+      })),
       onFilter: (value, record) => record.positionName === value,
     },
     {
       title: 'Ngày gia nhập',
       dataIndex: 'hireDate',
       key: 'hireDate',
+      sorter: (a, b) => new Date(a.hireDate) - new Date(b.hireDate),
+      render: (date) => (date ? new Date(date).toLocaleDateString('vi-VN') : '—'),
     },
     {
       title: 'Trạng thái',
@@ -82,26 +94,33 @@ const Employees = () => {
       key: 'status',
       filters: [
         { text: 'Đang làm việc', value: 'ACTIVE' },
-        { text: 'Đã nghỉ việc', value: 'INACTIVE' },
         { text: 'Đang nghỉ phép', value: 'ON_LEAVE' },
         { text: 'Đang thử việc', value: 'PROBATION' },
+        { text: 'Đã nghỉ việc (tự nguyện)', value: 'RESIGNED' },
+        { text: 'Bị cho nghỉ việc', value: 'TERMINATED' },
+        { text: 'Nghỉ hưu', value: 'RETIRED' },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => {
         switch (status) {
           case 'ACTIVE':
             return <Tag color="green">Đang làm việc</Tag>;
-          case 'INACTIVE':
-            return <Tag color="red">Đã nghỉ việc</Tag>;
           case 'ON_LEAVE':
             return <Tag color="gold">Đang nghỉ phép</Tag>;
           case 'PROBATION':
             return <Tag color="blue">Đang thử việc</Tag>;
+          case 'RESIGNED':
+            return <Tag color="orange">Đã nghỉ việc (tự nguyện)</Tag>;
+          case 'TERMINATED':
+            return <Tag color="red">Bị cho nghỉ việc</Tag>;
+          case 'RETIRED':
+            return <Tag color="cyan">Nghỉ hưu</Tag>;
           default:
-            return <Tag color="default">{status}</Tag>;
+            return <Tag>{status}</Tag>;
         }
       },
     },
+
     {
       title: 'Thao tác',
       key: 'actions',

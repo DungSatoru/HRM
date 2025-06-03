@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Form, 
-  Input, 
-  Select, 
-  Button, 
-  DatePicker, 
-  message, 
-  Card, 
-  Spin, 
-  Upload, 
-  Row, 
-  Col, 
-  Divider, 
+import {
+  Form,
+  Input,
+  Select,
+  Button,
+  DatePicker,
+  message,
+  Card,
+  Spin,
+  Upload,
+  Row,
+  Col,
+  Divider,
   Typography,
   Avatar,
-  Space
+  Space,
 } from 'antd';
-import { 
+import {
   PlusOutlined,
   UserOutlined,
   IdcardOutlined,
@@ -34,7 +34,7 @@ import {
   FileTextOutlined,
   BookOutlined,
   SaveOutlined,
-  CloseOutlined
+  CloseOutlined,
 } from '@ant-design/icons';
 import { addEmployee, updateEmployee, getEmployeeById } from '~/services/employeeService';
 import { getDepartments } from '~/services/departmentService';
@@ -81,7 +81,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
             identity: employeeData.identity,
             email: employeeData.email,
             phone: employeeData.phone,
-            roleName: employeeId === null ? "ROLE_EMPLOYEE" : role.roleName,
+            roleName: employeeId === null ? 'ROLE_EMPLOYEE' : role.roleName,
             positionId: employeeData.positionId,
             departmentId: employeeData.departmentId,
             status: employeeData.status,
@@ -171,12 +171,13 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
       <Title level={3} style={{ marginBottom: 24 }}>
         {isEdit ? 'Chỉnh Sửa Thông Tin Nhân Viên' : 'Thêm Nhân Viên'}
       </Title>
-      
-      <Card 
-        bordered={false} 
-        style={{ 
-          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
-          borderRadius: 8
+
+      <Card
+        bordered={false}
+        style={{
+          boxShadow:
+            '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
+          borderRadius: 8,
         }}
       >
         {loading ? (
@@ -212,11 +213,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                     style={{ width: '100%' }}
                   >
                     {imageUrl ? (
-                      <Avatar 
-                        src={imageUrl} 
-                        size={100} 
-                        style={{ width: '100%', height: '100%', borderRadius: 8 }}
-                      />
+                      <Avatar src={imageUrl} size={100} style={{ width: '100%', height: '100%', borderRadius: 8 }} />
                     ) : (
                       uploadButton
                     )}
@@ -300,10 +297,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                   name="positionId"
                   rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
                 >
-                  <Select
-                    placeholder="Chọn chức vụ"
-                    suffixIcon={<StarOutlined />}
-                  >
+                  <Select placeholder="Chọn chức vụ" suffixIcon={<StarOutlined />}>
                     {positions.map((pos) => (
                       <Option key={pos.positionId} value={pos.positionId}>
                         {pos.positionName}
@@ -318,10 +312,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                   name="departmentId"
                   rules={[{ required: true, message: 'Vui lòng chọn phòng ban' }]}
                 >
-                  <Select
-                    placeholder="Chọn phòng ban"
-                    suffixIcon={<TeamOutlined />}
-                  >
+                  <Select placeholder="Chọn phòng ban" suffixIcon={<TeamOutlined />}>
                     {departments.map((dep) => (
                       <Option key={dep.departmentId} value={dep.departmentId}>
                         {dep.departmentName}
@@ -337,10 +328,12 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                   rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
                 >
                   <Select placeholder="Chọn trạng thái">
-                    <Option value="ACTIVE">Đang làm việc</Option>
-                    <Option value="INACTIVE">Nghỉ việc</Option>
+                    <Option value="ACTIVE">Đang làm việc chính thức</Option>
                     <Option value="ON_LEAVE">Đang nghỉ phép</Option>
                     <Option value="PROBATION">Đang thử việc</Option>
+                    <Option value="RESIGNED">Đã nghỉ việc (tự nguyện)</Option>
+                    <Option value="TERMINATED">Bị cho nghỉ việc</Option>
+                    <Option value="RETIRED">Nghỉ hưu</Option>
                   </Select>
                 </Form.Item>
               </Col>
@@ -350,10 +343,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                   name="hireDate"
                   rules={[{ required: true, message: 'Vui lòng chọn ngày vào làm' }]}
                 >
-                  <DatePicker 
-                    style={{ width: '100%' }} 
-                    suffixIcon={<CalendarOutlined />}
-                  />
+                  <DatePicker style={{ width: '100%' }} suffixIcon={<CalendarOutlined />} />
                 </Form.Item>
               </Col>
             </Row>
@@ -365,17 +355,18 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
             <Row gutter={16}>
               <Col xs={24} sm={12} md={8}>
                 <Form.Item label="Ngày sinh" name="dateOfBirth">
-                  <DatePicker 
-                    style={{ width: '100%' }} 
-                    suffixIcon={<CalendarOutlined />}
-                  />
+                  <DatePicker style={{ width: '100%' }} suffixIcon={<CalendarOutlined />} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={8}>
                 <Form.Item label="Giới tính" name="gender">
                   <Select placeholder="Chọn giới tính">
-                    <Option value={true}><ManOutlined /> Nam</Option>
-                    <Option value={false}><WomanOutlined /> Nữ</Option>
+                    <Option value={true}>
+                      <ManOutlined /> Nam
+                    </Option>
+                    <Option value={false}>
+                      <WomanOutlined /> Nữ
+                    </Option>
                   </Select>
                 </Form.Item>
               </Col>
@@ -396,12 +387,31 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
               </Col>
               <Col xs={24} sm={12}>
                 <Form.Item label="Loại hợp đồng" name="contractType">
-                  <Input prefix={<FileTextOutlined />} placeholder="Loại hợp đồng" />
+                  <Select placeholder="Chọn loại hợp đồng">
+                    <Option value="PROBATION">Hợp đồng thử việc</Option>
+                    <Option value="FIXED_TERM">Hợp đồng xác định thời hạn</Option>
+                    <Option value="UNLIMITED_TERM">Hợp đồng không xác định thời hạn</Option>
+                    <Option value="SEASONAL">Hợp đồng thời vụ</Option>
+                    <Option value="PART_TIME">Hợp đồng bán thời gian</Option>
+                    <Option value="INTERNSHIP">Hợp đồng thực tập</Option>
+                    <Option value="FREELANCE">Hợp đồng khoán việc</Option>
+                    <Option value="SERVICE">Hợp đồng dịch vụ</Option>
+                  </Select>
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
                 <Form.Item label="Trình độ học vấn" name="educationLevel">
-                  <Input prefix={<BookOutlined />} placeholder="Trình độ học vấn" />
+                  <Select placeholder="Chọn trình độ học vấn">
+                    <Option value="PRIMARY">Tiểu học</Option>
+                    <Option value="SECONDARY">Trung học cơ sở</Option>
+                    <Option value="HIGH_SCHOOL">Trung học phổ thông</Option>
+                    <Option value="VOCATIONAL">Trung cấp</Option>
+                    <Option value="COLLEGE">Cao đẳng</Option>
+                    <Option value="BACHELOR">Đại học</Option>
+                    <Option value="MASTER">Thạc sĩ</Option>
+                    <Option value="DOCTOR">Tiến sĩ</Option>
+                    <Option value="OTHER">Khác</Option>
+                  </Select>
                 </Form.Item>
               </Col>
             </Row>
@@ -409,19 +419,10 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
             {/* Actions */}
             <div style={{ marginTop: 24, textAlign: 'right' }}>
               <Space>
-                <Button 
-                  onClick={() => navigate('/employees')} 
-                  disabled={submitting}
-                  icon={<CloseOutlined />}
-                >
+                <Button onClick={() => navigate('/employees')} disabled={submitting} icon={<CloseOutlined />}>
                   Hủy
                 </Button>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
-                  loading={submitting}
-                  icon={<SaveOutlined />}
-                >
+                <Button type="primary" htmlType="submit" loading={submitting} icon={<SaveOutlined />}>
                   {isEdit ? 'Lưu thay đổi' : 'Lưu'}
                 </Button>
               </Space>
