@@ -11,8 +11,5 @@ import java.util.List;
 @Repository
 public interface SalaryDeductionRepository extends JpaRepository<SalaryDeduction, Long> {
     List<SalaryDeduction> findByUserUserId(Long userId);
-
-    List<SalaryDeduction> findByUser_UserIdAndDeductionDateBetween(Long userId, LocalDate withDayOfMonth, LocalDate withDayOfMonth1);
-
     List<SalaryDeduction> findByUserUserIdAndDeductionDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 }

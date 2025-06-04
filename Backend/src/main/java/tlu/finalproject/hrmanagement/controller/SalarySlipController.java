@@ -55,8 +55,7 @@ public class SalarySlipController {
     ) {
         // Chuyển từ "2025-04" -> "2025-04-01"
         LocalDate localDate = LocalDate.parse(month + "-01");
-        salaryCalculationService.calculateAndSaveSalarySlip(userId, localDate);
-        String successMessage = "Tính toán và lưu Salary Slip thành công cho nhân viên ID: " + userId + " tháng: " + month;
-        return ResponseUtil.success(successMessage, "Tính toán và lưu bảng lương thành công");
+        String result = salaryCalculationService.calculateAndSaveSalarySlip(userId, localDate);
+        return ResponseUtil.success(null, result);
     }
 }

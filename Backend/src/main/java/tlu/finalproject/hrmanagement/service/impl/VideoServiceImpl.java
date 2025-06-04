@@ -42,30 +42,6 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public String processVideo(String filePath) {
-        try {
-            ProcessBuilder pb = new ProcessBuilder(
-                    "python",
-                    new File(extractFramesFilePath).getAbsolutePath(),
-                    new File(filePath).getAbsolutePath()
-            );
-
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            boolean finished = process.waitFor(30, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroy();
-                return "Timeout while extracting frames.";
-            }
-
-            return "Extract Successfully";
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing video with Python script", e);
-        }
-    }
-
-    @Override
     public String trainFaceEmployee(String filePath, String userId) {
         clearDirectory(new File(extractFramesFilePath).getAbsoluteFile());
         try {
@@ -94,8 +70,6 @@ public class VideoServiceImpl implements VideoService {
                 process.destroy();
                 return "Timeout while processing face training. Output:\n" + result;
             }
-
-
 
             return "Train Successfully. Output:\n" + result;
         } catch (Exception e) {

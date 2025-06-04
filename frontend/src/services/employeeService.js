@@ -70,7 +70,7 @@ export const updateEmployee = async (id, updatedData, avatarFile) => {
 export const assignRole = async (id, roleId) => {
   try {
   const response = await axiosClient.post(`/users/${id}/assign-role?roleId=${roleId}`);
-    toast.success('Cập nhật vai trò nhân viên thành công!');
+    toast.success(response.data.message);
     return response.data.data;
   } catch (error) {
     toast.error(error.response?.data?.message || 'Lỗi khi phân quyền cho nhân viên');

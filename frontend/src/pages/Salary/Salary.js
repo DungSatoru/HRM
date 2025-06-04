@@ -1,4 +1,4 @@
-import { Table, Button, Select, Card, Space } from 'antd';
+import { Table, Button, Select, Card, Space, Empty } from 'antd';
 import { FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useState } from 'react';
@@ -198,6 +198,18 @@ function Salary() {
           rowKey="id"
           pagination={{ pageSize: 10 }}
           loading={loading}
+          locale={{
+            emptyText: (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <span style={{ color: '#999', fontSize: 14 }}>
+                    Không có nhân viên nào được tính lương cho tháng này.
+                  </span>
+                }
+              />
+            ),
+          }}
         />
       </Card>
     </div>

@@ -13,7 +13,7 @@ const axiosInstance = axios.create({
   },
 });
 
-const loginService = {
+const authService = {
   login: async (username, password) => {
     try {
       const response = await axiosInstance.post('', {
@@ -29,12 +29,11 @@ const loginService = {
 
         const position = await getPositionById(response.data.user.positionId);
         localStorage.setItem('positionName', position.positionName || '');
-
-        const role = await getRoleById(response.data.user.roleId);
-
-        localStorage.setItem('roleName', role.roleName || '');
+        localStorage.setItem('roleName', response.data.roleName || '');
 
         toast.success('Đăng nhập thành công!');
+        if (response.data.roleName === 'ROLE_HR') window.location.href = `/attendances`;
+        else window.location.href = `/attendances/user/${response.data.user.userId}`;
         return response.data;
       } else {
         toast.error('Không nhận được token từ máy chủ!');
@@ -58,9 +57,17 @@ const loginService = {
   },
 
   logout: () => {
-    localStorage.clear();
-    toast.info('Đã đăng xuất!');
+    // Xóa từng key thay vì dùng localStorage.clear() (tránh ảnh hưởng các key khác)
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('fullName');
+    localStorage.removeItem('positionName');
+    localStorage.removeItem('roleName');
+
+    // 🔁 Phát sự kiện để các tab khác bắt được
+    localStorage.setItem('logout', Date.now());
+    window.location.href = '/login'; // điều hướng lại trang login
   },
 };
 
-export default loginService;
+export default authService;

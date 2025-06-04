@@ -8,7 +8,7 @@ import moment from 'moment';
 export const fetchAllDataForSalaryManagement = async (month) => {
   try {
     const [employeesData, departmentsData, positionsData, salaryConfigData] = await Promise.all([
-      getEmployees(),
+      getEmployees(), // Giả định các hàm này đã được import hoặc định nghĩa ở nơi khác
       getDepartments(),
       getPositions(),
       getSalaryConfigList(),
@@ -16,32 +16,29 @@ export const fetchAllDataForSalaryManagement = async (month) => {
 
     const salaryConfigMap = Object.fromEntries(salaryConfigData.map((s) => [s.userId, s]));
 
-    const selectedMonth = moment(month, 'YYYY-MM'); // Chuyển tháng dạng '2024-04' thành đối tượng moment
+    const selectedMonthMoment = moment(month, 'YYYY-MM'); // Chuyển tháng dạng '2024-04' thành đối tượng moment
 
     const mappedEmployees = employeesData
-    .filter((emp) => {
-      // Kiểm tra ngày gia nhập
-      if (!emp.hireDate) return false;
-      const hireDate = moment(emp.hireDate);
-      return hireDate.isSameOrBefore(selectedMonth, 'month');
-    })
-    .map((emp) => {
-      const department = departmentsData.find((d) => d.departmentId === emp.departmentId);
-      const position = positionsData.find((p) => p.positionId === emp.positionId);
-      const salaryConfig = salaryConfigMap[emp.userId];
+      .filter((emp) => {
+        // Kiểm tra ngày gia nhập
+        if (!emp.hireDate) return false;
+        const hireDate = moment(emp.hireDate);
+        return hireDate.isSameOrBefore(selectedMonthMoment, 'month');
+      })
+      .map((emp) => {
+        const department = departmentsData.find((d) => d.departmentId === emp.departmentId);
+        const position = positionsData.find((p) => p.positionId === emp.positionId);
+        const salaryConfig = salaryConfigMap[emp.userId];
 
-      return {
-        id: emp.userId,
-        name: emp.fullName || 'No Name',
-        department: department ? department.departmentName : 'Chưa có phòng ban',
-        position: position ? position.positionName : 'Chưa có chức vụ',
-        basicSalary: typeof salaryConfig?.basicSalary === 'number' ? salaryConfig.basicSalary : 0,
-        status: emp.status,
-      };
-    });
-
-    console.log(mappedEmployees);
-
+        return {
+          id: emp.userId,
+          fullName: emp.fullName || 'No Name',
+          departmentName: department ? department.departmentName : 'Chưa có phòng ban',
+          positionName: position ? position.positionName : 'Chưa có chức vụ',
+          basicSalary: typeof salaryConfig?.basicSalary === 'number' ? salaryConfig.basicSalary : 0,
+          status: emp.status,
+        };
+      });
     return [mappedEmployees, departmentsData, positionsData];
   } catch (error) {
     console.error('Lỗi khi tải dữ liệu:', error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   Button,
@@ -11,7 +11,6 @@ import {
   Form,
   message,
   Tooltip,
-  Badge,
   Space,
   Tag,
   Divider,
@@ -25,6 +24,7 @@ import {
   SettingOutlined,
   TrophyOutlined,
   FileTextOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import moment from 'moment';
 import { getSalaryConfigByUserId, updateSalaryConfig } from '~/services/salaryConfigService';
@@ -36,12 +36,12 @@ import { calculateSalary } from '~/services/salarySlipService';
 const { TabPane } = Tabs;
 const { Option } = Select;
 
+
+
 const SalaryManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
-  const [mappedEmployees, setMappedEmployees] = useState([]);
-  const [salaryConfig, setSalaryConfig] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(moment().month() + 1); // 1 - 12
   const [selectedYear, setSelectedYear] = useState(moment().year());
@@ -49,71 +49,86 @@ const SalaryManagement = () => {
   const [bonusModalVisible, setBonusModalVisible] = useState(false);
   const [deductionModalVisible, setDeductionModalVisible] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [form] = Form.useForm();
+  const [salaryConfigForm] = Form.useForm(); // Đổi tên form để rõ ràng hơn
+  const [bonusForm] = Form.useForm();
+  const [deductionForm] = Form.useForm();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
-  const years = Array.from({ length: 10 }, (_, i) => moment().year() - 5 + i); // 5 năm trước và sau
+  const years = Array.from({ length: 10 }, (_, i) => moment().year() - 5 + i); // 5 năm trước và 4 năm sau
+
+  const loadAllData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const monthString = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
+      const [fetchedEmployees, fetchedDepartments, fetchedPositions] = await fetchAllDataForSalaryManagement(monthString);
+      setEmployees(fetchedEmployees);
+      setDepartments(fetchedDepartments);
+      setPositions(fetchedPositions);
+      setFilteredEmployees(fetchedEmployees); // Cập nhật lại filteredEmployees khi dữ liệu được tải
+    } catch (error) {
+      message.error('Không thể tải dữ liệu quản lý lương.');
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedMonth, selectedYear]); // Dependency array
 
   useEffect(() => {
-    const monthString = `${selectedYear}-${selectedMonth}`;
-    const loadData = async () => {
-      try {
-        const [mappedEmployees, dept, posi] = await fetchAllDataForSalaryManagement(monthString);
-        setMappedEmployees(mappedEmployees);
-        setDepartments(dept);
-        setPositions(posi);
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
-    };
+    loadAllData();
+  }, [loadAllData]);
 
-    loadData();
-  }, []);
+  const handleSearch = (e) => {
+    const { value } = e.target;
+    setSearchTerm(value);
+    const filtered = employees.filter((emp) => emp.fullName?.toLowerCase().includes(value.toLowerCase()));
+    setFilteredEmployees(filtered);
+  };
 
   const handleSalaryConfigClick = async (employee) => {
     setSelectedEmployee(employee);
     setSalaryConfigModalVisible(true);
+    salaryConfigForm.resetFields(); // Reset form trước khi set giá trị mới
 
     try {
       const salaryConfig = await getSalaryConfigByUserId(employee.id);
 
-      form.setFieldsValue({
-        basicSalary: salaryConfig.basicSalary || 0,
-        standardWorkingDays: salaryConfig.standardWorkingDays || 0,
-        dayOvertimeRate: salaryConfig.dayOvertimeRate || 0,
-        nightOvertimeRate: salaryConfig.nightOvertimeRate || 0,
-        insuranceBaseSalary: salaryConfig.insuranceBaseSalary,
-        overtimeRate: salaryConfig.overtimeRate || 0,
-        otherAllowances: salaryConfig.otherAllowances || 0,
-        bonusRate: salaryConfig.bonusRate || 0,
-        breakDurationMinutes: salaryConfig.breakDurationMinutes || 0,
-        workStartTime: salaryConfig.workStartTime,
-        workEndTime: salaryConfig.workEndTime,
-        holidayOvertimeRate: salaryConfig.holidayOvertimeRate || 0,
-        numberOfDependents: salaryConfig.numberOfDependents || 0,
+      salaryConfigForm.setFieldsValue({
+        basicSalary: salaryConfig?.basicSalary || 0,
+        standardWorkingDays: salaryConfig?.standardWorkingDays || 0,
+        dayOvertimeRate: salaryConfig?.dayOvertimeRate || 0,
+        nightOvertimeRate: salaryConfig?.nightOvertimeRate || 0,
+        insuranceBaseSalary: salaryConfig?.insuranceBaseSalary || 0,
+        otherAllowances: salaryConfig?.otherAllowances || 0,
+        holidayOvertimeRate: salaryConfig?.holidayOvertimeRate || 0,
+        breakDurationMinutes: salaryConfig?.breakDurationMinutes || 0,
+        workStartTime: salaryConfig?.workStartTime,
+        workEndTime: salaryConfig?.workEndTime,
+        numberOfDependents: salaryConfig?.numberOfDependents || 0,
       });
     } catch (error) {
-      message.error('Không thể lấy cấu hình lương cho nhân viên');
+      message.error('Không thể lấy cấu hình lương cho nhân viên.');
+      console.error('Error fetching salary config:', error);
     }
   };
 
   const employeeColumns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'Họ tên', dataIndex: 'name', key: 'name' },
+    { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' }, // Sửa từ 'fullname' thành 'fullName'
     {
       title: 'Phòng ban',
-      dataIndex: 'department',
-      key: 'department',
+      dataIndex: 'departmentName',
+      key: 'departmentName',
       filters: departments.map((dept) => ({ text: dept.departmentName, value: dept.departmentName })),
-      onFilter: (value, record) => record.department.indexOf(value) === 0,
+      onFilter: (value, record) => record.departmentName.indexOf(value) === 0, // Sửa record.department
     },
     {
       title: 'Vị trí',
-      dataIndex: 'position',
-      key: 'position',
+      dataIndex: 'positionName',
+      key: 'positionName',
       filters: positions.map((pos) => ({ text: pos.positionName, value: pos.positionName })),
-      onFilter: (value, record) => record.position.indexOf(value) === 0,
+      onFilter: (value, record) => record.positionName.indexOf(value) === 0, // Sửa record.position
     },
     {
       title: 'Lương cơ bản',
@@ -158,10 +173,7 @@ const SalaryManagement = () => {
               type="primary"
               icon={<SettingOutlined />}
               size="small"
-              onClick={() => {
-                handleSalaryConfigClick(record);
-                setSalaryConfigModalVisible(true);
-              }}
+              onClick={() => handleSalaryConfigClick(record)}
             />
           </Tooltip>
           <Tooltip title="Thêm thưởng">
@@ -173,6 +185,7 @@ const SalaryManagement = () => {
               onClick={() => {
                 setSelectedEmployee(record);
                 setBonusModalVisible(true);
+                bonusForm.resetFields();
               }}
             />
           </Tooltip>
@@ -184,6 +197,7 @@ const SalaryManagement = () => {
               onClick={() => {
                 setSelectedEmployee(record);
                 setDeductionModalVisible(true);
+                deductionForm.resetFields();
               }}
             />
           </Tooltip>
@@ -196,71 +210,73 @@ const SalaryManagement = () => {
   ];
 
   const handleCalculateSalary = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const formattedMonth = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
 
-      // Kết hợp tháng và năm thành định dạng YYYY-MM
-      const formattedMonth = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`;
-
-      for (let employee of mappedEmployees) {
+      for (const employee of employees) { // Sử dụng 'employees' state
         if ((employee.status === 'ACTIVE' || employee.status === 'PROBATION') && employee.basicSalary > 0) {
-          const salaryData = {
-            userId: employee.id,
-            month: formattedMonth,
-          };
-
           try {
-            const result = await calculateSalary(salaryData.userId, salaryData.month);
+            await calculateSalary(employee.id, formattedMonth);
+            message.success(`Đã tính lương cho nhân viên ${employee.fullName}`);
           } catch (error) {
-            message.error(`Lỗi khi tính lương cho nhân viên ${employee.name}`);
+            message.error(`Lỗi khi tính lương cho nhân viên ${employee.fullName}`);
+            console.error(`Error calculating salary for ${employee.fullName}:`, error);
           }
         }
       }
-
-      message.success('Đã tính toán lương cho tất cả nhân viên có lương cơ bản hợp lệ!');
+      message.success('Hoàn tất tính toán lương cho các nhân viên hợp lệ!');
     } catch (error) {
-      message.error('Đã xảy ra lỗi khi tính toán lương cho nhân viên.');
+      message.error('Đã xảy ra lỗi tổng quát khi tính toán lương.');
+      console.error('General error during salary calculation:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSalaryConfigSubmit = async (values) => {
-    const monthString = `${selectedYear}-${selectedMonth}`;
+    if (!selectedEmployee) return;
     try {
       await updateSalaryConfig(selectedEmployee.id, values);
-      message.success('Cấu hình lương đã được cập nhật cho ' + selectedEmployee.name);
-      fetchAllDataForSalaryManagement(monthString);
+      message.success(`Cấu hình lương đã được cập nhật cho ${selectedEmployee.fullName}`);
+      setSalaryConfigModalVisible(false);
+      loadAllData(); // Tải lại dữ liệu sau khi cập nhật
     } catch (error) {
-      message.error('Đã xảy ra lỗi khi cập nhật cấu hình lương cho ' + selectedEmployee.name);
+      message.error(`Đã xảy ra lỗi khi cập nhật cấu hình lương cho ${selectedEmployee.fullName}`);
+      console.error('Error updating salary config:', error);
     }
-    setSalaryConfigModalVisible(false);
   };
 
   const handleBonusSubmit = async (values) => {
+    if (!selectedEmployee) return;
     try {
-      const monthString = `${selectedYear}-${selectedMonth}`;
-      const payload = { ...values, userId: selectedEmployee.id };
+      const payload = { ...values, userId: selectedEmployee.id, bonusDate: values.bonusDate };
       await createSalaryBonus(payload);
-      fetchAllDataForSalaryManagement(monthString);
+      message.success(`Đã thêm thưởng cho ${selectedEmployee.fullName}`);
+      setBonusModalVisible(false);
+      loadAllData(); // Tải lại dữ liệu sau khi thêm thưởng
     } catch (error) {
-      message.error('Đã xảy ra lỗi khi thêm thưởng cho ' + selectedEmployee.name);
+      message.error(`Đã xảy ra lỗi khi thêm thưởng cho ${selectedEmployee.fullName}`);
+      console.error('Error creating bonus:', error);
     }
-    setBonusModalVisible(false);
   };
 
   const handleDeductionSubmit = async (values) => {
+    if (!selectedEmployee) return;
     try {
-      const payload = { ...values, userId: selectedEmployee.id };
+      const payload = { ...values, userId: selectedEmployee.id, deductionDate: values.deductionDate };
       await createSalaryDeduction(payload);
+      message.success(`Đã thêm khoản khấu trừ cho ${selectedEmployee.fullName}`); // Sửa thông báo thành công
+      setDeductionModalVisible(false);
+      loadAllData(); // Tải lại dữ liệu sau khi thêm khấu trừ
     } catch (error) {
-      message.success('Đã thêm khoản khấu trừ cho ' + selectedEmployee.name);
+      message.error(`Đã xảy ra lỗi khi thêm khoản khấu trừ cho ${selectedEmployee.fullName}`); // Sửa thông báo lỗi
+      console.error('Error creating deduction:', error);
     }
-    setDeductionModalVisible(false);
   };
 
   return (
-    <div className="Salary-management p-3">
+    <div className="salary-management p-3">
       <h1>Quản lý lương và phúc lợi</h1>
       <Tabs defaultActiveKey="1">
         <TabPane
@@ -300,7 +316,7 @@ const SalaryManagement = () => {
                 ))}
               </Select>
 
-              <Button type="primary" icon={<CalculatorOutlined />} onClick={handleCalculateSalary}>
+              <Button type="primary" icon={<CalculatorOutlined />} onClick={handleCalculateSalary} loading={loading}>
                 Tính lương
               </Button>
             </Space>
@@ -308,12 +324,18 @@ const SalaryManagement = () => {
 
           <Card title="Danh sách nhân viên">
             <Space style={{ marginBottom: 16 }}>
-              <Input.Search placeholder="Tìm kiếm nhân viên" style={{ width: 300 }} />
+              <Input
+                placeholder="Tìm kiếm nhân viên"
+                value={searchTerm}
+                onChange={handleSearch}
+                prefix={<SearchOutlined />}
+                style={{ width: 300 }}
+              />
             </Space>
 
             <Table
               columns={employeeColumns}
-              dataSource={mappedEmployees}
+              dataSource={filteredEmployees}
               rowKey="id"
               loading={loading}
               pagination={{ pageSize: 10 }}
@@ -330,7 +352,7 @@ const SalaryManagement = () => {
           }
           key="3"
         >
-          <Card title="Thiết lập cấu hình lương">
+          <Card title="Thiết lập cấu hình lương mặc định"> {/* Đổi tên title cho rõ ràng */}
             <Form layout="vertical">
               <Form.Item label="Ngày trả lương trong tháng">
                 <Input type="number" min={1} max={31} defaultValue={25} />
@@ -357,15 +379,16 @@ const SalaryManagement = () => {
           </Card>
         </TabPane>
       </Tabs>
+
       {/* Modal for Salary Config */}
       <Modal
-        title={`Cấu hình lương cho ${selectedEmployee?.name}`}
+        title={`Cấu hình lương cho ${selectedEmployee?.fullName || ''}`}
         open={salaryConfigModalVisible}
         onCancel={() => setSalaryConfigModalVisible(false)}
         footer={null}
-        width={800} // ✅ tăng chiều rộng modal
+        width={800}
       >
-        <Form form={form} onFinish={handleSalaryConfigSubmit} layout="vertical">
+        <Form form={salaryConfigForm} onFinish={handleSalaryConfigSubmit} layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -476,18 +499,19 @@ const SalaryManagement = () => {
           </Form.Item>
         </Form>
       </Modal>
+
       {/* Modal for Bonus */}
       <Modal
-        title={`Thêm thưởng cho ${selectedEmployee?.name}`}
+        title={`Thêm thưởng cho ${selectedEmployee?.fullName || ''}`} 
         open={bonusModalVisible}
         onCancel={() => setBonusModalVisible(false)}
         footer={null}
       >
-        <Form onFinish={handleBonusSubmit} layout="vertical">
+        <Form form={bonusForm} onFinish={handleBonusSubmit} layout="vertical">
           <Form.Item
             label="Loại thưởng"
             name="bonusType"
-            rules={[{ required: true, message: 'Vui lòng chọn loại thưởng' }]}
+            rules={[{ required: true, message: 'Vui lòng nhập loại thưởng' }]}
           >
             <Input />
           </Form.Item>
@@ -496,7 +520,7 @@ const SalaryManagement = () => {
             name="bonusDate"
             rules={[{ required: true, message: 'Vui lòng chọn ngày thưởng' }]}
           >
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
           </Form.Item>
           <Form.Item
             label="Số tiền thưởng"
@@ -512,18 +536,19 @@ const SalaryManagement = () => {
           </Form.Item>
         </Form>
       </Modal>
+
       {/* Modal for Deduction */}
       <Modal
-        title={`Thêm khấu trừ cho ${selectedEmployee?.name}`}
+        title={`Thêm khấu trừ cho ${selectedEmployee?.fullName || ''}`} 
         open={deductionModalVisible}
         onCancel={() => setDeductionModalVisible(false)}
         footer={null}
       >
-        <Form onFinish={handleDeductionSubmit} layout="vertical">
+        <Form form={deductionForm} onFinish={handleDeductionSubmit} layout="vertical">
           <Form.Item
             label="Loại khấu trừ"
             name="deductionType"
-            rules={[{ required: true, message: 'Vui lòng chọn loại khấu trừ' }]}
+            rules={[{ required: true, message: 'Vui lòng nhập loại khấu trừ' }]}
           >
             <Input />
           </Form.Item>
@@ -532,7 +557,7 @@ const SalaryManagement = () => {
             name="deductionDate"
             rules={[{ required: true, message: 'Vui lòng chọn ngày khấu trừ' }]}
           >
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" /> 
           </Form.Item>
           <Form.Item
             label="Số tiền khấu trừ"

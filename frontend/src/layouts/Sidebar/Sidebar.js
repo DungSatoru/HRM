@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 import { getEmployeeById } from '~/services/employeeService';
+import authService from '~/services/authService';
 
 const Sidebar = () => {
   const fullName = localStorage.getItem('fullName') || 'Người dùng';
@@ -70,7 +71,7 @@ const Sidebar = () => {
         <p className="fw-bold">Chức năng chính</p>
         <ul className="list-unstyled">
           {/* Tổng quan - Tất cả đều xem được */}
-          {(isAdmin) && (
+          {isAdmin && (
             <li>
               <NavLink to="/dashboard">
                 <i className="fa-solid fas fa-tachometer-alt"></i> Tổng quan
@@ -79,7 +80,7 @@ const Sidebar = () => {
           )}
 
           {/* Quản lý nhân viên - HR và Admin */}
-          {(isHR) && (
+          {isHR && (
             <li>
               <NavLink to="/employees">
                 <i className="fa-solid fa-users"></i> Nhân viên
@@ -118,7 +119,7 @@ const Sidebar = () => {
                       <NavLink to="/departments">Quản lý phòng ban</NavLink>
                     </li>
                   )}
-                  {(isHR) && (
+                  {isHR && (
                     <li>
                       <NavLink to="/roles">Quản lý chức vụ</NavLink>
                     </li>
@@ -143,7 +144,7 @@ const Sidebar = () => {
             <div className={`collapse ${openSections.collapseChamCong ? 'show' : ''}`} id="collapseChamCong">
               <ul className="submenu">
                 <NavLink to={`/attendances/user/${localStorage.getItem('userId')}`}>Chấm công của tôi</NavLink>
-                {(isHR) && (
+                {isHR && (
                   <>
                     <li>
                       <NavLink to="/attendances">Chấm công nhân viên</NavLink>
@@ -180,7 +181,7 @@ const Sidebar = () => {
                 <li>
                   <NavLink to={`/salary/employee/${localStorage.getItem('userId')}`}>Bảng lương của tôi</NavLink>
                 </li>
-                {(isHR) && (
+                {isHR && (
                   <>
                     <li>
                       <NavLink to="/salary">Bảng lương nhân viên</NavLink>
@@ -226,8 +227,7 @@ const Sidebar = () => {
               to="/login"
               onClick={(e) => {
                 e.preventDefault();
-                localStorage.clear();
-                window.location.href = '/login';
+                authService.logout(); // Gọi hàm logout chuẩ
               }}
             >
               Đăng xuất

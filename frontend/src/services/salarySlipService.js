@@ -55,7 +55,7 @@ export const calculateSalary = async (userId, month) => {
         });
 
         if (response.status === 200) {
-            toast.success('Tính toán lương thành công!');
+            toast.success(response.data.message);
             return response.data.data; 
         } else {
             throw new Error(response.data.message || 'Không thể tính toán lương');

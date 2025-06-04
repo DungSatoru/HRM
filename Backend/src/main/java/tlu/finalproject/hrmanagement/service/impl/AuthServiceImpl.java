@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.config.JwtTokenProvider;
 import tlu.finalproject.hrmanagement.dto.AuthRequestDTO;
@@ -28,10 +29,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
-        if (authRequestDTO.getUsername() == null || authRequestDTO.getPassword() == null) {
-            throw new BadRequestException("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
-        }
-
         try {
             // Xác thực username + password
             Authentication authentication = authenticationManager.authenticate(
@@ -48,8 +45,12 @@ public class AuthServiceImpl implements AuthService {
             // Chuyển sang DTO
             EmployeeDTO employeeDTO = modelMapper.map(user, EmployeeDTO.class);
 
-            // Lấy role trực tiếp từ User entity
-            String role = user.getRole().getRoleName();
+            String role = authentication.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse(null);
+
 
             // Sinh token
             String token = jwtTokenProvider.generateToken(user.getUsername(), role);

@@ -14,9 +14,7 @@ const UserPermission = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Lấy các vai trò và người dùng khi component mount
-  useEffect(() => {
-    const fetchRolesAndUsers = async () => {
+  const fetchRolesAndUsers = async () => {
       try {
         setLoading(true);
         const fetchedRoles = await getRoles();
@@ -33,6 +31,10 @@ const UserPermission = () => {
         setLoading(false);
       }
     };
+
+  // Lấy các vai trò và người dùng khi component mount
+  useEffect(() => {
+    
 
     fetchRolesAndUsers();
   }, []);
@@ -53,7 +55,7 @@ const UserPermission = () => {
         user.userId === userId ? { ...user, roleId: updatedUser.roleId } : user
       );
       setUsers(updatedUsers);
-      toast.success('Cập nhật quyền người dùng thành công!');
+      fetchRolesAndUsers();
     } catch (error) {
       toast.error('Đã xảy ra lỗi khi cập nhật quyền');
     }

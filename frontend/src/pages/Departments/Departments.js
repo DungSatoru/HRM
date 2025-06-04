@@ -31,7 +31,6 @@ const Departments = () => {
       const data = await getDepartments();
       setDepartments(data || []);
     } catch (error) {
-      console.error('Error fetching departments:', error);
       message.error('Không thể tải danh sách phòng ban');
     } finally {
       setLoading(false);

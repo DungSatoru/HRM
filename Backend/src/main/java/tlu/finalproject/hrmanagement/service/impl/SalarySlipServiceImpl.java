@@ -27,6 +27,10 @@ public class SalarySlipServiceImpl implements SalarySlipService {
     @Override
     public List<SalarySlipDTO> getAllSalarySlipsByMonth(String month) {
         List<SalarySlip> slips = salarySlipRepository.findBySalaryPeriod(month);
+        // Trả về luôn nếu không có phiếu lương
+        if (slips == null || slips.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<SalarySlipDTO> dtos = new ArrayList<>();
 
         for (SalarySlip slip : slips) {
@@ -55,7 +59,7 @@ public class SalarySlipServiceImpl implements SalarySlipService {
     public SalarySlipDetailDTO getSalarySlipDetail(Long userId, String month) {
         SalarySlip salarySlip = salarySlipRepository
                 .findByUserUserIdAndSalaryPeriod(userId, month)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu lương"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu lương"));
 
         // Tính khoảng thời gian đầu-cuối tháng
         YearMonth ym = YearMonth.parse(month); // "2024-12"
