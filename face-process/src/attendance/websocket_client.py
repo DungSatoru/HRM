@@ -28,7 +28,7 @@ class WebSocketClient:
             
             if response == "success":
                 # Đường dẫn file âm thanh
-                file_path = r"D:\Documents\THUYLOIUNIVERSITY\Semester8\GraduationProject\HRM\Backend\src\main\resources\audio\success.wav"
+                file_path = r"data\success.wav"
 
                 # Khởi tạo pygame mixer
                 pygame.mixer.init()

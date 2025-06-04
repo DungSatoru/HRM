@@ -7,45 +7,54 @@ import numpy as np
 
 class FaceRecognizer:
     def __init__(self, encoding_file, yolo_model_path):
-        """
-        Initialize the face recognition system
-        
-        Args:
-            encoding_file (str): Path to the file containing face encodings
-            yolo_model_path (str): Path to the YOLOv8 face detection model
-        """
-        self.names, self.encodings = EncodingLoader.load_encoding_file(encoding_file)
+        self.face_ids, self.encodings = EncodingLoader.load_encoding_file(encoding_file)
         self.face_detector = FaceDetector(yolo_model_path)
-        print(f"Loaded {len(self.names)} face profiles")
+        self.tolerance = 0.35  # Ngưỡng để xác định có phải là người đó không
+        print(f"Loaded {len(self.face_ids)} face profiles")
+    
+    def calculate_confidence(self, face_distance):
+        """
+        Tính độ tin cậy từ khoảng cách khuôn mặt
+        Trả về giá trị từ 0-100 (percentage)
+        """
+        if face_distance > 1.0:
+            return 0.0
+        
+        # Công thức tuyến tính: distance càng nhỏ thì confidence càng cao
+        confidence = max(0.0, (1.0 - face_distance) * 100)
+        return round(confidence, 1)
     
     def recognize_faces(self, frame):
-        """
-        Recognize faces in a frame
-        
-        Args:
-            frame (numpy.ndarray): The frame to process
-            
-        Returns:
-            list: List of tuples (name, face_location)
-        """
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # face_locations = self.face_detector.detect_faces(frame)
-        face_locations = face_recognition.face_locations(frame)
+        face_locations = self.face_detector.detect_faces(frame) # Sử dụng model YOLO để phát hiện khuôn mặt
+        # face_locations = face_recognition.face_locations(frame) # Sử dụng face_recognition để phát hiện khuôn mặt 
         
         if not face_locations:
             return []
+        
+        # Kiểm tra nếu không có encodings để so sánh
+        if len(self.encodings) == 0:
+            return [("Unknown", face_location, 0.0) for face_location in face_locations]
             
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
         recognized_faces = []
         
         for face_location, face_encoding in zip(face_locations, face_encodings):
-            matches = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.45)
-            name = "Unknown"
+            # Tính khoảng cách với tất cả encodings đã biết
+            distances = face_recognition.face_distance(self.encodings, face_encoding)
             
-            if True in matches:
-                best_match_index = np.argmin(face_recognition.face_distance(self.encodings, face_encoding))
-                name = self.names[best_match_index]
+            # Tìm khoảng cách nhỏ nhất
+            best_match_index = np.argmin(distances)
+            best_distance = distances[best_match_index]
             
-            recognized_faces.append((name, face_location))
+            # Tính độ tin cậy
+            confidence = self.calculate_confidence(best_distance)
+            
+            # Xác định tên dựa trên tolerance
+            face_id = "Unknown"
+            if best_distance <= self.tolerance:
+                face_id = self.face_ids[best_match_index]
+                
+            recognized_faces.append((face_id, face_location, confidence))
         
         return recognized_faces
