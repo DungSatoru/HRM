@@ -10,7 +10,7 @@ import { getEmployees } from '~/services/employeeService';
 import Loading from '~/components/Loading/Loading';
 import AttendanceForm from '~/components/AttendanceForm/AttendanceForm';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const UserAttendanceHistory = () => {
   const [employees, setEmployees] = useState([]);

@@ -1,43 +1,54 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchEmpDepPos } from '~/utils/fetchData';
 import { Table, Button, Input, Tag, Space } from 'antd';
-import Loading from '~/components/Loading/Loading';
 import { SearchOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
+import Loading from '~/components/Loading/Loading';
 
 const Employees = () => {
   const navigate = useNavigate();
-
   const [employees, setEmployees] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
-  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const { mappedEmployees, departmentsData, positionsData } = await fetchEmpDepPos();
-        setEmployees(mappedEmployees);
-        setDepartments(departmentsData);
-        setPositions(positionsData);
-        setFilteredEmployees(mappedEmployees);
-      } catch (error) {
-        console.error('Lỗi khi tải dữ liệu:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
+  const loadData = useCallback(async () => {
+    try {
+      const { mappedEmployees, departmentsData, positionsData } = await fetchEmpDepPos();
+      setEmployees(mappedEmployees);
+      setFilteredEmployees(mappedEmployees);
+      setDepartments(departmentsData);
+      setPositions(positionsData);
+    } catch (error) {
+      console.error('Lỗi khi tải dữ liệu:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   const handleSearch = (e) => {
-    const { value } = e.target;
-    setSearchTerm(value);
-    const filtered = employees.filter((emp) => emp.fullName?.toLowerCase().includes(value.toLowerCase()));
-    setFilteredEmployees(filtered);
+    const keyword = e.target.value.toLowerCase();
+    setSearchTerm(keyword);
+    setFilteredEmployees(employees.filter((emp) => emp.fullName?.toLowerCase().includes(keyword)));
+  };
+
+  const renderStatusTag = (status) => {
+    const statusMap = {
+      ACTIVE: { color: 'green', label: 'Đang làm việc' },
+      ON_LEAVE: { color: 'gold', label: 'Đang nghỉ phép' },
+      PROBATION: { color: 'blue', label: 'Đang thử việc' },
+      RESIGNED: { color: 'orange', label: 'Đã nghỉ việc (tự nguyện)' },
+      TERMINATED: { color: 'red', label: 'Bị cho nghỉ việc' },
+      RETIRED: { color: 'cyan', label: 'Nghỉ hưu' },
+    };
+    const item = statusMap[status] || { color: 'default', label: status };
+    return <Tag color={item.color}>{item.label}</Tag>;
   };
 
   const columns = [
@@ -67,8 +78,8 @@ const Employees = () => {
         text: dep.departmentName,
         value: dep.departmentName,
       })),
-      filterMultiple: true, // Cho phép chọn nhiều
-      filterSearch: true, // Thêm thanh tìm kiếm
+      filterMultiple: true,
+      filterSearch: true,
       onFilter: (value, record) => record.departmentName === value,
     },
     {
@@ -79,8 +90,8 @@ const Employees = () => {
         text: pos.positionName,
         value: pos.positionName,
       })),
-      filterMultiple: true, // Cho phép chọn nhiều
-      filterSearch: true, // Thêm thanh tìm kiếm
+      filterMultiple: true,
+      filterSearch: true,
       onFilter: (value, record) => record.positionName === value,
     },
     {
@@ -103,26 +114,8 @@ const Employees = () => {
         { text: 'Nghỉ hưu', value: 'RETIRED' },
       ],
       onFilter: (value, record) => record.status === value,
-      render: (status) => {
-        switch (status) {
-          case 'ACTIVE':
-            return <Tag color="green">Đang làm việc</Tag>;
-          case 'ON_LEAVE':
-            return <Tag color="gold">Đang nghỉ phép</Tag>;
-          case 'PROBATION':
-            return <Tag color="blue">Đang thử việc</Tag>;
-          case 'RESIGNED':
-            return <Tag color="orange">Đã nghỉ việc (tự nguyện)</Tag>;
-          case 'TERMINATED':
-            return <Tag color="red">Bị cho nghỉ việc</Tag>;
-          case 'RETIRED':
-            return <Tag color="cyan">Nghỉ hưu</Tag>;
-          default:
-            return <Tag>{status}</Tag>;
-        }
-      },
+      render: renderStatusTag,
     },
-
     {
       title: 'Thao tác',
       key: 'actions',
@@ -160,7 +153,16 @@ const Employees = () => {
           {loading ? (
             <Loading />
           ) : (
-            <Table columns={columns} dataSource={filteredEmployees} rowKey="userId" pagination={{ pageSize: 10 }} />
+            <Table
+              columns={columns}
+              dataSource={filteredEmployees}
+              rowKey="userId"
+              pagination={{
+                pageSizeOptions: ['5', '10', '20', '50'],
+                defaultPageSize: 10,
+                showSizeChanger: true,
+              }}
+            />
           )}
         </div>
       </div>
