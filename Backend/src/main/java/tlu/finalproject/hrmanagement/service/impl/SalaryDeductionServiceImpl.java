@@ -105,7 +105,7 @@ public class SalaryDeductionServiceImpl implements SalaryDeductionService {
 
     private double getPerMinuteSalary(Long userId) {
         SalaryConfiguration config = salaryConfigurationRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu hình lương"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy cấu hình lương"));
         return config.getBasicSalary() / 22 / 8 / 60;
     }
 }

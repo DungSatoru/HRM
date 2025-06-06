@@ -27,7 +27,6 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
     private static final double BHYT_RATE = 0.015;
     private static final double BHTN_RATE = 0.01;
     private static final double PERSONAL_DEDUCTION = 11_000_000.0;
-    private static final double PROBATION_RATE = 0.85;
     private static final double DEPENDENT_DEDUCTION = 4_400_000.0;
 
 
@@ -90,7 +89,7 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
 
         // Nếu nhân viên đang trong thời gian thử việc → áp dụng hệ số thử việc (PROBATION_RATE)
         if (user.getStatus() == EmploymentStatus.PROBATION) {
-            basicSalary *= PROBATION_RATE;
+            basicSalary *= (config.getProbationRate() / 100.0);
         }
 
         // 4.2. Tính lương theo ngày = Lương cơ bản / số ngày làm việc tiêu chuẩn trong tháng

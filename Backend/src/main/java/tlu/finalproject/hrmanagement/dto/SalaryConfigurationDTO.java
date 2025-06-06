@@ -26,4 +26,5 @@ public class SalaryConfigurationDTO {
     LocalTime workEndTime;
     Integer breakDurationMinutes;
     Integer numberOfDependents;
+    Integer probationRate;
 }

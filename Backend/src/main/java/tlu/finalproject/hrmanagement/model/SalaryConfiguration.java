@@ -56,4 +56,7 @@ public class SalaryConfiguration {
 
     @Column(name = "number_of_dependents", columnDefinition = "INT DEFAULT 0")
     Integer numberOfDependents = 0;
+
+    @Column(name = "probation_rate", columnDefinition = "INT DEFAULT 85")
+    Integer probationRate = 85;
 }

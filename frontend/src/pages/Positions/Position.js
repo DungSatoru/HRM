@@ -100,6 +100,7 @@ const Positions = () => {
       key: 'positionId',
       width: 80,
       align: 'center',
+      sorter: (a, b) => a.positionId - b.positionId,
     },
     {
       title: 'Tên chức vụ',
@@ -107,12 +108,14 @@ const Positions = () => {
       key: 'positionName',
       align: 'center',
       render: (text) => <b>{text}</b>,
+      sorter: (a, b) => a.positionName.localeCompare(b.positionName),
     },
     {
       title: 'Số nhân viên',
       dataIndex: 'totalEmployees',
       key: 'totalEmployees',
       align: 'center',
+      sorter: (a, b) => a.totalEmployees - b.totalEmployees,
       render: (count) => <Badge count={count || 0} style={{ backgroundColor: '#52c41a' }} />,
     },
     {

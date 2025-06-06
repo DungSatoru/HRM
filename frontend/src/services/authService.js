@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { getPositionById } from './positionService';
-import { getRoleById } from './roleService';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const API_URL = `${apiUrl}/auth/login`;
@@ -20,27 +19,28 @@ const authService = {
         username: username,
         password: password,
       });
+      const data = response.data.data;
 
-      if (response.data.token) {
+      if (data.token) {
         // Lưu thông tin cơ bản trước
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userId', response.data.user.userId || '');
-        localStorage.setItem('fullName', response.data.user.fullName || '');
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.user.userId || '');
+        localStorage.setItem('fullName', data.user.fullName || '');
 
-        const position = await getPositionById(response.data.user.positionId);
+        const position = await getPositionById(data.user.positionId);
         localStorage.setItem('positionName', position.positionName || '');
-        localStorage.setItem('roleName', response.data.roleName || '');
+        localStorage.setItem('roleName', data.roleName || '');
 
-        toast.success('Đăng nhập thành công!');
-        if (response.data.roleName === 'ROLE_HR') window.location.href = `/attendances`;
-        else window.location.href = `/attendances/user/${response.data.user.userId}`;
-        return response.data;
+        toast.success(data.message);
+        if (data.roleName === 'ROLE_HR') window.location.href = `/attendances`;
+        else window.location.href = `/attendances/user/${data.user.userId}`;
+        return data.token;
       } else {
         toast.error('Không nhận được token từ máy chủ!');
         throw new Error('Không nhận được token từ máy chủ.');
       }
     } catch (error) {
-      const message = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin!';
+      const message = error.response?.data?.message;
       toast.error(message);
       console.error('Login failed:', error.response ? error.response.data : error.message);
       throw error;

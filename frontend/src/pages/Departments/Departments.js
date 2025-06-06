@@ -1,31 +1,22 @@
-import { useEffect, useState } from 'react';
-import { getDepartments, deleteDepartment, addDepartment, updateDepartment } from '~/services/departmentService';
+import { useEffect, useState, useCallback } from 'react';
 import { Table, Input, Button, Modal, Form, Card, Space, Badge, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { getDepartments, deleteDepartment, addDepartment, updateDepartment } from '~/services/departmentService';
 import Loading from '~/components/Loading/Loading';
-import './Departments.css';
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalAction, setModalAction] = useState(''); // 'Add', 'Edit', 'Delete'
-  const [selectedDepartment, setSelectedDepartment] = useState({});
+  const [modalAction, setModalAction] = useState(''); // 'Add' | 'Edit' | 'Delete'
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [form] = Form.useForm();
 
   const role = localStorage.getItem('roleName');
-
-  // Phân quyền chi tiết
   const isAdmin = role === 'ROLE_ADMIN';
-  const isHR = role === 'ROLE_HR';
-  const isEmployee = role === 'ROLE_EMPLOYEE';
 
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
-
-  const fetchDepartments = async () => {
+  const fetchDepartments = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getDepartments();
@@ -35,17 +26,17 @@ const Departments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filteredDepartments = departments.filter((dep) =>
-    dep.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
 
-  const openModal = (action, department = {}) => {
+  const openModal = (action, department = null) => {
     setModalAction(action);
     setSelectedDepartment(department);
     setIsModalOpen(true);
-    if (action === 'Edit') {
+    if (action === 'Edit' && department) {
       form.setFieldsValue({ departmentName: department.departmentName });
     } else {
       form.resetFields();
@@ -54,17 +45,19 @@ const Departments = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedDepartment({});
+    setSelectedDepartment(null);
     form.resetFields();
   };
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
+      const { departmentName } = await form.validateFields();
       if (modalAction === 'Add') {
-        await addDepartment({ departmentName: values.departmentName });
+        await addDepartment({ departmentName });
+        message.success('Thêm phòng ban thành công!');
       } else if (modalAction === 'Edit') {
-        await updateDepartment(selectedDepartment.departmentId, { departmentName: values.departmentName });
+        await updateDepartment(selectedDepartment.departmentId, { departmentName });
+        message.success('Cập nhật phòng ban thành công!');
       }
       fetchDepartments();
       closeModal();
@@ -77,13 +70,19 @@ const Departments = () => {
   const handleDelete = async () => {
     try {
       await deleteDepartment(selectedDepartment.departmentId);
+      message.success('Xóa phòng ban thành công!');
       fetchDepartments();
-      closeModal();
     } catch (error) {
       console.error('Lỗi khi xóa phòng ban:', error);
+      message.error('Xóa thất bại!');
+    } finally {
       closeModal();
     }
   };
+
+  const filteredDepartments = departments.filter((dep) =>
+    dep.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   const columns = [
     {
@@ -91,42 +90,43 @@ const Departments = () => {
       dataIndex: 'departmentId',
       key: 'departmentId',
       width: 80,
+      sorter: (a, b) => a.departmentId - b.departmentId,
     },
     {
       title: 'Tên phòng ban',
       dataIndex: 'departmentName',
       key: 'departmentName',
       render: (text) => <b>{text}</b>,
+      sorter: (a, b) => a.departmentName.localeCompare(b.departmentName),
     },
     {
       title: 'Trưởng phòng',
       dataIndex: 'departmentManager',
       key: 'departmentManager',
       render: (manager) => manager || 'Chưa có',
+      sorter: (a, b) => (a.departmentManager || '').localeCompare(b.departmentManager || ''),
     },
     {
       title: 'Số nhân viên',
       dataIndex: 'totalEmployees',
       key: 'totalEmployees',
       render: (count) => <Badge count={count || 0} style={{ backgroundColor: '#1890ff' }} />,
+      sorter: (a, b) => a.totalEmployees - b.totalEmployees,
     },
     {
       title: 'Thao tác',
       key: 'actions',
-      render: (_, record) => (
-        <Space>
-          {isAdmin && (
-            <>
-              <Button icon={<EditOutlined />} onClick={() => openModal('Edit', record)}>
-                Sửa
-              </Button>
-              <Button icon={<DeleteOutlined />} danger onClick={() => openModal('Delete', record)}>
-                Xóa
-              </Button>
-            </>
-          )}
-        </Space>
-      ),
+      render: (_, record) =>
+        isAdmin && (
+          <Space>
+            <Button icon={<EditOutlined />} onClick={() => openModal('Edit', record)}>
+              Sửa
+            </Button>
+            <Button icon={<DeleteOutlined />} danger onClick={() => openModal('Delete', record)}>
+              Xóa
+            </Button>
+          </Space>
+        ),
     },
   ];
 
@@ -143,7 +143,7 @@ const Departments = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: 300 }}
           />
-          {localStorage.getItem('roleName') === 'ROLE_ADMIN' && (
+          {isAdmin && (
             <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('Add')}>
               Thêm phòng ban
             </Button>
@@ -174,7 +174,7 @@ const Departments = () => {
       >
         {modalAction === 'Delete' ? (
           <p>
-            Bạn có chắc chắn muốn xóa phòng ban <b>{selectedDepartment.departmentName}</b> không?
+            Bạn có chắc chắn muốn xóa phòng ban <b>{selectedDepartment?.departmentName}</b> không?
           </p>
         ) : (
           <Form form={form} layout="vertical">

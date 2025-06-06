@@ -51,7 +51,7 @@ public class User {
     Position position;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 100)
+    @Column(name = "status", columnDefinition = "VARCHAR(20)", length = 100)
     EmploymentStatus status;
 
     @Temporal(TemporalType.DATE)

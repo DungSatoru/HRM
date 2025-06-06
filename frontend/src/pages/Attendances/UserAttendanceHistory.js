@@ -1,19 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Table,
-  DatePicker,
-  Button,
-  Card,
-  Badge,
-  Modal,
-  message,
-  List,
-  Row,
-  Col,
-  Typography,
-  Space,
-  Popconfirm,
-  Input,
+  Table, DatePicker, Button, Card, Badge, Modal, message,
+  List, Row, Col, Typography, Space, Popconfirm, Input
 } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -25,88 +13,78 @@ import AttendanceForm from '~/components/AttendanceForm/AttendanceForm';
 const { Title, Text } = Typography;
 
 const UserAttendanceHistory = () => {
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [attendances, setAttendances] = useState([]);
   const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [attendances, setAttendances] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [dateRange, setDateRange] = useState({
     start: dayjs().startOf('month'),
     end: dayjs().endOf('month'),
   });
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
   const [formMode, setFormMode] = useState('create');
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [modal, setModal] = useState({ visible: false, message: '' });
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const data = await getEmployees();
-        setEmployees(data);
-      } catch (error) {
-        console.error('Lỗi lấy danh sách nhân viên:', error);
-      }
-    };
-    fetchEmployees();
+  const fetchEmployees = useCallback(async () => {
+    try {
+      const data = await getEmployees();
+      setEmployees(data);
+    } catch {
+      message.error('Lỗi khi tải danh sách nhân viên');
+    }
   }, []);
 
-  const fetchAttendance = async (userId) => {
-    if (!userId) {
-      setModalMessage('Vui lòng chọn nhân viên.');
-      setModalVisible(true);
+  const fetchAttendance = useCallback(async () => {
+    if (!selectedUser) {
+      setModal({ visible: true, message: 'Vui lòng chọn nhân viên.' });
       return;
     }
-
+    setLoading(true);
     try {
-      setLoading(true);
       const startDate = dateRange.start.format('YYYY-MM-DD');
       const endDate = dateRange.end.format('YYYY-MM-DD');
-      const data = await getUserAttendanceByRange(userId, startDate, endDate);
+      const data = await getUserAttendanceByRange(selectedUser.userId, startDate, endDate);
       setAttendances(data || []);
-    } catch (error) {
-      console.error('Lỗi lấy lịch sử chấm công:', error);
+    } catch {
       message.error('Không thể tải dữ liệu chấm công');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedUser, dateRange]);
 
-  const handleSelectEmployee = (employee) => {
-    setSelectedUser(employee);
-    fetchAttendance(employee.userId);
-  };
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
+
+  useEffect(() => {
+    if (selectedUser) fetchAttendance();
+  }, [selectedUser, dateRange, fetchAttendance]);
+
+  const handleSelectEmployee = (employee) => setSelectedUser(employee);
 
   const handleDateChange = (dates) => {
     if (dates && dates.length === 2) {
-      const [start, end] = dates;
       setDateRange({
-        start: start.startOf('day'),
-        end: end.endOf('day'),
+        start: dates[0].startOf('day'),
+        end: dates[1].endOf('day'),
       });
-
-      if (selectedUser) {
-        fetchAttendance(selectedUser.userId);
-      }
     }
   };
 
   const handleEdit = (id) => {
-    setFormMode('edit');
     setEditingId(id);
+    setFormMode('edit');
     setFormVisible(true);
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteAttendance(id);
-      message.success('Xóa chấm công thành công!');
-      if (selectedUser) {
-        fetchAttendance(selectedUser.userId);
-      }
-    } catch (error) {
-      console.error('Lỗi xóa chấm công:', error);
+      message.success('Xóa thành công!');
+      fetchAttendance();
+    } catch {
       message.error('Xóa thất bại!');
     }
   };
@@ -114,9 +92,7 @@ const UserAttendanceHistory = () => {
   const closeForm = () => {
     setFormVisible(false);
     setEditingId(null);
-    if (selectedUser) {
-      fetchAttendance(selectedUser.userId);
-    }
+    fetchAttendance();
   };
 
   const filteredEmployees = employees.filter((emp) =>
@@ -151,7 +127,9 @@ const UserAttendanceHistory = () => {
       key: 'status',
       align: 'center',
       render: (_, record) =>
-        record.checkOut ? <Badge status="success" text="Đã checkout" /> : <Badge status="error" text="Chưa checkout" />,
+        record.checkOut
+          ? <Badge status="success" text="Đã checkout" />
+          : <Badge status="error" text="Chưa checkout" />,
     },
     {
       title: 'Thao tác',
@@ -161,7 +139,7 @@ const UserAttendanceHistory = () => {
         <Space>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record.attendanceId)} />
           <Popconfirm
-            title="Bạn chắc chắn muốn xóa chấm công này?"
+            title="Xác nhận xóa?"
             onConfirm={() => handleDelete(record.attendanceId)}
             okText="Xóa"
             cancelText="Hủy"
@@ -176,12 +154,10 @@ const UserAttendanceHistory = () => {
   return (
     <div className="page-container user-attendances-container">
       <h2 className="page-title">Lịch sử chấm công nhân viên</h2>
-      <Title level={3}></Title>
 
-      <Row gutter={16} style={{ overflow: 'hidden' }}>
-        {/* Danh sách nhân viên */}
+      <Row gutter={16}>
         <Col span={6}>
-          <Card title="Danh sách nhân viên" style={{ height: '100%' }}>
+          <Card title="Danh sách nhân viên">
             <Input.Search
               placeholder="Tìm nhân viên"
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -209,18 +185,15 @@ const UserAttendanceHistory = () => {
           </Card>
         </Col>
 
-        {/* Bảng chấm công */}
         <Col span={18}>
           <Card
-            title={selectedUser ? `Chấm công của ${selectedUser.fullName}` : 'Chọn một nhân viên để xem dữ liệu'}
+            title={selectedUser ? `Chấm công của ${selectedUser.fullName}` : 'Chọn nhân viên'}
             extra={
-              <Space>
-                <DatePicker.RangePicker
-                  value={[dateRange.start, dateRange.end]}
-                  onChange={handleDateChange}
-                  format="DD/MM/YYYY"
-                />
-              </Space>
+              <DatePicker.RangePicker
+                value={[dateRange.start, dateRange.end]}
+                onChange={handleDateChange}
+                format="DD/MM/YYYY"
+              />
             }
           >
             {loading ? (
@@ -239,19 +212,17 @@ const UserAttendanceHistory = () => {
         </Col>
       </Row>
 
-      {/* Modal thông báo */}
       <Modal
         title="Thông báo"
-        open={modalVisible}
-        onOk={() => setModalVisible(false)}
-        onCancel={() => setModalVisible(false)}
+        open={modal.visible}
+        onOk={() => setModal({ visible: false, message: '' })}
+        onCancel={() => setModal({ visible: false, message: '' })}
         okText="Đóng"
         cancelButtonProps={{ style: { display: 'none' } }}
       >
-        <p>{modalMessage}</p>
+        <p>{modal.message}</p>
       </Modal>
 
-      {/* AttendanceForm */}
       <AttendanceForm
         visible={formVisible}
         onClose={closeForm}

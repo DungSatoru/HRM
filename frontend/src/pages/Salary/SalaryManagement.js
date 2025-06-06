@@ -36,8 +36,6 @@ import { calculateSalary } from '~/services/salarySlipService';
 const { TabPane } = Tabs;
 const { Option } = Select;
 
-
-
 const SalaryManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -62,7 +60,9 @@ const SalaryManagement = () => {
     setLoading(true);
     try {
       const monthString = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
-      const [fetchedEmployees, fetchedDepartments, fetchedPositions] = await fetchAllDataForSalaryManagement(monthString);
+      const [fetchedEmployees, fetchedDepartments, fetchedPositions] = await fetchAllDataForSalaryManagement(
+        monthString,
+      );
       setEmployees(fetchedEmployees);
       setDepartments(fetchedDepartments);
       setPositions(fetchedPositions);
@@ -106,6 +106,7 @@ const SalaryManagement = () => {
         workStartTime: salaryConfig?.workStartTime,
         workEndTime: salaryConfig?.workEndTime,
         numberOfDependents: salaryConfig?.numberOfDependents || 0,
+        probationRate: salaryConfig?.probationRate || 0,
       });
     } catch (error) {
       message.error('Không thể lấy cấu hình lương cho nhân viên.');
@@ -143,21 +144,27 @@ const SalaryManagement = () => {
       key: 'status',
       filters: [
         { text: 'Đang làm việc', value: 'ACTIVE' },
-        { text: 'Đã nghỉ việc', value: 'INACTIVE' },
-        { text: 'Đang nghỉ phép', value: 'ON_LEAVE' },
         { text: 'Đang thử việc', value: 'PROBATION' },
+        { text: 'Đang nghỉ phép', value: 'ON_LEAVE' },
+        { text: 'Đã nghỉ việc', value: 'RESIGNED' },
+        { text: 'Bị sa thải', value: 'TERMINATED' },
+        { text: 'Nghỉ hưu', value: 'RETIRED' },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => {
         switch (status) {
           case 'ACTIVE':
             return <Tag color="green">Đang làm việc</Tag>;
-          case 'INACTIVE':
-            return <Tag color="red">Đã nghỉ việc</Tag>;
-          case 'ON_LEAVE':
-            return <Tag color="gold">Đang nghỉ phép</Tag>;
           case 'PROBATION':
             return <Tag color="blue">Đang thử việc</Tag>;
+          case 'ON_LEAVE':
+            return <Tag color="gold">Đang nghỉ phép</Tag>;
+          case 'RESIGNED':
+            return <Tag color="orange">Đã nghỉ việc</Tag>;
+          case 'TERMINATED':
+            return <Tag color="red">Bị sa thải</Tag>;
+          case 'RETIRED':
+            return <Tag color="gray">Nghỉ hưu</Tag>;
           default:
             return <Tag color="default">{status}</Tag>;
         }
@@ -214,7 +221,8 @@ const SalaryManagement = () => {
     try {
       const formattedMonth = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
 
-      for (const employee of employees) { // Sử dụng 'employees' state
+      for (const employee of employees) {
+        // Sử dụng 'employees' state
         if ((employee.status === 'ACTIVE' || employee.status === 'PROBATION') && employee.basicSalary > 0) {
           try {
             await calculateSalary(employee.id, formattedMonth);
@@ -352,7 +360,9 @@ const SalaryManagement = () => {
           }
           key="3"
         >
-          <Card title="Thiết lập cấu hình lương mặc định"> {/* Đổi tên title cho rõ ràng */}
+          <Card title="Thiết lập cấu hình lương mặc định">
+            {' '}
+            {/* Đổi tên title cho rõ ràng */}
             <Form layout="vertical">
               <Form.Item label="Ngày trả lương trong tháng">
                 <Input type="number" min={1} max={31} defaultValue={25} />
@@ -490,6 +500,15 @@ const SalaryManagement = () => {
                 <Input type="number" min={0} step={1} />
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Mức hưởng lương thử việc (%)"
+                name="probationRate"
+                rules={[{ required: true, message: 'Nhập mức hưởng lương thử việc' }]}
+              >
+                <Input type="number" min={0} step={1} />
+              </Form.Item>
+            </Col>
           </Row>
 
           <Form.Item style={{ textAlign: 'right', marginTop: 16 }}>
@@ -502,7 +521,7 @@ const SalaryManagement = () => {
 
       {/* Modal for Bonus */}
       <Modal
-        title={`Thêm thưởng cho ${selectedEmployee?.fullName || ''}`} 
+        title={`Thêm thưởng cho ${selectedEmployee?.fullName || ''}`}
         open={bonusModalVisible}
         onCancel={() => setBonusModalVisible(false)}
         footer={null}
@@ -539,7 +558,7 @@ const SalaryManagement = () => {
 
       {/* Modal for Deduction */}
       <Modal
-        title={`Thêm khấu trừ cho ${selectedEmployee?.fullName || ''}`} 
+        title={`Thêm khấu trừ cho ${selectedEmployee?.fullName || ''}`}
         open={deductionModalVisible}
         onCancel={() => setDeductionModalVisible(false)}
         footer={null}
@@ -557,7 +576,7 @@ const SalaryManagement = () => {
             name="deductionDate"
             rules={[{ required: true, message: 'Vui lòng chọn ngày khấu trừ' }]}
           >
-            <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" /> 
+            <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
           </Form.Item>
           <Form.Item
             label="Số tiền khấu trừ"

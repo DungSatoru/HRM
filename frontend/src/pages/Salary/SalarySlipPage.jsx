@@ -10,42 +10,33 @@ const SalarySlipPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-   const routeParams = useParams(); // chỉ gọi 1 lần duy nhất ở đầu component
+  const routeParams = useParams(); // chỉ gọi 1 lần duy nhất ở đầu component
 
   const role = localStorage.getItem('roleName');
-  const userId =
-    role === 'ROLE_HR'
-      ? routeParams.userId
-      : localStorage.getItem('userId');
-  
+  const userId = role === 'ROLE_HR' ? routeParams.userId : localStorage.getItem('userId');
+
   const [selectedMonth, setSelectedMonth] = useState(dayjs()); // mặc định là tháng hiện tại
 
-  const fetchData = async (month) => {
-    setLoading(true); // Đặt trạng thái loading thành true khi bắt đầu lấy dữ liệu
-    setError(null); // Xóa lỗi cũ nếu có
-
-    const formattedMonth = month.format('YYYY-MM'); // Định dạng lại tháng thành 'YYYY-MM'
-
-    try {
-      // Gọi API để lấy dữ liệu phiếu lương
-      const response = await getSalarySlipByEmployeeIdAndMonth(userId, formattedMonth);
-      console.log(response); // Log dữ liệu để kiểm tra
-
-      // Cập nhật dữ liệu vào state
-      setData(response);
-    } catch (error) {
-      // Xử lý lỗi khi API trả về lỗi
-      console.error('Lỗi khi lấy dữ liệu phiếu lương:', error);
-      setError(error.message || 'Không thể lấy dữ liệu phiếu lương.');
-    } finally {
-      // Đảm bảo rằng loading luôn được tắt, bất kể có lỗi hay không
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchData(selectedMonth);
-  }, [selectedMonth]);
+    const fetch = async () => {
+      setLoading(true);
+      setError(null);
+
+      const formattedMonth = selectedMonth.format('YYYY-MM');
+
+      try {
+        const response = await getSalarySlipByEmployeeIdAndMonth(userId, formattedMonth);
+        setData(response);
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu phiếu lương:', error);
+        setError(error.message || 'Không thể lấy dữ liệu phiếu lương.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetch();
+  }, [selectedMonth, userId]);
 
   const handleMonthChange = (value) => {
     if (value) setSelectedMonth(value);

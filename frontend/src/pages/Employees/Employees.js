@@ -79,6 +79,8 @@ const Employees = () => {
         text: pos.positionName,
         value: pos.positionName,
       })),
+      filterMultiple: true, // Cho phép chọn nhiều
+      filterSearch: true, // Thêm thanh tìm kiếm
       onFilter: (value, record) => record.positionName === value,
     },
     {

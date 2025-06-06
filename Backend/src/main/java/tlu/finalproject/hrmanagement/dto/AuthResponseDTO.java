@@ -11,8 +11,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthResponseDTO {
-     String token;       // JWT Token
+    String token;       // JWT Token
     EmployeeDTO user;   // Thông tin nhân viên (không có password)
     String roleName;
-     long expiresIn;     // Thời gian hết hạn của token (tính bằng giây)
+    long expiresIn;     // Thời gian hết hạn của token (tính bằng giây)
 }

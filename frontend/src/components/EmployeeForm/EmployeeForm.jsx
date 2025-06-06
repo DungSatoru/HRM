@@ -297,7 +297,13 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                   name="positionId"
                   rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
                 >
-                  <Select placeholder="Chọn chức vụ" suffixIcon={<StarOutlined />}>
+                  <Select
+                    showSearch
+                    placeholder="Chọn chức vụ"
+                    suffixIcon={<StarOutlined />}
+                    optionFilterProp="children"
+                    filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                  >
                     {positions.map((pos) => (
                       <Option key={pos.positionId} value={pos.positionId}>
                         {pos.positionName}
@@ -312,7 +318,13 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                   name="departmentId"
                   rules={[{ required: true, message: 'Vui lòng chọn phòng ban' }]}
                 >
-                  <Select placeholder="Chọn phòng ban" suffixIcon={<TeamOutlined />}>
+                  <Select
+                    showSearch
+                    placeholder="Chọn phòng ban"
+                    suffixIcon={<TeamOutlined />}
+                    optionFilterProp="children"
+                    filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                  >
                     {departments.map((dep) => (
                       <Option key={dep.departmentId} value={dep.departmentId}>
                         {dep.departmentName}
