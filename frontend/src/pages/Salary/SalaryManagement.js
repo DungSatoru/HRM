@@ -346,7 +346,12 @@ const SalaryManagement = () => {
               dataSource={filteredEmployees}
               rowKey="id"
               loading={loading}
-              pagination={{ pageSize: 10 }}
+              pagination={{
+                showSizeChanger: true,
+                pageSizeOptions: ['5', '10', '20', '50'],
+                defaultPageSize: 10,
+                showTotal: (total, range) => `${range[0]}-${range[1]} trên tổng ${total} bản ghi`,
+              }}
             />
           </Card>
         </TabPane>

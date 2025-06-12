@@ -1,4 +1,5 @@
 # encoding_loader.py
+import mysql.connector
 import numpy as np
 
 class EncodingLoader:
@@ -42,3 +43,87 @@ class EncodingLoader:
             encodings.append(current_encoding)
 
         return names, encodings
+
+
+class EncodingHelper:
+    @staticmethod
+    def save_face_encoding(user_id, encoding_vector, db_config):
+        try:
+            blob = np.array(encoding_vector, dtype=np.float32).tobytes()
+
+            conn = mysql.connector.connect(**db_config)
+            cursor = conn.cursor()
+
+            cursor.execute(
+                "INSERT INTO face_vectors (user_id, encoding) VALUES (%s, %s)",
+                (user_id, blob)
+            )
+
+            conn.commit()
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi lưu dữ liệu: {err}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    @staticmethod
+    def load_face_encodings(db_config):
+        conn = None
+        cursor = None
+        ids = []
+        encodings = []
+
+        try:
+            conn = mysql.connector.connect(**db_config)
+            cursor = conn.cursor()
+            cursor.execute("SELECT user_id, encoding FROM face_vectors")
+            result = cursor.fetchall()
+
+            for user_id, blob in result:
+                vector = np.frombuffer(blob, dtype=np.float32)
+                ids.append(user_id)
+                encodings.append(vector)
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi tải dữ liệu: {err}")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
+        return ids, encodings
+
+
+face_ids, encodings = EncodingLoader.load_encoding_file(r"data\encodings.txt")
+
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'hr_management',
+    'port': 3306
+}
+def insert_face_vector(user_id, encoding_vector):
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        # Chuyển list -> bytes
+        blob = np.array(encoding_vector, dtype=np.float32).tobytes()
+
+        # Chèn vào bảng
+        cursor.execute(
+            "INSERT INTO face_vectors (user_id, encoding) VALUES (%s, %s)",
+            (user_id, blob)
+        )
+
+        conn.commit()
+        print(f"Đã chèn vector của user {user_id}")
+    except mysql.connector.Error as err:
+        print(f"Lỗi khi lưu user {user_id}: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+        
+# for user_id, encoding_vector in zip(face_ids, encodings):
+#     insert_face_vector(user_id, encoding_vector)

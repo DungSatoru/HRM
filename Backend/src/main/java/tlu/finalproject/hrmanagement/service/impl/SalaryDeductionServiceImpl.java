@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tlu.finalproject.hrmanagement.dto.LateDeductionDTO;
 import tlu.finalproject.hrmanagement.dto.SalaryDeductionDTO;
+import tlu.finalproject.hrmanagement.exception.BadRequestException;
 import tlu.finalproject.hrmanagement.exception.ResourceNotFoundException;
 import tlu.finalproject.hrmanagement.model.SalaryConfiguration;
 import tlu.finalproject.hrmanagement.model.SalaryDeduction;

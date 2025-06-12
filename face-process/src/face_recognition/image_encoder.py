@@ -3,8 +3,36 @@ import sys
 import os
 import cv2
 import time
+import numpy as np
+import mysql.connector
 
-def encode_images(video_path, directory_path, encoding_file, ID):
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'hr_management',
+    'port': 3306
+}
+
+def save_encoding_to_mysql(user_id, encoding_vector, db_config):
+    try:
+        blob = np.array(encoding_vector, dtype=np.float32).tobytes()
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "INSERT INTO face_vectors (user_id, encoding) VALUES (%s, %s)",
+            (user_id, blob)
+        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print(f"Saved encoding to MySQL for user_id: {user_id}")
+    except Exception as e:
+        print(f"Failed to save encoding for {user_id}: {e}")
+
+def encode_images(video_path, directory_path, encoding_file, user_id):
     extract_frames(video_path, directory_path)
 
     if not os.path.exists(directory_path):
@@ -27,7 +55,9 @@ def encode_images(video_path, directory_path, encoding_file, ID):
                 encodings = face_recognition.face_encodings(image)
 
                 if len(encodings) > 0:
-                    encoding_f.write(f"{ID}: {list(encodings[0])}\n")
+                    # encoding_f.write(f"{user_id}: {list(encodings[0])}\n")
+                    save_encoding_to_mysql(user_id, encodings[0], db_config)
+
                     print(f"Encoded {filename} successfully")
                 else:
                     print(f"Not found face in the {filename}, Skip!")
@@ -53,12 +83,13 @@ def extract_frames(video_path, output_folder):
 
 if __name__ == "__main__":
     if len(sys.argv) != 5:
-        print("How use: python image_encoder.py <video_path> <folder_path> <encoding_file> <ID>")
+        print("How use: python image_encoder.py <video_path> <folder_path> <encoding_file> <user_id>")
         sys.exit(1)
+        #  python "imageencodinh.py" "video" "exrtrach" "encodefile"
 
     video_path = sys.argv[1]
     folder_path = sys.argv[2]
     encoding_file = sys.argv[3]
-    ID = sys.argv[4]
+    user_id = int(sys.argv[4])
 
-    encode_images(video_path, folder_path, encoding_file, ID)
+    encode_images(video_path, folder_path, encoding_file, user_id)

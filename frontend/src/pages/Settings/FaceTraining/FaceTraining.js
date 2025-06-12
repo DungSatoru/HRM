@@ -164,6 +164,10 @@ const FaceTraining = () => {
                       }}
                       value={selectedDepartment}
                       placeholder="Chọn phòng ban"
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children.toLowerCase().includes(input.toLowerCase())
+                      }
                       style={{ width: "100%" }}
                     >
                       {departments.map((dept) => (
@@ -180,6 +184,10 @@ const FaceTraining = () => {
                       onChange={(value) => setSelectedEmployee(value)}
                       value={selectedEmployee}
                       disabled={!selectedDepartment}
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children.toLowerCase().includes(input.toLowerCase())
+                      }
                       placeholder="Chọn nhân viên"
                       style={{ width: "100%" }}
                     >

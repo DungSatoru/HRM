@@ -60,7 +60,7 @@ class VideoProcessor:
                         self.recent_face_centers[face_id].pop(0)
 
                     if self._is_stable(self.recent_face_centers[face_id]):
-                        if self.attendance_tracker.can_check_in(face_id):
+                        # if self.attendance_tracker.can_check_in(face_id):
                             self.attendance_tracker.record_attendance(face_id)
 
         # Luôn vẽ kết quả nhận diện gần nhất

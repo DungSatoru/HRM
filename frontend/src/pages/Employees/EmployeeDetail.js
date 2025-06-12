@@ -18,7 +18,6 @@ import {
   TeamOutlined,
   StarOutlined,
   ContactsOutlined,
-  FileTextOutlined,
   BookOutlined,
   ArrowLeftOutlined,
   EditOutlined,
@@ -64,6 +63,17 @@ const EmployeeDetail = () => {
         <Spin size="large" />
       </div>
     );
+
+  const educationMap = {
+    PRIMARY: 'Tiểu học',
+    SECONDARY: 'Trung học cơ sở',
+    HIGH_SCHOOL: 'Trung học phổ thông',
+    VOCATIONAL: 'Trung cấp',
+    COLLEGE: 'Cao đẳng',
+    BACHELOR: 'Đại học',
+    MASTER: 'Thạc sĩ',
+    DOCTOR: 'Tiến sĩ',
+  };
 
   if (!employee) return <div>Không tìm thấy thông tin nhân viên</div>;
 
@@ -277,20 +287,42 @@ const EmployeeDetail = () => {
           <Descriptions.Item
             label={
               <span>
-                <FileTextOutlined /> Loại hợp đồng
+                <BookOutlined /> Loại hợp đồng
               </span>
             }
           >
-            {employee.contractType || 'Chưa cập nhật'}
+            {(() => {
+              switch (employee.contractType) {
+                case 'PROBATION':
+                  return 'Hợp đồng thử việc';
+                case 'FIXED_TERM':
+                  return 'Hợp đồng xác định thời hạn';
+                case 'UNLIMITED_TERM':
+                  return 'Hợp đồng không xác định thời hạn';
+                case 'SEASONAL':
+                  return 'Hợp đồng thời vụ';
+                case 'PART_TIME':
+                  return 'Hợp đồng bán thời gian';
+                case 'INTERNSHIP':
+                  return 'Hợp đồng thực tập';
+                case 'FREELANCE':
+                  return 'Hợp đồng khoán việc';
+                case 'SERVICE':
+                  return 'Hợp đồng dịch vụ';
+                default:
+                  return 'Chưa cập nhật';
+              }
+            })()}
           </Descriptions.Item>
+
           <Descriptions.Item
             label={
               <span>
                 <BookOutlined /> Trình độ học vấn
               </span>
             }
-          >
-            {employee.educationLevel || 'Chưa cập nhật'}
+            >
+            {educationMap[employee.educationLevel] || 'Chưa cập nhật'}
           </Descriptions.Item>
         </Descriptions>
       </Card>

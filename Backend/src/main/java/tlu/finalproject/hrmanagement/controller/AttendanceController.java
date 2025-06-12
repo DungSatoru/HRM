@@ -59,6 +59,19 @@ public class AttendanceController {
         return ResponseUtil.success(dto, "Thêm dữ liệu chấm công thành công");
     }
 
+
+    // Sửa bản ghi chấm công
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('HR')")
+    public ResponseEntity<ApiResponse<AttendanceDTO>> updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
+        AttendanceDTO updatedAttendance = attendanceService.updateAttendance(id, attendanceDTO);
+        if (updatedAttendance == null) {
+            return ResponseUtil.notFound("Không tìm thấy chấm công với ID " + id);
+        }
+        return ResponseUtil.success(updatedAttendance, "Cập nhật dữ liệu chấm công thành công");
+    }
+
+
     // Xóa dữ liệu chấm công theo ID
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('HR')")
@@ -72,17 +85,6 @@ public class AttendanceController {
         return ResponseUtil.success(null, "Xóa dữ liệu chấm công thành công");
     }
 
-
-    // Sửa bản ghi chấm công
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR')")
-    public ResponseEntity<ApiResponse<AttendanceDTO>> updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
-        AttendanceDTO updatedAttendance = attendanceService.updateAttendance(id, attendanceDTO);
-        if (updatedAttendance == null) {
-            return ResponseUtil.notFound("Không tìm thấy chấm công với ID " + id);
-        }
-        return ResponseUtil.success(updatedAttendance, "Cập nhật dữ liệu chấm công thành công");
-    }
 
 
     // TEST CHẤM CÔNG THỦ CÔNG VỚI DỮ LIỆU GỬI VÀO ĐỂ CHECK XEM LÀ CHECKIN HAY SẼ CHECKOUT

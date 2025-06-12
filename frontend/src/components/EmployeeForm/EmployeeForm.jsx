@@ -210,10 +210,10 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
                       setImageFile(file);
                       return false;
                     }}
-                    style={{ width: '100%' }}
                   >
                     {imageUrl ? (
-                      <Avatar src={imageUrl} size={100} style={{ width: '100%', height: '100%', borderRadius: 8 }} />
+                      <Avatar src={imageUrl} size={100} style={{ borderRadius: 8 }} />
+
                     ) : (
                       uploadButton
                     )}
@@ -399,7 +399,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
               </Col>
               <Col xs={24} sm={12}>
                 <Form.Item label="Loại hợp đồng" name="contractType">
-                  <Select placeholder="Chọn loại hợp đồng">
+                  <Select showSearch optionFilterProp="children" placeholder="Chọn loại hợp đồng">
                     <Option value="PROBATION">Hợp đồng thử việc</Option>
                     <Option value="FIXED_TERM">Hợp đồng xác định thời hạn</Option>
                     <Option value="UNLIMITED_TERM">Hợp đồng không xác định thời hạn</Option>
@@ -413,7 +413,7 @@ const EmployeeForm = ({ isEdit = false, employeeId = null }) => {
               </Col>
               <Col xs={24} sm={12}>
                 <Form.Item label="Trình độ học vấn" name="educationLevel">
-                  <Select placeholder="Chọn trình độ học vấn">
+                  <Select showSearch optionFilterProp="children" placeholder="Chọn trình độ học vấn">
                     <Option value="PRIMARY">Tiểu học</Option>
                     <Option value="SECONDARY">Trung học cơ sở</Option>
                     <Option value="HIGH_SCHOOL">Trung học phổ thông</Option>

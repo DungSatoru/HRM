@@ -1,15 +1,27 @@
 # face_recognizer.py
 import cv2
 from .face_detector import FaceDetector
-from .encoding_loader import EncodingLoader
+from .encoding_loader import EncodingLoader, EncodingHelper
 import face_recognition
 import numpy as np
+# EncodingHelper.save_face_encoding("john", vector, db_config)
+# names, encodings = EncodingHelper.load_face_encodings(db_config)
+
+
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'hr_management',
+    'port': 3306
+}
 
 class FaceRecognizer:
     def __init__(self, encoding_file, yolo_model_path):
-        self.face_ids, self.encodings = EncodingLoader.load_encoding_file(encoding_file)
+        # self.face_ids, self.encodings = EncodingLoader.load_encoding_file(encoding_file)
+        self.face_ids, self.encodings = EncodingHelper.load_face_encodings(db_config)
         self.face_detector = FaceDetector(yolo_model_path)
-        self.tolerance = 0.35  # Ngưỡng để xác định có phải là người đó không
+        self.tolerance = 0.40  # Ngưỡng để xác định có phải là người đó không
         print(f"Loaded {len(self.face_ids)} face profiles")
     
     def calculate_confidence(self, face_distance):

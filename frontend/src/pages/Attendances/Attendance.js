@@ -107,71 +107,90 @@ const Attendance = () => {
   }));
 
   const columns = [
-    {
-      title: 'STT',
-      dataIndex: 'stt',
-      key: 'stt',
-      width: 60,
-      align: 'center',
+  {
+    title: 'STT',
+    dataIndex: 'stt',
+    key: 'stt',
+    width: 60,
+    align: 'center',
+    sorter: (a, b) => a.stt - b.stt,
+  },
+  {
+    title: 'Họ tên',
+    dataIndex: 'fullName',
+    key: 'fullName',
+    sorter: (a, b) => a.fullName.localeCompare(b.fullName),
+  },
+  {
+    title: 'Thời gian vào',
+    dataIndex: 'checkIn',
+    key: 'checkIn',
+    align: 'center',
+    sorter: (a, b) => {
+      const aTime = a.checkIn === '-' ? '' : a.checkIn;
+      const bTime = b.checkIn === '-' ? '' : b.checkIn;
+      return aTime.localeCompare(bTime);
     },
-    {
-      title: 'Họ tên',
-      dataIndex: 'fullName',
-      key: 'fullName',
+  },
+  {
+    title: 'Thời gian ra',
+    dataIndex: 'checkOut',
+    key: 'checkOut',
+    align: 'center',
+    sorter: (a, b) => {
+      const aTime = a.checkOut === '-' ? '' : a.checkOut;
+      const bTime = b.checkOut === '-' ? '' : b.checkOut;
+      return aTime.localeCompare(bTime);
     },
-    {
-      title: 'Thời gian vào',
-      dataIndex: 'checkIn',
-      key: 'checkIn',
-      align: 'center',
-    },
-    {
-      title: 'Thời gian ra',
-      dataIndex: 'checkOut',
-      key: 'checkOut',
-      align: 'center',
-    },
-    {
-      title: 'Tổng giờ',
-      dataIndex: 'duration',
-      key: 'duration',
-      align: 'center',
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      align: 'center',
-      render: (status) =>
-        status === 'Đã chấm công' ? (
-          <Badge status="success" text="Đã checkout" />
-        ) : (
-          <Badge status="error" text="Chưa checkout" />
-        ),
-    },
-    {
-      title: 'Thao tác',
-      key: 'actions',
-      align: 'center',
-      render: (_, record) => (
-        <Space>
-          <Button type="link" onClick={() => handleEdit(record.key)}>
-            Chỉnh sửa
-          </Button>
-          <Popconfirm
-            title="Bạn chắc chắn muốn xóa chấm công này?"
-            onConfirm={() => handleDelete(record.key)}
-            okText="Xóa"
-            cancelText="Hủy"
-          >
-            <Button type="link" danger>
-              Xóa
-            </Button>
-          </Popconfirm>
-        </Space>
+  },
+  {
+    title: 'Tổng giờ',
+    dataIndex: 'duration',
+    key: 'duration',
+    align: 'center',
+  },
+  {
+    title: 'Trạng thái',
+    dataIndex: 'status',
+    key: 'status',
+    align: 'center',
+    filters: [
+      { text: 'Đã checkout', value: 'Đã chấm công' },
+      { text: 'Chưa checkout', value: 'Chưa checkout' },
+      { text: 'Chưa chấm công', value: 'Chưa chấm công' },
+    ],
+    onFilter: (value, record) => record.status === value,
+    render: (status) =>
+      status === 'Đã chấm công' ? (
+        <Badge status="success" text="Đã checkout" />
+      ) : (
+        <Badge status="error" text={status} />
       ),
-    },
-  ];
+  },
+  {
+    title: 'Thao tác',
+    key: 'actions',
+    align: 'center',
+    render: (_, record) => (
+      <Space>
+        <Button type="link" onClick={() => handleEdit(record.key)}>
+          Chỉnh sửa
+        </Button>
+        <Popconfirm
+          title="Bạn chắc chắn muốn xóa chấm công này?"
+          onConfirm={() => handleDelete(record.key)}
+          okText="Xóa"
+          cancelText="Hủy"
+        >
+          <Button type="link" danger>
+            Xóa
+          </Button>
+        </Popconfirm>
+      </Space>
+    ),
+  },
+];
+
 
   return (
     <div className="page-container attendance-container">
@@ -200,7 +219,12 @@ const Attendance = () => {
             columns={columns}
             dataSource={mappedData}
             rowKey="key"
-            pagination={{ pageSize: 10 }}
+            pagination={{
+              showSizeChanger: true,
+              pageSizeOptions: ['5', '10', '20', '50'],
+              defaultPageSize: 10,
+              showTotal: (total, range) => `${range[0]}-${range[1]} trên tổng ${total} bản ghi`,
+            }}
             locale={{ emptyText: 'Không có dữ liệu chấm công' }}
           />
         )}

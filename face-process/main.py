@@ -1,8 +1,5 @@
-#  python main.py --ip 192.168.0.100 --user admin --password L23F65D3
+#  python main.py --ip 192.168.0.101 --user admin --password L23F65D3
 # main.py - Main application file
-import os, sys
-import time
-import cv2
 import argparse
 from src.face_recognition.face_recognizer import FaceRecognizer
 from src.attendance.attendance_tracker import AttendanceTracker
@@ -18,9 +15,6 @@ def main():
     args = parser.parse_args()
     
     # Configuration parameters
-    # rtsp_url = f"rtsp://{args.user}:{args.password}@{args.ip}:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
-
-    # rtsp_url = "rtsp://admin:L23F65D3@192.168.0.108:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
     encoding_file = r"data\encodings.txt"
     yolo_model_path = r"data\yolov8n-face.pt"
     checkin_folder = r"src\attendance\checkin"

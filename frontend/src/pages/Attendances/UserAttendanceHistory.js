@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Table, DatePicker, Button, Card, Badge, Modal, message,
-  List, Row, Col, Typography, Space, Popconfirm, Input
+  Table,
+  DatePicker,
+  Button,
+  Card,
+  Badge,
+  Modal,
+  message,
+  Row,
+  Col,
+  Typography,
+  Space,
+  Popconfirm,
+  Select,
 } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -24,7 +35,6 @@ const UserAttendanceHistory = () => {
   const [formVisible, setFormVisible] = useState(false);
   const [formMode, setFormMode] = useState('create');
   const [editingId, setEditingId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [modal, setModal] = useState({ visible: false, message: '' });
 
   const fetchEmployees = useCallback(async () => {
@@ -62,7 +72,10 @@ const UserAttendanceHistory = () => {
     if (selectedUser) fetchAttendance();
   }, [selectedUser, dateRange, fetchAttendance]);
 
-  const handleSelectEmployee = (employee) => setSelectedUser(employee);
+  const handleSelectEmployee = (userId) => {
+    const user = employees.find((emp) => emp.userId === userId);
+    setSelectedUser(user);
+  };
 
   const handleDateChange = (dates) => {
     if (dates && dates.length === 2) {
@@ -95,17 +108,13 @@ const UserAttendanceHistory = () => {
     fetchAttendance();
   };
 
-  const filteredEmployees = employees.filter((emp) =>
-    emp.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const columns = [
     {
       title: 'Ngày',
       dataIndex: 'date',
       key: 'date',
-      render: (date) => dayjs(date).format('DD/MM/YYYY'),
       align: 'center',
+      render: (date) => dayjs(date).format('DD/MM/YYYY'),
       sorter: (a, b) => dayjs(a.date).unix() - dayjs(b.date).unix(),
     },
     {
@@ -127,9 +136,7 @@ const UserAttendanceHistory = () => {
       key: 'status',
       align: 'center',
       render: (_, record) =>
-        record.checkOut
-          ? <Badge status="success" text="Đã checkout" />
-          : <Badge status="error" text="Chưa checkout" />,
+        record.checkOut ? <Badge status="success" text="Đã checkout" /> : <Badge status="error" text="Chưa checkout" />,
     },
     {
       title: 'Thao tác',
@@ -152,65 +159,64 @@ const UserAttendanceHistory = () => {
   ];
 
   return (
-    <div className="page-container user-attendances-container">
-      <h2 className="page-title">Lịch sử chấm công nhân viên</h2>
+    <div style={{ padding: 24 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Lịch sử chấm công</h2>
 
-      <Row gutter={16}>
-        <Col span={6}>
-          <Card title="Danh sách nhân viên">
-            <Input.Search
-              placeholder="Tìm nhân viên"
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <Card style={{ marginBottom: 16 }}>
+        <Row gutter={16} align="middle">
+          <Col xs={24} md={10}>
+            <Select
+              showSearch
               allowClear
-              style={{ marginBottom: 12 }}
+              placeholder="Chọn nhân viên"
+              style={{ width: '100%' }}
+              optionFilterProp="children"
+              value={selectedUser?.userId}
+              onChange={handleSelectEmployee}
+              filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+            >
+              {employees.map((emp) => (
+                <Select.Option key={emp.userId} value={emp.userId}>
+                  {emp.fullName}
+                </Select.Option>
+              ))}
+            </Select>
+          </Col>
+          <Col xs={24} md={10}>
+            <DatePicker.RangePicker
+              value={[dateRange.start, dateRange.end]}
+              onChange={handleDateChange}
+              format="DD/MM/YYYY"
+              style={{ width: '100%' }}
             />
-            <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 250px)' }}>
-              <List
-                dataSource={filteredEmployees}
-                loading={!employees.length}
-                renderItem={(emp) => (
-                  <List.Item
-                    style={{
-                      cursor: 'pointer',
-                      background: selectedUser?.userId === emp.userId ? '#e6f7ff' : '',
-                      padding: '12px 16px',
-                    }}
-                    onClick={() => handleSelectEmployee(emp)}
-                  >
-                    <Text strong>{emp.fullName}</Text>
-                  </List.Item>
-                )}
-              />
-            </div>
-          </Card>
-        </Col>
+          </Col>
+          <Col xs={24} md={4}>
+            <Button type="primary" block disabled={!selectedUser} onClick={() => setFormVisible(true)}>
+              Tạo chấm công
+            </Button>
+          </Col>
+        </Row>
+      </Card>
 
-        <Col span={18}>
-          <Card
-            title={selectedUser ? `Chấm công của ${selectedUser.fullName}` : 'Chọn nhân viên'}
-            extra={
-              <DatePicker.RangePicker
-                value={[dateRange.start, dateRange.end]}
-                onChange={handleDateChange}
-                format="DD/MM/YYYY"
-              />
-            }
-          >
-            {loading ? (
-              <Loading />
-            ) : (
-              <Table
-                columns={columns}
-                dataSource={attendances}
-                rowKey="attendanceId"
-                pagination={{ pageSize: 10 }}
-                scroll={{ x: 'max-content' }}
-                locale={{ emptyText: 'Không có dữ liệu chấm công' }}
-              />
-            )}
-          </Card>
-        </Col>
-      </Row>
+      <Card title={selectedUser ? `Chấm công - ${selectedUser.fullName}` : 'Chọn nhân viên để xem dữ liệu'}>
+        {loading ? (
+          <Loading />
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={attendances}
+            rowKey="attendanceId"
+            pagination={{
+              showSizeChanger: true,
+              pageSizeOptions: ['5', '10', '20', '50'],
+              defaultPageSize: 10,
+              showTotal: (total, range) => `${range[0]}-${range[1]} trên tổng ${total} bản ghi`,
+            }}
+            scroll={{ x: 'max-content' }}
+            locale={{ emptyText: 'Không có dữ liệu chấm công' }}
+          />
+        )}
+      </Card>
 
       <Modal
         title="Thông báo"

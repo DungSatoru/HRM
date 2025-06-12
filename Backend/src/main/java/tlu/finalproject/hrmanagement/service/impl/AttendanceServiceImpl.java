@@ -102,12 +102,13 @@ public class AttendanceServiceImpl implements AttendanceService {
         return modelMapper.map(saved, AttendanceDTO.class);
     }
 
+    @Transactional
     @Override
     public boolean deleteAttendance(Long id) {
         Attendance attendance = attendanceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu chấm công với ID: " + id));
         overtimeRecordRepository.deleteByAttendance(attendance);
-        attendanceRepository.delete(attendance);
+        attendanceRepository.deleteById(id);
         return true;
     }
 
