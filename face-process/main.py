@@ -1,4 +1,4 @@
-#  python main.py --ip 192.168.0.101 --user admin --password L23F65D3
+#  python main.py --ip 192.168.0.108 --user admin --password L23F65D3
 # main.py - Main application file
 import argparse
 from src.face_recognition.face_recognizer import FaceRecognizer

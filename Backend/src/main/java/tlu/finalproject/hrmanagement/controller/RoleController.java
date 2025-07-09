@@ -12,7 +12,7 @@ import tlu.finalproject.hrmanagement.service.RoleService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/roles") // http://localhost:8080/api/roles
+@RequestMapping("api/roles")
 @RequiredArgsConstructor
 public class RoleController {
     private final RoleService roleService;

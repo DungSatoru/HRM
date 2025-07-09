@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EmployeeDTO getUserById(Long id) {
+    public EmployeeDTO  getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nhân viên không tồn tại"));
         return modelMapper.map(user, EmployeeDTO.class);

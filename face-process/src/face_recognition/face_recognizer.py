@@ -8,10 +8,17 @@ import numpy as np
 # names, encodings = EncodingHelper.load_face_encodings(db_config)
 
 
+# db_config = {
+#     'host': 'localhost',
+#     'user': 'root',
+#     'password': '',
+#     'database': 'hr_management',
+#     'port': 3306
+# }
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
+    'host': '192.168.0.103',
+    'user': 'dunghq',
+    'password': '123456',
     'database': 'hr_management',
     'port': 3306
 }
@@ -21,7 +28,7 @@ class FaceRecognizer:
         # self.face_ids, self.encodings = EncodingLoader.load_encoding_file(encoding_file)
         self.face_ids, self.encodings = EncodingHelper.load_face_encodings(db_config)
         self.face_detector = FaceDetector(yolo_model_path)
-        self.tolerance = 0.40  # Ngưỡng để xác định có phải là người đó không
+        self.tolerance = 0.35 
         print(f"Loaded {len(self.face_ids)} face profiles")
     
     def calculate_confidence(self, face_distance):
@@ -32,7 +39,6 @@ class FaceRecognizer:
         if face_distance > 1.0:
             return 0.0
         
-        # Công thức tuyến tính: distance càng nhỏ thì confidence càng cao
         confidence = max(0.0, (1.0 - face_distance) * 100)
         return round(confidence, 1)
     

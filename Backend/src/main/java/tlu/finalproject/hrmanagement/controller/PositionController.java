@@ -11,7 +11,7 @@ import tlu.finalproject.hrmanagement.service.PositionService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/positions") // http://localhost:8080/api/positions
+@RequestMapping("api/positions") 
 public class PositionController {
     private final PositionService positionService;
 
