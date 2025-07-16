@@ -1,1 +1,12 @@
 __pycache__/
+
+docs/*
+
+*.zip
+
+
+*.docx
+*.csv
+*.xlsx
+*.sql
+*.pdf

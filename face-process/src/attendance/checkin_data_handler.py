@@ -1,4 +1,3 @@
-# checkin_data_handler.py
 import os
 import csv
 
@@ -42,5 +41,4 @@ class CheckInDataHandler:
         return last_time
     
     def get_check_in_file_path(self, user_id):
-        # Trả về đường dẫn file check-in cho user_id
         return os.path.join(self.checkin_folder, f"{user_id}_check_in.csv")

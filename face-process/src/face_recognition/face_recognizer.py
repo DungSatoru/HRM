@@ -16,7 +16,7 @@ import numpy as np
 #     'port': 3306
 # }
 db_config = {
-    'host': '192.168.0.103',
+    'host': '192.168.137.238',
     'user': 'dunghq',
     'password': '123456',
     'database': 'hr_management',

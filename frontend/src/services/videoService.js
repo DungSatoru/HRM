@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/video/upload'; // URL của API
+
+const apiUrl = process.env.REACT_APP_API_URL;
+const API_URL = `${apiUrl}/videos/upload`;
 
 export const uploadVideo = async (file, userId) => {
   try {

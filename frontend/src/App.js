@@ -3,7 +3,7 @@ import { Route, BrowserRouter as Router, Routes, Outlet, Navigate, useNavigate }
 import { privateRoutes, publicRoutes } from './routes/routes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import 'antd/dist/reset.css';
+// import 'antd/dist/reset.css';
 
 import { ConfigProvider } from 'antd';
 import locale from 'antd/es/date-picker/locale/vi_VN';

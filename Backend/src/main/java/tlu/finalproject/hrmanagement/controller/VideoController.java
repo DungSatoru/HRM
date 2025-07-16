@@ -12,7 +12,7 @@ import tlu.finalproject.hrmanagement.service.VideoService;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/video")
+@RequestMapping("/api/videos")
 public class VideoController {
     private final VideoService videoService;
 

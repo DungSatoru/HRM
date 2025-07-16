@@ -35,18 +35,6 @@ class AttendanceTracker:
                 pass
         return True, check_in_file
 
-    # def can_check_in(self, user_id):
-    #     """
-    #     Kiểm tra xem người này có thể điểm danh không, dựa trên thời gian cooldown
-        
-    #     Tham số:
-    #         user_id (str): Tên của người đó
-        
-    #     Trả về:
-    #         bool: True nếu người đó có thể điểm danh, False nếu không
-    #     """
-    #     should_record, check_in_file = self._should_record_attendance(user_id)
-    #     return should_record
 
     def record_attendance(self, user_id):
         """
